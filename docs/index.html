@@ -32,8 +32,12 @@
           Framework for Constructing and Benchmarking Mistake Aware Egocentric
           Procedural Videos
         </p>
-        <p class="authors">Olga Loginova and Frank Keller</p>
-        <p class="affiliations">University of Trento &middot; University of Edinburgh</p>
+        <p class="authors">
+          Olga Loginova<sup>1</sup> &nbsp; Frank Keller<sup>2</sup>
+        </p>
+        <p class="affiliations">
+          <sup>1</sup> University of Trento &nbsp; <sup>2</sup> University of Edinburgh
+        </p>
         <div class="link-row" aria-label="Project links">
           <a href="https://arxiv.org/abs/2604.15134">Paper</a>
           <a href="https://github.com/ologin/PIE-V">Code</a>
@@ -233,52 +237,63 @@
           </p>
         </div>
 
-        <div class="rubric-grid">
-          <article class="rubric-card">
-            <h3>Error Validity</h3>
-            <p><strong>What we measure:</strong> whether the proposed deviation has procedural impact.</p>
-            <p><strong>Why it matters:</strong> filters out harmless execution variation before downstream scoring.</p>
-          </article>
-          <article class="rubric-card">
-            <h3>Human/Text Plausibility</h3>
-            <p><strong>What we measure:</strong> how likely a real person is to make this mistake in context.</p>
-            <p><strong>Why it matters:</strong> keeps generated mistakes aligned with human behavior.</p>
-          </article>
-          <article class="rubric-card">
-            <h3>Confusability</h3>
-            <p><strong>What we measure:</strong> how difficult the mistake is to notice during execution.</p>
-            <p><strong>Why it matters:</strong> captures detectability and subtlety.</p>
-          </article>
-          <article class="rubric-card">
-            <h3>Procedure Logic</h3>
-            <p><strong>What we measure:</strong> whether the full procedure becomes logically broken, with annotator confidence.</p>
-            <p><strong>Why it matters:</strong> connects local edits to global procedure feasibility.</p>
-          </article>
-          <article class="rubric-card">
-            <h3>Sequence Consistency</h3>
-            <p><strong>What we measure:</strong> whether the edited step order remains executable.</p>
-            <p><strong>Why it matters:</strong> detects ordering failures after edits and transpositions.</p>
-          </article>
-          <article class="rubric-card">
-            <h3>State-Change Coherence</h3>
-            <p><strong>What we measure:</strong> whether object states and prerequisites remain possible across the trace.</p>
-            <p><strong>Why it matters:</strong> catches impossible or missing state transitions.</p>
-          </article>
-          <article class="rubric-card">
-            <h3>Taxonomy Fit</h3>
-            <p><strong>What we measure:</strong> which WE, D, S, I, T, or C label best explains the marked deviation.</p>
-            <p><strong>Why it matters:</strong> makes heterogeneous mistake datasets comparable.</p>
-          </article>
-          <article class="rubric-card">
-            <h3>Video Plausibility</h3>
-            <p><strong>What we measure:</strong> how natural the generated or annotated visual behavior looks.</p>
-            <p><strong>Why it matters:</strong> separates procedural quality from visual artifacts.</p>
-          </article>
-          <article class="rubric-card">
-            <h3>Text-Video Grounding</h3>
-            <p><strong>What we measure:</strong> whether the full textual trace matches the video at episode level.</p>
-            <p><strong>Why it matters:</strong> catches mismatches that accumulate after a mistake or recovery.</p>
-          </article>
+        <div class="table-wrapper">
+          <table class="rubric-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>What we measure</th>
+                <th>Why it matters</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Error Validity</td>
+                <td>Whether the proposed deviation has procedural impact.</td>
+                <td>Filters out harmless execution variation before downstream scoring.</td>
+              </tr>
+              <tr>
+                <td>Human Plausibility</td>
+                <td>How likely a real person is to make this mistake in context.</td>
+                <td>Keeps generated mistakes aligned with human behavior.</td>
+              </tr>
+              <tr>
+                <td>Confusability</td>
+                <td>How difficult the mistake is to notice during execution.</td>
+                <td>Captures detectability and subtlety.</td>
+              </tr>
+              <tr>
+                <td>Procedure Logic</td>
+                <td>Whether the full procedure becomes logically broken, with annotator confidence.</td>
+                <td>Connects local edits to global procedure feasibility.</td>
+              </tr>
+              <tr>
+                <td>Sequence Consistency</td>
+                <td>Whether the edited step order remains executable.</td>
+                <td>Detects ordering failures after edits and transpositions.</td>
+              </tr>
+              <tr>
+                <td>State-Change Coherence</td>
+                <td>Whether object states and prerequisites remain possible across the trace.</td>
+                <td>Catches impossible or missing state transitions.</td>
+              </tr>
+              <tr>
+                <td>Taxonomy Fit</td>
+                <td>Which WE, D, S, I, T, or C label best explains the marked deviation.</td>
+                <td>Makes heterogeneous mistake datasets comparable.</td>
+              </tr>
+              <tr>
+                <td>Video Plausibility</td>
+                <td>How natural the generated or annotated visual behavior looks.</td>
+                <td>Separates procedural quality from visual artifacts.</td>
+              </tr>
+              <tr>
+                <td>Text-Video Grounding</td>
+                <td>Whether the full textual trace matches the video at episode level.</td>
+                <td>Catches mismatches that accumulate after a mistake or recovery.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 

@@ -4,6 +4,7 @@
   --muted: #566274;
   --paper: #ffffff;
   --soft: #f5f7fb;
+  --warm-bg: #f7f4ee;
   --line: #d8dee8;
   --blue: #205493;
   --teal: #00838a;
@@ -129,8 +130,16 @@ h1 {
   font-weight: 700;
 }
 
+.authors sup,
+.affiliations sup {
+  margin-left: 1px;
+  color: var(--blue);
+  font-size: 0.72em;
+  font-weight: 820;
+}
+
 .affiliations {
-  margin: 3px 0 0;
+  margin: 6px 0 0;
   color: var(--muted);
   font-size: 1rem;
 }
@@ -206,8 +215,7 @@ h3 {
 .section-heading p,
 .lead-copy p,
 .method-grid p,
-.taxonomy-card p,
-.rubric-card p {
+.taxonomy-card p {
   color: var(--muted);
   font-size: 1.03rem;
 }
@@ -225,8 +233,7 @@ h3 {
 .lead-copy p:last-child,
 .method-grid p:last-child,
 .section-heading p:last-child,
-.taxonomy-card p:last-child,
-.rubric-card p:last-child {
+.taxonomy-card p:last-child {
   margin-bottom: 0;
 }
 
@@ -364,36 +371,13 @@ h3 {
   text-underline-offset: 3px;
 }
 
-.rubric-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.rubric-card {
-  min-height: 218px;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fbfcfe;
-}
-
-.rubric-card h3 {
-  color: var(--ink);
-}
-
-.rubric-card strong {
-  color: var(--ink);
-  font-weight: 780;
-}
-
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
   margin-top: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--paper);
+  background: var(--warm-bg);
 }
 
 table {
@@ -422,13 +406,13 @@ td {
 thead th {
   border-top: 0;
   color: var(--ink);
-  background: var(--soft);
+  background: var(--warm-bg);
   font-size: 0.84rem;
   font-weight: 800;
 }
 
 tbody tr:nth-child(even) td {
-  background: #fbfcfe;
+  background: #fffdf8;
 }
 
 td {
@@ -439,6 +423,11 @@ td {
 td:first-child {
   color: var(--ink);
   font-weight: 720;
+}
+
+.rubric-table th,
+.rubric-table td {
+  width: 33.333%;
 }
 
 .results-table th:not(:first-child),
@@ -509,8 +498,7 @@ td:first-child {
   }
 
   .method-grid,
-  .example-grid,
-  .rubric-grid {
+  .example-grid {
     grid-template-columns: 1fr;
   }
 
