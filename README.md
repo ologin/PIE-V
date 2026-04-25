@@ -20,7 +20,7 @@ EgoVis CVPR Workshop 2026 release: [cvprw26](https://github.com/ologin/PIE-V/rel
 - Example PIE-V outputs for the 50-scenario Ego-Exo4D subset.
 
 Raw Ego-Exo4D videos, original Ego-Exo4D annotation files, and generated MP4 media
-are not stored in git. The `cvprw26` GitHub release is the media location used by
+remain outside git. The `cvprw26` GitHub release is the media location used by
 the paper and project page:
 [https://github.com/ologin/PIE-V/releases/tag/cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw26).
 
@@ -142,9 +142,9 @@ Ego-Exo4D `split_50.json` and `keystep_train.json` files remain local inputs.
 ## Video Generation
 
 The paper uses provider-specific video-editing case studies for Seedance, Kling,
-Runway, Veo, and Sora-style workflows. The public repository documents the
-representative cases used for the project page; the full text pipeline covers all
-five PIE-V error types.
+Runway, Veo, and Sora-style workflows. The examples document the representative
+cases used for the project page; the full text pipeline covers all five PIE-V
+error types.
 
 ## Citation
 

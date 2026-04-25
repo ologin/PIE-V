@@ -123,8 +123,15 @@ def main() -> None:
         draw.text((x, 755), value, font=FONT_STAT, fill=YELLOW, anchor="mm")
         draw.text((x, 824), label, font=FONT_STAT_LABEL, fill=WHITE, anchor="mm")
 
-    tags = [("WE", "#c9241c"), ("D", "#e98200"), ("S", "#6b4dbb"), ("I", "#00838a"), ("T", "#005bbb")]
-    tx = 1120
+    tags = [
+        ("WE", "#c9241c"),
+        ("D", "#2e7d32"),
+        ("S", "#6b4dbb"),
+        ("I", "#00838a"),
+        ("T", "#9a6a00"),
+        ("C", "#005bbb"),
+    ]
+    tx = 1060
     for label, color in tags:
         draw.rounded_rectangle((tx, 858, tx + 72, 902), radius=16, fill=color)
         draw.text((tx + 36, 880), label, font=FONT_TAG, fill=WHITE, anchor="mm")

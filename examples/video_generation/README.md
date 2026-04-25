@@ -23,4 +23,4 @@ export KLING_SECRET_KEY="..."
 ```
 
 The text planner covers all five PIE-V error types. The video scripts document
-selected editing windows rather than a provider-agnostic generation API.
+selected editing windows with provider-specific generation calls.

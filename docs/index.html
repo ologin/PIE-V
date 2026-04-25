@@ -6,7 +6,7 @@
     <title>PIE-V | Mistake Aware Egocentric Procedural Videos</title>
     <meta
       name="description"
-      content="PIE-V: a framework for constructing and benchmarking mistake-aware egocentric procedural videos."
+      content="PIE-V: a pipeline for constructing and evaluating mistake-aware egocentric procedural videos."
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -17,9 +17,9 @@
         <a href="#about">About</a>
         <a href="#method">Method</a>
         <a href="#taxonomy">Taxonomy</a>
+        <a href="#examples">Examples</a>
         <a href="#rubric">Rubric</a>
         <a href="#results">Results</a>
-        <a href="#examples">Examples</a>
         <a href="#citation">Citation</a>
       </nav>
     </header>
@@ -48,24 +48,23 @@
         />
       </section>
 
-      <section id="about" class="section lead-section">
+      <section id="about" class="section about-section">
         <div class="section-heading">
           <h2>About</h2>
         </div>
         <div class="lead-copy">
           <p>
-            PIE-V, Psychologically Inspired Error injection for Videos, constructs
-            controlled mistake-aware egocentric procedural videos from clean
-            Ego-Exo4D keystep procedures. The goal is to create examples where
-            mistakes are not random corruptions, but human-plausible deviations
-            with explicit procedural consequences and, when appropriate,
-            recoveries.
+            PIE-V is a pipeline to create examples of erroneous procedure
+            execution where mistakes are not random, scripted, or staged, but
+            <em>human-plausible deviations with explicit procedural consequences
+            and, when appropriate, recoveries</em>. It constructs controlled
+            mistake-aware egocentric procedural videos from clean
+            keystep-annotated procedures.
           </p>
           <p>
-            The project contributes a structured error planner, a correction
-            planner, LLM-based procedure rewriting and judging, video-editing
-            case studies, and a human evaluation rubric for comparing generated
-            mistake traces with existing egocentric mistake datasets.
+            The pipeline combines phase- and load-aware error planning, semantic
+            role edits, recovery sampling, LLM rewriting and judging, and
+            targeted video generation for affected windows.
           </p>
         </div>
       </section>
@@ -74,10 +73,10 @@
         <div class="section-heading">
           <h2>From Clean Keysteps To Mistake-Aware Videos</h2>
           <p>
-            The public repository is a demonstration of the PIE-V pipeline and
-            evaluation protocol, not a redistribution of the full Ego-Exo4D video
-            dataset. Source videos and original Ego-Exo4D annotations remain
-            local inputs governed by the Ego-Exo4D access terms.
+            We show how the PIE-V pipeline and evaluation protocol work on
+            procedural videos from Ego-Exo4D. Source videos and original
+            Ego-Exo4D annotations remain local inputs governed by the Ego-Exo4D
+            access terms.
           </p>
         </div>
 
@@ -88,11 +87,11 @@
               PIE-V starts from 17 Ego-Exo4D keystep tasks, covering COVID test
               procedures, bicycle repair, CPR, and cooking tasks such as salads,
               noodles, omelets, tea, pasta, coffee latte, and sushi rolls. The
-              subset contains 50 takes: three videos per task, except Cooking
-              Sushi Rolls, where only one take is available, and COVID Test,
-              where a fourth take is added because it is the most frequent task.
-              The released manifest lists the
-              <a href="https://github.com/ologin/PIE-V/blob/main/data/manifests/take_names.txt">50 take names</a>.
+              subset contains
+              <a href="https://github.com/ologin/PIE-V/blob/main/data/manifests/take_names.txt">50 takes</a>:
+              three videos per task, except Cooking Sushi Rolls, where only one
+              take is available, and COVID Test, where a fourth take is added
+              because it is the most frequent task.
             </p>
           </article>
 
@@ -100,26 +99,23 @@
             <h3>Structured Error Planning</h3>
             <p>
               The planner samples 102 mistakes across the 50 takes. Sampling is
-              conditioned on video duration, step complexity, overall task
-              complexity, procedure phase, working-memory load, and semantic
-              step information from semantic role labeling. The repository
-              includes the
+              conditioned on video duration, step complexity, task complexity,
+              procedure phase, working-memory load, and semantic step
+              information from semantic role labeling. The
               <a href="https://github.com/ologin/PIE-V/tree/main/data/resources">semantic resources</a>
               and
               <a href="https://github.com/ologin/PIE-V/tree/main/data/examples">generated text examples</a>
-              used to inspect the resulting plans.
+              document the intermediate outputs.
             </p>
           </article>
 
           <article>
             <h3>Recovery Mechanism</h3>
             <p>
-              PIE-V adds 27 sampled corrections, so mistake-aware traces can
-              represent recovery rather than only failure. Corrections are
-              sampled conditionally on detectability, action type, latency, and
-              repair strategy, including stopping to fix an action, rolling back
-              and redoing a step, undoing an extra step, or performing a missed
-              step later.
+              PIE-V adds 27 sampled corrections that are sampled conditionally
+              on detectability, action type, latency, and repair strategy,
+              including stopping to fix an action, rolling back and redoing a
+              step, undoing an extra step, or performing a missed step later.
             </p>
           </article>
 
@@ -127,12 +123,12 @@
             <h3>Human Evaluation</h3>
             <p>
               Five annotators evaluated the resulting scenarios with a nine-part
-              rubric designed for plausible erroneous procedures. The repository
-              provides the aggregate
+              rubric designed for plausible erroneous procedures and grounded in
+              human perception of mistakes. The aggregate
               <a href="https://github.com/ologin/PIE-V/blob/main/data/annotations/annotation_summary.csv">annotation summary</a>
-              and the
+              and
               <a href="https://github.com/ologin/PIE-V/blob/main/data/annotations/PIE-V_Annotation_Template.xlsx">annotation template</a>
-              used to structure the ratings.
+              document the rating fields.
             </p>
           </article>
         </div>
@@ -142,183 +138,43 @@
         <div class="section-heading">
           <h2>Error Taxonomy + Correction</h2>
           <p>
-            PIE-V uses a compact taxonomy that can map both generated mistakes
-            and existing mistake datasets into a shared procedural language.
+            PIE-V maps generated mistakes and existing datasets into shared
+            procedural categories.
           </p>
         </div>
 
-        <div class="taxonomy-table" role="table" aria-label="PIE-V error taxonomy">
-          <div role="row">
-            <strong role="cell">Wrong execution</strong>
-            <span role="cell">A step is attempted with the wrong object, side, amount, location, orientation, or manner.</span>
-          </div>
-          <div role="row">
-            <strong role="cell">Deletion</strong>
-            <span role="cell">A required step is skipped, creating a missing prerequisite or missing state change.</span>
-          </div>
-          <div role="row">
-            <strong role="cell">Substitution</strong>
-            <span role="cell">A plausible but incorrect alternative step replaces the intended step.</span>
-          </div>
-          <div role="row">
-            <strong role="cell">Insertion</strong>
-            <span role="cell">An unnecessary extra step is added, often through repetition or routine overgeneralization.</span>
-          </div>
-          <div role="row">
-            <strong role="cell">Transposition</strong>
-            <span role="cell">Two steps are performed in the wrong order while remaining locally plausible.</span>
-          </div>
-          <div role="row">
-            <strong role="cell">Correction</strong>
-            <span role="cell">A recovery step is explicitly tied to the mistake it detects and repairs.</span>
-          </div>
-        </div>
-      </section>
-
-      <section id="rubric" class="section">
-        <div class="section-heading">
-          <h2>Human Rubric</h2>
-          <p>
-            The rubric separates step-level plausibility from procedure-level
-            coherence, so generated mistakes can be judged as complete
-            procedural traces rather than isolated anomalies.
-          </p>
-        </div>
-
-        <div class="table-wrapper">
-          <table class="rubric-table">
-            <thead>
-              <tr>
-                <th>Metric</th>
-                <th>Scale</th>
-                <th>What it measures</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Error Validity</td>
-                <td>Binary</td>
-                <td>Whether the deviation is a consequential mistake rather than a benign execution variant.</td>
-              </tr>
-              <tr>
-                <td>Human/Text Plausibility</td>
-                <td>Likert 1-5</td>
-                <td>Whether a real person could naturally make this mistake in the given context.</td>
-              </tr>
-              <tr>
-                <td>Confusability</td>
-                <td>Likert 1-5</td>
-                <td>How difficult the mistake is to notice during real-time execution.</td>
-              </tr>
-              <tr>
-                <td>Procedure Logic</td>
-                <td>Binary + confidence 1-3</td>
-                <td>Whether the whole procedure becomes logically broken, weighted by annotator confidence.</td>
-              </tr>
-              <tr>
-                <td>Sequence Consistency</td>
-                <td>Likert 1-5</td>
-                <td>Whether the edited step order remains executable as a coherent procedure.</td>
-              </tr>
-              <tr>
-                <td>State-Change Coherence</td>
-                <td>Binary</td>
-                <td>Whether object states and preconditions remain possible across the trace.</td>
-              </tr>
-              <tr>
-                <td>Taxonomy Fit</td>
-                <td>Categorical</td>
-                <td>Which error type or correction best explains the marked deviation.</td>
-              </tr>
-              <tr>
-                <td>Video Plausibility</td>
-                <td>Likert 1-5</td>
-                <td>Whether the visual depiction looks natural when generated or annotated video is available.</td>
-              </tr>
-              <tr>
-                <td>Text-Video Grounding</td>
-                <td>Likert 1-5</td>
-                <td>Whether the full textual trace matches the video at the episode level.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section id="results" class="section">
-        <div class="section-heading">
-          <h2>Benchmark Results</h2>
-          <p>
-            The paper applies the same rubric to existing egocentric mistake
-            datasets and to Ego-Exo4D generations. Taxonomy Fit is omitted from
-            the scalar table because it is a categorical label.
-          </p>
-        </div>
-
-        <div class="table-wrapper">
-          <table class="results-table">
-            <caption>Aggregated rubric statistics. Lower is better for Proc.Logic and State-Chg; higher is better elsewhere.</caption>
-            <thead>
-              <tr>
-                <th>Dataset</th>
-                <th>Err.Valid %</th>
-                <th>Human Pl.</th>
-                <th>Confus.</th>
-                <th>Proc.Logic %</th>
-                <th>Seq.Cons.</th>
-                <th>State-Chg %</th>
-                <th>Vid.Pl.</th>
-                <th>T-V Gr.</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>EgoPER</td><td>51</td><td>2.67</td><td>1.88</td><td>26</td><td>4.41</td><td>14</td><td>3.22</td><td>3.42</td>
-              </tr>
-              <tr>
-                <td>EgoOops</td><td>72</td><td>3.73</td><td>1.63</td><td>28</td><td>4.50</td><td>10</td><td>4.31</td><td>3.74</td>
-              </tr>
-              <tr>
-                <td>Assembly101</td><td>65</td><td>3.69</td><td>2.09</td><td>12</td><td>4.82</td><td>4</td><td>4.05</td><td>3.22</td>
-              </tr>
-              <tr>
-                <td>CaptainCook4D</td><td>74</td><td>3.71</td><td>2.32</td><td>12</td><td>4.73</td><td>2</td><td>3.42</td><td>3.63</td>
-              </tr>
-              <tr>
-                <td>Ego-Exo4D-Qwen freeform</td><td>57</td><td>3.34</td><td>2.04</td><td>36</td><td>4.20</td><td>27</td><td>--</td><td>--</td>
-              </tr>
-              <tr>
-                <td>Ego-Exo4D-GPT-5.2 freeform</td><td>55</td><td>3.08</td><td>1.76</td><td>25</td><td>4.18</td><td>7</td><td>--</td><td>--</td>
-              </tr>
-              <tr>
-                <td>PIE-V + Qwen2.5, Qwen3-VL judged</td><td>71</td><td>3.09</td><td>1.86</td><td>30</td><td>4.39</td><td>10</td><td>--</td><td>--</td>
-              </tr>
-              <tr class="highlight-row">
-                <td>PIE-V + GPT-5.2, judged</td><td>89</td><td>3.41</td><td>1.76</td><td>6</td><td>4.48</td><td>3</td><td>3.54</td><td>3.87</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-wrapper compact-table">
-          <table class="results-table">
-            <caption>Scale statistics for Ego-Exo4D generations.</caption>
-            <thead>
-              <tr>
-                <th>Setting</th>
-                <th>Total steps</th>
-                <th>Mistake steps</th>
-                <th>Mistake rate %</th>
-                <th>Avg. mistakes/video</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Ego-Exo4D-Qwen freeform</td><td>1156</td><td>112</td><td>9.69</td><td>2.24</td></tr>
-              <tr><td>Ego-Exo4D-GPT-5.2 freeform</td><td>1270</td><td>77</td><td>6.06</td><td>1.54</td></tr>
-              <tr><td>Ego-Exo4D-Qwen-PJ</td><td>1320</td><td>143</td><td>10.83</td><td>2.86</td></tr>
-              <tr><td>Ego-Exo4D-GPT-5.2-PJ</td><td>1323</td><td>141</td><td>10.66</td><td>2.82</td></tr>
-            </tbody>
-          </table>
+        <div class="taxonomy-flow" aria-label="PIE-V error taxonomy">
+          <article class="taxonomy-card tax-we">
+            <span>WE</span>
+            <h3>Wrong Execution</h3>
+            <p>Wrong object, side, amount, location, orientation, or manner.</p>
+          </article>
+          <article class="taxonomy-card tax-d">
+            <span>D</span>
+            <h3>Deletion</h3>
+            <p>A required step is skipped, leaving a missing prerequisite.</p>
+          </article>
+          <article class="taxonomy-card tax-s">
+            <span>S</span>
+            <h3>Substitution</h3>
+            <p>A plausible incorrect action replaces the intended step.</p>
+          </article>
+          <article class="taxonomy-card tax-i">
+            <span>I</span>
+            <h3>Insertion</h3>
+            <p>An extra unnecessary step enters the procedure.</p>
+          </article>
+          <article class="taxonomy-card tax-t">
+            <span>T</span>
+            <h3>Transposition</h3>
+            <p>Two locally plausible steps are executed in the wrong order.</p>
+          </article>
+          <div class="taxonomy-plus" aria-hidden="true">+</div>
+          <article class="taxonomy-card tax-c">
+            <span>C</span>
+            <h3>Correction</h3>
+            <p>A recovery step detects and repairs a specific mistake.</p>
+          </article>
         </div>
       </section>
 
@@ -326,8 +182,8 @@
         <div class="section-heading">
           <h2>Examples</h2>
           <p>
-            Each preview compares a clip of the original correct step with a
-            generated erroneous-step clip that replaces or extends that step.
+            Each preview compares an original correct-step clip with a generated
+            erroneous-step clip.
           </p>
         </div>
 
@@ -368,24 +224,108 @@
         </div>
       </section>
 
-      <section id="materials" class="section lead-section">
+      <section id="rubric" class="section">
         <div class="section-heading">
-          <h2>Repository Materials</h2>
+          <h2>Human Rubric</h2>
+          <p>
+            The rubric separates local plausibility, procedural coherence, and
+            video grounding.
+          </p>
         </div>
-        <div class="lead-copy">
+
+        <div class="rubric-grid">
+          <article class="rubric-card">
+            <h3>Error Validity</h3>
+            <p><strong>What we measure:</strong> whether the proposed deviation has procedural impact.</p>
+            <p><strong>Why it matters:</strong> filters out harmless execution variation before downstream scoring.</p>
+          </article>
+          <article class="rubric-card">
+            <h3>Human/Text Plausibility</h3>
+            <p><strong>What we measure:</strong> how likely a real person is to make this mistake in context.</p>
+            <p><strong>Why it matters:</strong> keeps generated mistakes aligned with human behavior.</p>
+          </article>
+          <article class="rubric-card">
+            <h3>Confusability</h3>
+            <p><strong>What we measure:</strong> how difficult the mistake is to notice during execution.</p>
+            <p><strong>Why it matters:</strong> captures detectability and subtlety.</p>
+          </article>
+          <article class="rubric-card">
+            <h3>Procedure Logic</h3>
+            <p><strong>What we measure:</strong> whether the full procedure becomes logically broken, with annotator confidence.</p>
+            <p><strong>Why it matters:</strong> connects local edits to global procedure feasibility.</p>
+          </article>
+          <article class="rubric-card">
+            <h3>Sequence Consistency</h3>
+            <p><strong>What we measure:</strong> whether the edited step order remains executable.</p>
+            <p><strong>Why it matters:</strong> detects ordering failures after edits and transpositions.</p>
+          </article>
+          <article class="rubric-card">
+            <h3>State-Change Coherence</h3>
+            <p><strong>What we measure:</strong> whether object states and prerequisites remain possible across the trace.</p>
+            <p><strong>Why it matters:</strong> catches impossible or missing state transitions.</p>
+          </article>
+          <article class="rubric-card">
+            <h3>Taxonomy Fit</h3>
+            <p><strong>What we measure:</strong> which WE, D, S, I, T, or C label best explains the marked deviation.</p>
+            <p><strong>Why it matters:</strong> makes heterogeneous mistake datasets comparable.</p>
+          </article>
+          <article class="rubric-card">
+            <h3>Video Plausibility</h3>
+            <p><strong>What we measure:</strong> how natural the generated or annotated visual behavior looks.</p>
+            <p><strong>Why it matters:</strong> separates procedural quality from visual artifacts.</p>
+          </article>
+          <article class="rubric-card">
+            <h3>Text-Video Grounding</h3>
+            <p><strong>What we measure:</strong> whether the full textual trace matches the video at episode level.</p>
+            <p><strong>Why it matters:</strong> catches mismatches that accumulate after a mistake or recovery.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="results" class="section">
+        <div class="section-heading">
+          <h2>Results</h2>
           <p>
-            The repository includes code for the planner, writer, judge, and
-            analysis utilities; public semantic resources; generated plans and
-            judged text examples; the 50-take manifest; aggregate annotation
-            summaries; an annotator template; and anonymized video-generation
-            scripts for representative case studies.
+            Aggregated rubric statistics compare PIE-V with existing egocentric
+            mistake datasets. Taxonomy Fit is categorical, so it is omitted from
+            the scalar table.
           </p>
-          <p>
-            The project page stores the GIF previews directly in
-            <code>docs/assets</code>. The MP4 links in the example captions point
-            to the <code>cvprw26</code> GitHub release assets, so they become live
-            when that release is created and the MP4 files are uploaded there.
-          </p>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="results-table">
+            <caption>Lower is better for Proc.Logic and State-Chg; higher is better elsewhere.</caption>
+            <thead>
+              <tr>
+                <th>Dataset</th>
+                <th>Err.Valid %</th>
+                <th>Human Pl.</th>
+                <th>Confus.</th>
+                <th>Proc.Logic %</th>
+                <th>Seq.Cons.</th>
+                <th>State-Chg %</th>
+                <th>Vid.Pl.</th>
+                <th>T-V Gr.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>EgoPER</td><td>51</td><td>2.67</td><td>1.88</td><td>26</td><td>4.41</td><td>14</td><td>3.22</td><td>3.42</td>
+              </tr>
+              <tr>
+                <td>EgoOops</td><td>72</td><td>3.73</td><td>1.63</td><td>28</td><td>4.50</td><td>10</td><td>4.31</td><td>3.74</td>
+              </tr>
+              <tr>
+                <td>Assembly101</td><td>65</td><td>3.69</td><td>2.09</td><td>12</td><td>4.82</td><td>4</td><td>4.05</td><td>3.22</td>
+              </tr>
+              <tr>
+                <td>CaptainCook4D</td><td>74</td><td>3.71</td><td>2.32</td><td>12</td><td>4.73</td><td>2</td><td>3.42</td><td>3.63</td>
+              </tr>
+              <tr class="highlight-row">
+                <td>PIE-V</td><td>89</td><td>3.41</td><td>1.76</td><td>6</td><td>4.48</td><td>3</td><td>3.54</td><td>3.87</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -401,5 +341,9 @@
 }</code></pre>
       </section>
     </main>
+
+    <footer class="site-footer">
+      <p>Contact: <a href="mailto:olga.loginovva@gmail.com">Olga Loginova</a></p>
+    </footer>
   </body>
 </html>
