@@ -1,0 +1,63 @@
+{
+  "tag": "cvprw26",
+  "release_url": "https://github.com/ologin/PIE-V/releases/tag/cvprw26",
+  "download_base_url": "https://github.com/ologin/PIE-V/releases/download/cvprw26",
+  "assets": [
+    {
+      "filename": "georgiatech_covid_18_10_correct_step_clip.mp4",
+      "kind": "correct_step_clip",
+      "take_name": "georgiatech_covid_18_10",
+      "duration_s": 6.666667,
+      "clip_window_s": [272.34064, 279.007307],
+      "step": "Apply a few drops of the test solution to the test indicator"
+    },
+    {
+      "filename": "georgiatech_covid_18_10_wrong_execution_full.mp4",
+      "kind": "full_generated_video",
+      "take_name": "georgiatech_covid_18_10",
+      "duration_s": 287.033333,
+      "error_type": "wrong_execution",
+      "correct_step": "Apply a few drops of the test solution to the test indicator",
+      "generated_step": "Apply a few drops of the test solution to the wrong side of the test indicator"
+    },
+    {
+      "filename": "georgiatech_covid_18_10_wrong_execution_clip.mp4",
+      "kind": "error_clip",
+      "take_name": "georgiatech_covid_18_10",
+      "duration_s": 6.699675,
+      "clip_window_s": [272.34064, 279.031667],
+      "error_type": "wrong_execution",
+      "correct_step": "Apply a few drops of the test solution to the test indicator",
+      "generated_step": "Apply a few drops of the test solution to the wrong side of the test indicator"
+    },
+    {
+      "filename": "sfu_covid_002_10_correct_step_clip.mp4",
+      "kind": "correct_step_clip",
+      "take_name": "sfu_covid_002_10",
+      "duration_s": 21.433333,
+      "clip_window_s": [53.29568, 74.729013],
+      "step": "Read the test instruction sheet."
+    },
+    {
+      "filename": "sfu_covid_002_10_instruction_correction_full.mp4",
+      "kind": "full_generated_video",
+      "take_name": "sfu_covid_002_10",
+      "duration_s": 465.0,
+      "error_type": "wrong_execution_with_correction",
+      "correct_step": "Read the test instruction sheet.",
+      "generated_step": "Read the test instruction sheet, but only skim it and miss some key details.",
+      "correction_step": "Stop and re-read the test instruction sheet carefully from start to finish to catch the missed details."
+    },
+    {
+      "filename": "sfu_covid_002_10_instruction_correction_clip.mp4",
+      "kind": "error_and_correction_clip",
+      "take_name": "sfu_covid_002_10",
+      "duration_s": 21.433333,
+      "clip_window_s": [53.29568, 74.722347],
+      "error_type": "wrong_execution_with_correction",
+      "correct_step": "Read the test instruction sheet.",
+      "generated_step": "Read the test instruction sheet, but only skim it and miss some key details.",
+      "correction_step": "Stop and re-read the test instruction sheet carefully from start to finish to catch the missed details."
+    }
+  ]
+}

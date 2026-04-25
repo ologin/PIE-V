@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "piev"
+version = "0.1.0"
+description = "Psychologically Inspired Error injection for Videos (PIE-V)"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Olga Loginova" },
+  { name = "Frank Keller" },
+]
+keywords = [
+  "egocentric video",
+  "procedural video",
+  "mistake detection",
+  "Ego-Exo4D",
+  "video generation",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "krippendorff>=0.8",
+  "openai>=1.0",
+  "requests>=2.31",
+  "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+qwen = [
+  "torch",
+  "transformers>=4.50",
+  "accelerate",
+  "qwen-vl-utils",
+]
+video = [
+  "PyJWT>=2.8",
+  "runwayml",
+  "google-auth",
+  "google-cloud-aiplatform",
+]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
+]
+
+[project.urls]
+Homepage = "https://ologin.github.io/PIE-V/"
+Repository = "https://github.com/ologin/PIE-V"
+Paper = "https://arxiv.org/abs/2604.15134"
+Release = "https://github.com/ologin/PIE-V/releases/tag/cvprw26"
+
+[project.scripts]
+piev-error-plan = "piev.error_simulator:main"
+piev-corrections = "piev.correction_simulator:main"
+piev-write-instructions = "piev.error_instruction_writer:main"
+piev-judge-instructions = "piev.error_instruction_judge:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

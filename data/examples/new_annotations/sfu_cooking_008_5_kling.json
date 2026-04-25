@@ -1,0 +1,142 @@
+{
+  "take_uid": "b26b4d93-0364-4333-8d4d-38ca1a6a4dfa",
+  "take_name": "sfu_cooking_008_5",
+  "scenario": "Making Coffee latte",
+  "annotation_meta": {
+    "annotation_uid": "0d6b05ac-ccb3-4d4b-b656-f6de7ba24891",
+    "annotator_id": 6022759037779532,
+    "response_time": 1695905798,
+    "job_id": 874284347604715,
+    "response_id": 191507733965518,
+    "corrected_task_name": null,
+    "queue": " 230922:0554_4JXcFk7u"
+  },
+  "segments": [
+    {
+      "start_time": 0,
+      "end_time": 3.006,
+      "step_id": 862,
+      "step_name": "Get coffee grounds",
+      "step_description": "Get coffee grounds from the kitchen countertop",
+      "is_essential": true,
+      "step_unique_id": 525
+    },
+    {
+      "start_time": 3.07283,
+      "end_time": 12.703,
+      "step_id": 871,
+      "step_name": "Add the desired amount of freshly ground coffee to the filter",
+      "step_description": "Add coffee grounds to the coffee maker filter",
+      "is_essential": true,
+      "step_unique_id": 2253
+    },
+    {
+      "start_time": 13.2796,
+      "end_time": 19.089,
+      "step_id": 867,
+      "step_name": "Fill the water reservoir",
+      "step_description": "Add water to the coffee maker reservoir",
+      "is_essential": true,
+      "step_unique_id": 2250
+    },
+    {
+      "start_time": 19.15599,
+      "end_time": 20.064,
+      "step_id": 873,
+      "step_name": "Close the lid of the coffee maker",
+      "step_description": "Close the lid of the coffee maker",
+      "is_essential": true,
+      "step_unique_id": 2254
+    },
+    {
+      "start_time": 20.131,
+      "end_time": 21.31763,
+      "step_id": 866,
+      "step_name": "Turn on the coffee maker",
+      "step_description": "Turn on the coffee maker",
+      "is_essential": true,
+      "step_unique_id": 2249
+    },
+    {
+      "start_time": 22.02892,
+      "end_time": 24.99385,
+      "step_id": 608,
+      "step_name": "Get a cup or mug",
+      "step_description": "Get cup from the kitchen countertop",
+      "is_essential": true,
+      "step_unique_id": 638
+    },
+    {
+      "start_time": 27.17662,
+      "end_time": 33.02,
+      "step_id": 558,
+      "step_name": "Get milk",
+      "step_description": "Get milk from the refrigerator",
+      "is_essential": true,
+      "step_unique_id": 558
+    },
+    {
+      "start_time": 35.8125,
+      "end_time": 86.95676,
+      "step_id": 875,
+      "step_name": "Wait until the desired amount of coffee is extracted",
+      "step_description": "Wait while the coffee in the coffee maker brews",
+      "is_essential": true,
+      "step_unique_id": 2256
+    },
+    {
+      "start_time": 87.05676,
+      "end_time": 94.2,
+      "step_id": 949,
+      "step_name": "Pour cold milk into a cup or mug",
+      "step_description": "Pour milk into the cup",
+      "is_essential": true,
+      "step_unique_id": 2304
+    },
+    {
+      "start_time": 94.327,
+      "end_time": 101.251,
+      "step_id": 754,
+      "step_name": "Put away milk",
+      "step_description": "Return milk container into the refrigerator",
+      "is_essential": false,
+      "step_unique_id": 774
+    },
+    {
+      "start_time": 101.55188,
+      "end_time": 153.02,
+      "step_id": 875,
+      "step_name": "Wait until the desired amount of coffee is extracted",
+      "step_description": "Wait while the coffee in the coffee maker brews",
+      "is_essential": true,
+      "step_unique_id": 2256
+    },
+    {
+      "start_time": 153.057,
+      "end_time": 158.41963,
+      "step_id": 971,
+      "step_name": "Turn off the stove",
+      "step_description": "Turn off the coffee maker",
+      "is_essential": false,
+      "step_unique_id": 493
+    },
+    {
+      "start_time": 158.51963,
+      "end_time": 169.20000000000002,
+      "step_id": 947,
+      "step_name": "Pour the coffee into a cup or mug",
+      "step_description": "Pour coffee into milk in the cup but spill some onto the kitchen countertop instead of getting it all into the cup",
+      "is_essential": true,
+      "step_unique_id": 2284
+    },
+    {
+      "start_time": 169.20000000000002,
+      "end_time": 176.2,
+      "step_id": 947,
+      "step_name": "Wipe spill and finish pour",
+      "step_description": "Wipe up the spilled coffee from the countertop and then pour coffee into milk in the cup",
+      "is_essential": true,
+      "step_unique_id": 2305
+    }
+  ]
+}

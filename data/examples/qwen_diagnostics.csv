@@ -1,0 +1,51 @@
+take_uid,scenario,take_name,status,error,schema_ok,schema_msg,n_input_steps,n_final_steps,n_meta,n_del,mods_u,mods_e,mods_m,mods_c,mods_i,u_not_verbatim,e_no_change,deleted_src_still_used
+0872b2cd-933d-4a0d-8561-9b3d60361203,Install a Wheel,fair_bike_02_4,invalid_schema,meta[2] mod='we' but text is IDENTICAL to original step 2,0,Missing/invalid final_steps,10,0,0,0,0,0,0,0,0,0,0,0
+0b05324a-47a2-456a-9f7a-1c36519d86e0,Cooking Noodles,fair_cooking_05_6,ok,,0,meta[4].mod invalid: s,58,33,33,3,30,0,0,0,1,5,0,0
+0b771d9f-7bab-4023-ac08-e56c06505946,Cooking Tomato & Eggs,iiith_cooking_147_2,invalid_schema,meta[11] mod='we' but text is IDENTICAL to original step 11,0,Missing/invalid final_steps,47,0,0,0,0,0,0,0,0,0,0,0
+154d1224-d0c0-45f9-8e89-33f1ffa04606,Cooking Noodles,fair_cooking_06_2,ok,,0,meta[18].mod invalid: we,41,41,41,0,40,0,0,0,0,3,0,0
+17755616-d1eb-4727-8237-a4e496642276,Clean and Lubricate the Chain,georgiatech_bike_18_4,ok,,1,ok,11,10,10,1,10,0,0,0,0,1,0,0
+19912997-45b4-4c43-8209-7599079d8eed,Cooking Scrambled Eggs,sfu_cooking015_4,invalid_schema,meta[6] mod='we' but text is IDENTICAL to original step 6,0,Missing/invalid final_steps,18,0,0,0,0,0,0,0,0,0,0,0
+2059dde7-ecdd-4bfe-90ca-5f482b44fe47,Cooking Tomato & Eggs,indiana_cooking_10_4,invalid_schema,Missing or invalid 'final_steps' (must be list[str]),0,Missing/invalid final_steps,129,0,0,0,0,0,0,0,0,0,0,0
+281b1c72-71be-4745-9a21-3a24a02e3c6f,Cooking an Omelet,iiith_cooking_79_2,ok,,1,ok,15,16,16,0,15,0,0,0,1,0,0,0
+35bfade9-8ead-46a4-b2f0-cdcfb86df1d6,Cooking an Omelet,iiith_cooking_32_1,ok,,0,meta[5].mod invalid: s,46,41,41,5,40,0,0,0,0,0,0,0
+39feb026-bcf8-4a61-89ad-9f5566c2c7bf,Making Cucumber & Tomato Salad,sfu_cooking_005_2,ok,,1,ok,37,30,30,4,30,0,0,0,0,0,0,0
+3c744ca5-c64a-4de3-8235-c2f542ac5056,Making Cucumber & Tomato Salad,sfu_cooking022_2,ok,,1,ok,12,13,13,0,12,0,0,0,1,2,0,0
+3c7e6b2f-75c5-46d6-b0c0-880429a93e10,Cooking an Omelet,sfu_cooking029_8,ok,,1,ok,19,20,20,0,19,0,0,0,1,0,0,0
+3cbd7070-7c55-4b15-ac31-100ab8c7298a,Cooking Noodles,fair_cooking_05_2,invalid_schema,'final_steps' and 'meta' must have the same length,0,Missing/invalid final_steps,46,0,0,0,0,0,0,0,0,0,0,0
+407f60e4-68b2-42df-84a9-3160398aaf10,Making Sesame-Ginger Asian Salad,fair_cooking_08_8,invalid_schema,meta[20] mod='we' but text is IDENTICAL to original step 20,0,Missing/invalid final_steps,28,0,0,0,0,0,0,0,0,0,0,0
+52b94833-ab64-4cfd-86fd-77ece1ece3ea,Fix a Flat Tire - Replace a Bike Tube,fair_bike_06_11,ok,,0,meta[7].mod invalid: we,13,13,13,0,12,0,0,0,0,10,0,0
+57efe7a9-0685-40b8-b076-51e59542c5d9,Making Coffee latte,uniandes_cooking_006_8,ok,,1,ok,29,29,29,3,29,0,0,0,0,0,0,3
+629a4ed5-9d3f-4a61-b699-99e77a03b449,Making Sesame-Ginger Asian Salad,fair_cooking_08_10,ok,,0,meta[3].mod invalid: s,21,20,20,1,16,0,0,0,0,0,0,0
+6ba1dc31-7a08-4e92-aaad-5954bce6a7da,Remove a Wheel,cmu_bike16_2,ok,,1,ok,3,4,4,0,3,0,0,0,1,0,0,0
+6e0bfa70-e88e-487d-9698-d16afbdb3e56,First Aid - CPR,nus_cpr_15_1,ok,,1,ok,8,7,7,1,7,0,0,0,0,0,0,0
+6ea11962-0de6-49bd-b133-91be5b46f810,Covid-19 Rapid Antigen Test,sfu_covid_002_10,ok,,1,ok,26,23,23,1,23,0,0,0,0,0,0,0
+7264ecac-1636-4e6e-8364-0951dc527b1c,Covid-19 Rapid Antigen Test,nus_covidtest_36_2,ok,,0,meta[5].mod invalid: we,21,21,21,0,20,0,0,0,0,19,0,0
+762f9011-aac1-4bea-b0aa-b21d642a61ea,Cooking Scrambled Eggs,sfu_cooking026_4,invalid_schema,meta[0] mod='u' but final_steps[0] is not verbatim of INPUT.steps[0],0,Missing/invalid final_steps,4,0,0,0,0,0,0,0,0,0,0,0
+76311964-abcc-4d73-b84b-241e9c782850,Install a Wheel,cmu_bike14_4,ok,,0,meta[1].mod invalid: mt,5,5,5,0,3,0,0,0,0,0,0,0
+77710d87-a25a-4076-856c-a62e8e2bc13b,First Aid - CPR,nus_cpr_29_2,ok,,0,meta[7].mod invalid: we,8,8,8,0,7,0,0,0,0,0,0,0
+7ec750d7-fc17-41dc-b627-be30b2682c7a,Making Chai Tea,sfu_cooking_009_7,ok,,0,meta[26].mod invalid: we,37,37,37,0,36,0,0,0,0,10,0,0
+8011f715-1132-4cdf-ad47-146bc1759f21,Cooking Pasta,minnesota_cooking_061_2,invalid_schema,meta[15] mod='we' but text is IDENTICAL to original step 15,0,Missing/invalid final_steps,27,0,0,0,0,0,0,0,0,0,0,0
+8067827f-ebcf-4493-866c-93ca84290df7,First Aid - CPR,utokyo_cpr_2005_32_4,ok,,0,meta[6].mod invalid: we,21,21,21,0,20,0,0,0,0,1,0,0
+9273e1ed-05a9-447a-9de4-dc6ac3580c47,Making Cucumber & Tomato Salad,iiith_cooking_89_4,invalid_schema,meta[6] mod='we' but text is IDENTICAL to original step 6,0,Missing/invalid final_steps,22,0,0,0,0,0,0,0,0,0,0,0
+95f2d2b4-c5de-4620-9d6a-3dd6e1cb7264,Fix a Flat Tire - Replace a Bike Tube,cmu_bike15_3,ok,,1,ok,12,13,13,0,12,0,0,0,1,9,0,0
+9da3d7c3-42aa-447a-9080-98c703d49c25,Cooking Pasta,minnesota_cooking_074_2,ok,,1,ok,24,22,22,2,22,0,0,0,0,0,0,0
+a57a2fd6-18dd-446e-b11c-fe8b127ebb5b,Cooking Pasta,minnesota_cooking_031_2,invalid_schema,'final_steps' and 'meta' must have the same length,0,Missing/invalid final_steps,59,0,0,0,0,0,0,0,0,0,0,0
+abcd9473-0885-43cc-9e4e-f632f36871d2,Making Milk Tea,iiith_cooking_45_1,invalid_schema,meta[3] mod='s' but text is IDENTICAL to original step 4,0,Missing/invalid final_steps,10,0,0,0,0,0,0,0,0,0,0,0
+ac5bc1ee-b7d5-4948-90aa-8f418ca4c0fa,Making Chai Tea,indiana_cooking_08_2,invalid_schema,meta[24] mod='we' but text is IDENTICAL to original step 24,0,Missing/invalid final_steps,49,0,0,0,0,0,0,0,0,0,0,0
+b26b4d93-0364-4333-8d4d-38ca1a6a4dfa,Making Coffee latte,sfu_cooking_008_5,invalid_schema,meta[7] mod='we' but text is IDENTICAL to original step 7,0,Missing/invalid final_steps,13,0,0,0,0,0,0,0,0,0,0,0
+b880f349-0ef2-4470-b597-adbd239ea6e2,Making Coffee latte,sfu_cooking026_8,ok,,0,meta[2].mod invalid: s,4,5,5,0,3,0,0,0,1,0,0,0
+b918c9ce-f1ad-4fb2-9569-3726685517ee,Cooking Sushi Rolls,indiana_cooking_04_2,ok,,1,ok,25,25,25,1,24,0,0,0,1,24,0,1
+b9519252-bc68-4d3f-9781-81426234e671,Remove a Wheel,fair_bike_06_6,ok,,0,meta[1].mod invalid: s,4,4,4,0,3,0,0,0,0,0,0,0
+bd82feb8-fdf7-421d-8d31-41c43d0b0fff,Clean and Lubricate the Chain,georgiatech_bike_19_10,invalid_schema,meta[1] mod='we' but text is IDENTICAL to original step 1,0,Missing/invalid final_steps,5,0,0,0,0,0,0,0,0,0,0,0
+c8749317-8f4c-443a-9f82-6b18edbcac23,Making Chai Tea,indiana_cooking_26_2,ok,,0,meta[31].mod invalid: we,53,53,53,0,52,0,0,0,0,0,0,0
+c95ba288-2cca-46f2-b606-f4e4d145d40e,Making Milk Tea,nus_cooking_10_5,ok,,0,meta[10].mod invalid: we,15,16,16,0,14,0,0,0,1,14,0,0
+cda6c810-63a5-455e-b92c-f288e26c72e1,Install a Wheel,fair_bike_07_12,ok,,0,meta[3].mod invalid: we,9,9,9,0,8,0,0,0,0,0,0,0
+cfd6b713-2511-41d4-84b8-0eced6beb5db,Covid-19 Rapid Antigen Test,georgiatech_covid_18_10,ok,,0,meta[8].mod invalid: s,28,28,28,0,27,0,0,0,0,0,0,0
+d03179da-1fd6-40f1-9ed2-8c2681ca2a0c,Fix a Flat Tire - Replace a Bike Tube,fair_bike_06_15,ok,,1,ok,15,14,14,1,14,0,0,0,0,0,0,0
+d2e07def-3ea4-4c31-b20c-5f5a7ed52fb9,Making Sesame-Ginger Asian Salad,fair_cooking_08_2,invalid_schema,meta[3] mod='we' but text is IDENTICAL to original step 4,0,Missing/invalid final_steps,25,0,0,0,0,0,0,0,0,0,0,0
+dd649889-5705-4532-8191-c261acfb864a,Covid-19 Rapid Antigen Test,nus_covidtest_15_2,ok,,1,ok,30,29,29,1,29,0,0,0,0,0,0,0
+e3160bd8-6829-4c41-9db5-bfc750728405,Clean and Lubricate the Chain,indiana_bike_03_1,ok,,0,meta[2].mod invalid: s,4,5,5,0,3,0,0,0,1,0,0,0
+e3b4afb7-d65c-4185-a038-9b9235caf342,Cooking Tomato & Eggs,upenn_0714_Cooking_1_3,ok,,1,ok,73,73,73,3,73,0,0,0,0,6,0,3
+e5bfb696-72d8-4005-9a49-442579352db8,Cooking Scrambled Eggs,minnesota_cooking_060_2,ok,,0,meta[6].mod invalid: we,25,25,25,1,22,0,0,0,0,0,0,1
+f830b550-8282-4e37-8417-5fe5d094f0fc,Remove a Wheel,georgiatech_bike_09_8,ok,,1,ok,8,9,9,0,8,0,0,0,1,8,0,0
+fb733912-4a66-4821-9313-344628fd1154,Making Milk Tea,nus_cooking_07_5,ok,,0,meta[1].mod invalid: mt,7,7,7,1,4,0,0,0,1,0,0,0

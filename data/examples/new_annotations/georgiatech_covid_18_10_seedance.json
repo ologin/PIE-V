@@ -1,0 +1,272 @@
+{
+  "annotations": [
+    {
+      "take_uid": "cfd6b713-2511-41d4-84b8-0eced6beb5db",
+      "take_name": "georgiatech_covid_18_10",
+      "scenario": "Covid-19 Rapid Antigen Test",
+      "annotation_meta": {
+        "annotation_uid": "90e49ed4-dbe1-4d2c-a7ea-4a066b1caa1c",
+        "annotator_id": 6427969490559145,
+        "response_time": 1695383889,
+        "job_id": 336529318726845,
+        "response_id": 331948292734388,
+        "corrected_task_name": null,
+        "queue": " 230919:2249_6q2_52VE"
+      },
+      "segments": [
+        {
+          "start_time": 0.3004,
+          "end_time": 20.3717,
+          "step_id": 31,
+          "step_name": "Unbox package",
+          "step_description": "Unbox the test pack onto the table",
+          "is_essential": true,
+          "step_unique_id": 843
+        },
+        {
+          "start_time": 20.40503,
+          "end_time": 36.62649,
+          "step_id": 10,
+          "step_name": "Read the instructions",
+          "step_description": "Read the instruction sheet on the table",
+          "is_essential": true,
+          "step_unique_id": 824
+        },
+        {
+          "start_time": 36.65982,
+          "end_time": 51.4698,
+          "step_id": 19,
+          "step_name": "Locate and unwrap the test plate",
+          "step_description": "Locate and unwrap the test indicator",
+          "is_essential": true,
+          "step_unique_id": 833
+        },
+        {
+          "start_time": 51.50313,
+          "end_time": 61.15545,
+          "step_id": 31,
+          "step_name": "Unbox package",
+          "step_description": "Unbox the test pack onto the table",
+          "is_essential": true,
+          "step_unique_id": 843
+        },
+        {
+          "start_time": 61.18878,
+          "end_time": 73.3311,
+          "step_id": 7,
+          "step_name": "Unwrap the testing tube",
+          "step_description": "Unwrap the test vial from its packaging",
+          "is_essential": true,
+          "step_unique_id": 822
+        },
+        {
+          "start_time": 73.36444,
+          "end_time": 80.83374,
+          "step_id": 17,
+          "step_name": "Position the covid 19 test tube on the box",
+          "step_description": "Position the covid test vial on the test pack",
+          "is_essential": true,
+          "step_unique_id": 863
+        },
+        {
+          "start_time": 80.86707,
+          "end_time": 93.63106,
+          "step_id": 18,
+          "step_name": "carefully open the test tube seal paper",
+          "step_description": "Tear off the seal paper on covid test vial on the test pack",
+          "is_essential": true,
+          "step_unique_id": 832
+        },
+        {
+          "start_time": 97.1821,
+          "end_time": 112.49098,
+          "step_id": 16,
+          "step_name": "Locate and unwrap the collection swab",
+          "step_description": "Locate and unwrap the test swab",
+          "is_essential": true,
+          "step_unique_id": 830
+        },
+        {
+          "start_time": 112.52431,
+          "end_time": 113.61078,
+          "step_id": 25,
+          "step_name": "Slowly insert the tip of the swab into the nose",
+          "step_description": "Insert the tip of the test swab into the right nostril",
+          "is_essential": true,
+          "step_unique_id": 838
+        },
+        {
+          "start_time": 113.64411,
+          "end_time": 120.28473,
+          "step_id": 26,
+          "step_name": "Rotate and swirl the swab around for 5-10 times",
+          "step_description": "Rotate the test swab in the right nostril",
+          "is_essential": true,
+          "step_unique_id": 839
+        },
+        {
+          "start_time": 120.31806,
+          "end_time": 121.37922,
+          "step_id": 27,
+          "step_name": "Slowly extract the swab from the nostril",
+          "step_description": "Extract the test swab from the right nostril",
+          "is_essential": true,
+          "step_unique_id": 840
+        },
+        {
+          "start_time": 121.41255,
+          "end_time": 122.36578,
+          "step_id": 25,
+          "step_name": "Slowly insert the tip of the swab into the nose",
+          "step_description": "Insert the tip of the test swab into the right nostril",
+          "is_essential": true,
+          "step_unique_id": 838
+        },
+        {
+          "start_time": 122.39911,
+          "end_time": 127.53984,
+          "step_id": 26,
+          "step_name": "Rotate and swirl the swab around for 5-10 times",
+          "step_description": "Rotate the test swab in the right nostril",
+          "is_essential": true,
+          "step_unique_id": 839
+        },
+        {
+          "start_time": 127.57318,
+          "end_time": 128.4698,
+          "step_id": 27,
+          "step_name": "Slowly extract the swab from the nostril",
+          "step_description": "Extract the test swab from the right nostril",
+          "is_essential": true,
+          "step_unique_id": 840
+        },
+        {
+          "start_time": 128.50313,
+          "end_time": 133.09991,
+          "step_id": 36,
+          "step_name": "Dip the swab into the testing tube",
+          "step_description": "Dip the test swab into the test vial on the test pack",
+          "is_essential": true,
+          "step_unique_id": 847
+        },
+        {
+          "start_time": 133.13324,
+          "end_time": 141.68438,
+          "step_id": 42,
+          "step_name": "Rotate and swirl the swab around for 5-10 times",
+          "step_description": "Rotate the test swab in the test vial on the test pack",
+          "is_essential": true,
+          "step_unique_id": 839
+        },
+        {
+          "start_time": 141.71771,
+          "end_time": 149.63443,
+          "step_id": 10,
+          "step_name": "Read the instructions",
+          "step_description": "Read the instruction sheet on the table",
+          "is_essential": true,
+          "step_unique_id": 824
+        },
+        {
+          "start_time": 149.66777,
+          "end_time": 152.74912,
+          "step_id": 42,
+          "step_name": "Rotate and swirl the swab around for 5-10 times",
+          "step_description": "Rotate the test swab in the test vial on the test pack",
+          "is_essential": true,
+          "step_unique_id": 839
+        },
+        {
+          "start_time": 160.1989,
+          "end_time": 189.8627,
+          "step_id": 45,
+          "step_name": "Wait for the testing solution incubation time",
+          "step_description": "Wait for the test solution incubation time",
+          "is_essential": true,
+          "step_unique_id": 856
+        },
+        {
+          "start_time": 189.89603,
+          "end_time": 200.14566,
+          "step_id": 4,
+          "step_name": "Locate and unwrap test tube cap",
+          "step_description": "Locate and unwrap the cap of the test vial",
+          "is_essential": true,
+          "step_unique_id": 820
+        },
+        {
+          "start_time": 200.17899,
+          "end_time": 234.74251,
+          "step_id": 45,
+          "step_name": "Wait for the testing solution incubation time",
+          "step_description": "Wait for the test solution incubation time",
+          "is_essential": true,
+          "step_unique_id": 856
+        },
+        {
+          "start_time": 234.77584,
+          "end_time": 250.90244,
+          "step_id": 49,
+          "step_name": "Remove the swab from the testing tube",
+          "step_description": "Remove the test swab from the test vial",
+          "is_essential": true,
+          "step_unique_id": 860
+        },
+        {
+          "start_time": 250.93577,
+          "end_time": 264.32026,
+          "step_id": 40,
+          "step_name": "cover the test tube",
+          "step_description": "Cover the test vial with its cap",
+          "is_essential": true,
+          "step_unique_id": 834
+        },
+        {
+          "start_time": 264.35359,
+          "end_time": 272.3073,
+          "step_id": 10,
+          "step_name": "Read the instructions",
+          "step_description": "Read the instruction sheet on the table",
+          "is_essential": true,
+          "step_unique_id": 824
+        },
+        {
+          "start_time": 272.34064,
+          "end_time": 279.031667,
+          "step_id": 39,
+          "step_name": "Apply a few drops of the testing solution to the testing plate",
+          "step_description": "Apply a few drops of the test solution to the wrong side of the test indicator",
+          "is_essential": true,
+          "step_unique_id": 850
+        },
+        {
+          "start_time": 279.064997,
+          "end_time": 281.03679700000004,
+          "step_id": 52,
+          "step_name": "Position the covid 19 test tube on the box",
+          "step_description": "Position the test vial on the test pack",
+          "is_essential": true,
+          "step_unique_id": 863
+        },
+        {
+          "start_time": 281.070127,
+          "end_time": 285.44401700000003,
+          "step_id": 54,
+          "step_name": "Wait for 15 minutes",
+          "step_description": "Wait for few minutes for the test results",
+          "is_essential": true,
+          "step_unique_id": 867
+        },
+        {
+          "start_time": 285.477347,
+          "end_time": 287.101667,
+          "step_id": 11,
+          "step_name": "fold the instruction paper",
+          "step_description": "Fold the instruction sheet on the table",
+          "is_essential": true,
+          "step_unique_id": 825
+        }
+      ]
+    }
+  ]
+}

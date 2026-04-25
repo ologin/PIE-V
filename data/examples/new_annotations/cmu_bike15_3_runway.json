@@ -1,0 +1,146 @@
+{
+  "annotations": [
+    {
+      "take_uid": "95f2d2b4-c5de-4620-9d6a-3dd6e1cb7264",
+      "take_name": "cmu_bike15_3",
+      "scenario": "Fix a Flat Tire - Replace a Bike Tube",
+      "annotation_meta": {
+        "annotation_uid": "592e4d3c-5286-4b42-a5a6-145e6d308b82",
+        "annotator_id": 6048949151824772,
+        "response_time": 1695830389,
+        "job_id": 868319014377169,
+        "response_id": 1360920684806605,
+        "corrected_task_name": null,
+        "queue": " 230927:0436_lx3xbVyQ"
+      },
+      "segments": [
+        {
+          "start_time": 0.94285,
+          "end_time": 7.61442,
+          "step_id": 4,
+          "step_name": "Remove dust cap from the wheel",
+          "step_description": "Remove the dust cap from the valve stem",
+          "is_essential": true,
+          "step_unique_id": 875
+        },
+        {
+          "start_time": 7.64775,
+          "end_time": 16.79333,
+          "step_id": 8,
+          "step_name": "Squeeze out any air inside the tube",
+          "step_description": "Deflate the wheel using a deflating needle, but only press it briefly so the wheel barely deflates.",
+          "is_essential": true,
+          "step_unique_id": 879
+        },
+        {
+          "start_time": 16.79333,
+          "end_time": 27.72333,
+          "step_id": 8,
+          "step_name": "Squeeze out any air inside the tube",
+          "step_description": "Stop and fix it: press the deflating needle properly until the wheel is fully deflated.",
+          "is_essential": true,
+          "step_unique_id": 879
+        },
+        {
+          "start_time": 27.75715,
+          "end_time": 32.0502,
+          "step_id": 10,
+          "step_name": "Get bike tire lever",
+          "step_description": "Get a tire lever to remove the tube",
+          "is_essential": true,
+          "step_unique_id": 911
+        },
+        {
+          "start_time": 32.08233,
+          "end_time": 33.69333,
+          "step_id": 11,
+          "step_name": "Engage a tire lever anywhere on the rim except right at the valve",
+          "step_description": "Insert the tire lever between the tire and wheel rim",
+          "is_essential": true,
+          "step_unique_id": 881
+        },
+        {
+          "start_time": 33.69533,
+          "end_time": 34.36333,
+          "step_id": 12,
+          "step_name": "Pull back and lift the bead out of the rim",
+          "step_description": "Pry out a section of the tire with the tire lever",
+          "is_essential": true,
+          "step_unique_id": 882
+        },
+        {
+          "start_time": 34.36333,
+          "end_time": 44.76933,
+          "step_id": 14,
+          "step_name": "Use the tire lever around the rim until the tube is complete off the wheel",
+          "step_description": "Run the tire lever around the rim to remove the tire with tube from the wheel rim",
+          "is_essential": true,
+          "step_unique_id": 883
+        },
+        {
+          "start_time": 44.77025,
+          "end_time": 49.84433,
+          "step_id": 16,
+          "step_name": "Pull the inner tube out",
+          "step_description": "Seperate the inner tube from the tire",
+          "is_essential": true,
+          "step_unique_id": 885
+        },
+        {
+          "start_time": 49.87833,
+          "end_time": 58.67333,
+          "step_id": 33,
+          "step_name": "Fit the tube to the wheel",
+          "step_description": "Fit the inner tube into the tire, but leave part of the tube twisted and not fully tucked inside.",
+          "is_essential": true,
+          "step_unique_id": 900
+        },
+        {
+          "start_time": 58.67333,
+          "end_time": 63.58667,
+          "step_id": 33,
+          "step_name": "Fit the tube to the wheel",
+          "step_description": "Stop and fix it: pull the tube back out, untwist it, and fit the inner tube into the tire evenly.",
+          "is_essential": true,
+          "step_unique_id": 900
+        },
+        {
+          "start_time": 63.58667,
+          "end_time": 80.18667,
+          "step_id": 34,
+          "step_name": "Fit the tire to the wheel",
+          "step_description": "Push the tire back into place on the wheel rim",
+          "is_essential": true,
+          "step_unique_id": 901
+        },
+        {
+          "start_time": 80.18667,
+          "end_time": 83.81967,
+          "step_id": 32,
+          "step_name": "Engage the valve stem into the rim",
+          "step_description": "Perform the missed step now: insert the valve stem into the hole on the rim.",
+          "is_essential": true,
+          "step_unique_id": 899
+        },
+        {
+          "start_time": 83.81967,
+          "end_time": 104.06309,
+          "step_id": 35,
+          "step_name": "Partially inflate the the tube to check the bead is properly seated",
+          "step_description": "Inflate the tube to check if the tire bead is properly seated in the rim",
+          "is_essential": true,
+          "step_unique_id": 902
+        },
+        {
+          "start_time": 104.09642,
+          "end_time": 110.26316,
+          "step_id": 28,
+          "step_name": "Apply the dust cap",
+          "step_description": "Cover the valve stem with the dust cap",
+          "is_essential": true,
+          "step_unique_id": 895
+        }
+      ]
+    }
+  ]
+}

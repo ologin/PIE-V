@@ -1,0 +1,15 @@
+[paths]
+egoexo4d_root = "local/egoexo4d"
+outputs_root = "local/outputs"
+resources_root = "data/resources"
+annotations_root = "local/egoexo4d/annotations"
+videos_root = "local/egoexo4d/videos_ego"
+frames_root = "local/egoexo4d/frames_ego"
+split50_path = "local/egoexo4d/split_50.json"
+keystep_train_path = "local/egoexo4d/keystep_train.json"
+take_names_path = "data/manifests/take_names.txt"
+
+[models]
+openai_model = "gpt-5.2"
+qwen_text_model = "Qwen/Qwen2.5-32B-Instruct"
+qwen_vl_model = "Qwen/Qwen3-VL-32B-Instruct"

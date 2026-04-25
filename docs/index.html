@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PIE-V | How to Correctly Make Mistakes</title>
+    <meta
+      name="description"
+      content="PIE-V: a framework for constructing and benchmarking mistake-aware egocentric procedural videos."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top">PIE-V</a>
+      <nav aria-label="Project navigation">
+        <a href="#examples">Examples</a>
+        <a href="#taxonomy">Taxonomy</a>
+        <a href="#data">Data</a>
+        <a href="#citation">Citation</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <p class="venue">CVPR Workshop 2026</p>
+        <h1>PIE-V</h1>
+        <p class="paper-title">
+          How to Correctly Make Mistakes: A Framework for Constructing and
+          Benchmarking Mistake Aware Egocentric Procedural Videos
+        </p>
+        <p class="authors">Olga Loginova and Frank Keller</p>
+        <div class="link-row" aria-label="Project links">
+          <a href="https://arxiv.org/abs/2604.15134">Paper</a>
+          <a href="https://github.com/ologin/PIE-V">Code</a>
+          <a href="https://github.com/ologin/PIE-V/releases/tag/cvprw26">Release</a>
+        </div>
+      </section>
+
+      <section class="teaser" aria-label="PIE-V method overview">
+        <img
+          src="assets/piev-pipeline.png"
+          alt="PIE-V pipeline from clean Ego-Exo4D keysteps to semantic roles, error planning, correction planning, LLM rewriting, judging, and generated videos."
+        />
+      </section>
+
+      <section class="abstract">
+        <h2>Abstract</h2>
+        <p>
+          PIE-V builds controlled mistake-aware procedural video examples from
+          clean egocentric procedures. It samples cognitively plausible mistakes,
+          models corrections, rewrites procedures with an LLM, validates the
+          resulting text, and links the plan to video editing case studies.
+        </p>
+      </section>
+
+      <section class="stats" aria-label="Dataset statistics">
+        <div>
+          <strong>17</strong>
+          <span>procedural tasks</span>
+        </div>
+        <div>
+          <strong>50</strong>
+          <span>Ego-Exo4D takes</span>
+        </div>
+        <div>
+          <strong>102</strong>
+          <span>sampled mistakes</span>
+        </div>
+        <div>
+          <strong>27</strong>
+          <span>corrections</span>
+        </div>
+        <div>
+          <strong>9</strong>
+          <span>human rubric metrics</span>
+        </div>
+      </section>
+
+      <section id="examples" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Examples</p>
+          <h2>Representative generated video edits</h2>
+          <p>
+            Each preview compares an original correct step with the matching
+            generated mistake clip.
+          </p>
+        </div>
+
+        <div class="example-grid">
+          <article class="example-card">
+            <img
+              class="comparison-gif"
+              src="assets/georgiatech_correct_vs_generated.gif"
+              alt="Side-by-side GIF: correct Ego-Exo4D step and generated wrong-execution clip for georgiatech_covid_18_10."
+            />
+            <div class="example-copy">
+              <p class="tag">Wrong execution</p>
+              <h3>Applying solution to the wrong side</h3>
+              <dl>
+                <div>
+                  <dt>Correct step</dt>
+                  <dd>Apply a few drops of the test solution to the test indicator.</dd>
+                </div>
+                <div>
+                  <dt>Generated mistake</dt>
+                  <dd>
+                    Apply a few drops of the test solution to the wrong side of
+                    the test indicator.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Take</dt>
+                  <dd>georgiatech_covid_18_10</dd>
+                </div>
+                <div>
+                  <dt>MP4 clips</dt>
+                  <dd>
+                    <a href="https://github.com/ologin/PIE-V/releases/download/cvprw26/georgiatech_covid_18_10_correct_step_clip.mp4">correct</a>
+                    ·
+                    <a href="https://github.com/ologin/PIE-V/releases/download/cvprw26/georgiatech_covid_18_10_wrong_execution_clip.mp4">generated</a>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </article>
+
+          <article class="example-card">
+            <img
+              class="comparison-gif"
+              src="assets/sfu_correct_vs_generated.gif"
+              alt="Side-by-side GIF: correct Ego-Exo4D instruction-reading step and generated mistake plus correction clip for sfu_covid_002_10."
+            />
+            <div class="example-copy">
+              <p class="tag correction">Error and correction</p>
+              <h3>Skimming instructions, then recovering</h3>
+              <dl>
+                <div>
+                  <dt>Correct step</dt>
+                  <dd>Read the test instruction sheet.</dd>
+                </div>
+                <div>
+                  <dt>Generated mistake</dt>
+                  <dd>
+                    Read the sheet, but only skim it and miss key details.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Correction</dt>
+                  <dd>
+                    Stop and re-read the sheet carefully from start to finish.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Take</dt>
+                  <dd>sfu_covid_002_10</dd>
+                </div>
+                <div>
+                  <dt>MP4 clips</dt>
+                  <dd>
+                    <a href="https://github.com/ologin/PIE-V/releases/download/cvprw26/sfu_covid_002_10_correct_step_clip.mp4">correct</a>
+                    ·
+                    <a href="https://github.com/ologin/PIE-V/releases/download/cvprw26/sfu_covid_002_10_instruction_correction_clip.mp4">generated</a>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="taxonomy" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Error taxonomy</p>
+          <h2>Five controllable procedural mistake types</h2>
+        </div>
+
+        <div class="taxonomy-table" role="table" aria-label="PIE-V error taxonomy">
+          <div role="row">
+            <strong role="cell">Wrong execution</strong>
+            <span role="cell">A step is performed with an incorrect argument, object, location, or manner.</span>
+          </div>
+          <div role="row">
+            <strong role="cell">Deletion</strong>
+            <span role="cell">A required procedural step is skipped.</span>
+          </div>
+          <div role="row">
+            <strong role="cell">Substitution</strong>
+            <span role="cell">A step is replaced by a plausible but incorrect alternative.</span>
+          </div>
+          <div role="row">
+            <strong role="cell">Insertion</strong>
+            <span role="cell">An unnecessary step is inserted into the procedure.</span>
+          </div>
+          <div role="row">
+            <strong role="cell">Transposition</strong>
+            <span role="cell">Two steps are performed in an incorrect order.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="data" class="section split">
+        <div>
+          <p class="eyebrow">Repository</p>
+          <h2>Code, generated text plans, and aggregate annotations</h2>
+          <p>
+            The repository includes semantic-role resources, sampled PIE-V plans,
+            judged instruction rewrites, a 50-take name list, and an aggregate
+            annotation summary. Ego-Exo4D source videos and original annotation
+            files are local inputs governed by the Ego-Exo4D access terms.
+          </p>
+        </div>
+        <ul class="resource-list">
+          <li><a href="https://github.com/ologin/PIE-V/tree/main/data/resources">Semantic resources</a></li>
+          <li><a href="https://github.com/ologin/PIE-V/tree/main/data/examples">Generated text examples</a></li>
+          <li><a href="https://github.com/ologin/PIE-V/blob/main/data/manifests/take_names.txt">50 take names</a></li>
+          <li><a href="https://github.com/ologin/PIE-V/blob/main/data/annotations/annotation_summary.csv">Annotation summary</a></li>
+        </ul>
+      </section>
+
+      <section id="citation" class="section citation">
+        <div class="section-heading">
+          <p class="eyebrow">Citation</p>
+          <h2>How to cite</h2>
+        </div>
+        <pre><code>@article{loginova2026correctly,
+  title={How to Correctly Make Mistakes: A Framework for Constructing and Benchmarking Mistake Aware Egocentric Procedural Videos},
+  author={Loginova, Olga and Keller, Frank},
+  journal={arXiv preprint arXiv:2604.15134},
+  year={2026}
+}</code></pre>
+      </section>
+    </main>
+
+    <footer>
+      <span>PIE-V</span>
+      <a href="https://arxiv.org/abs/2604.15134">arXiv</a>
+      <a href="https://github.com/ologin/PIE-V">GitHub</a>
+      <a href="https://github.com/ologin/PIE-V/releases/tag/cvprw26">cvprw26</a>
+    </footer>
+  </body>
+</html>

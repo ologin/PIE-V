@@ -1,0 +1,218 @@
+{
+  "annotations": [
+    {
+      "take_uid": "7264ecac-1636-4e6e-8364-0951dc527b1c",
+      "take_name": "nus_covidtest_36_2",
+      "scenario": "Covid-19 Rapid Antigen Test",
+      "annotation_meta": {
+        "annotation_uid": "f82a82cd-b098-4edf-b894-d3a8f78e1c31",
+        "annotator_id": 6048949151824772,
+        "response_time": 1698937565,
+        "job_id": 1552833102196032,
+        "response_id": 3554748451469044,
+        "corrected_task_name": null,
+        "queue": " 231028:1600_ScqQtF7B"
+      },
+      "segments": [
+        {
+          "start_time": 2.24673,
+          "end_time": 22.83183,
+          "step_id": 31,
+          "step_name": "Unbox package",
+          "step_description": "Unbox the test materials from the covid test box onto a table",
+          "is_essential": true,
+          "step_unique_id": 843
+        },
+        {
+          "start_time": 22.854,
+          "end_time": 26.35,
+          "step_id": 63,
+          "step_name": "Unfold the instruction paper",
+          "step_description": "Open up the covid test instruction sheet",
+          "is_essential": true,
+          "step_unique_id": 871
+        },
+        {
+          "start_time": 26.352,
+          "end_time": 64.20507,
+          "step_id": 10,
+          "step_name": "Read the instructions",
+          "step_description": "Read the covid test instruction sheet",
+          "is_essential": true,
+          "step_unique_id": 824
+        },
+        {
+          "start_time": 64.2384,
+          "end_time": 66.40753,
+          "step_id": 11,
+          "step_name": "fold the instruction paper",
+          "step_description": "Put away the covid test instruction sheet on the table",
+          "is_essential": false,
+          "step_unique_id": 825
+        },
+        {
+          "start_time": 66.44087,
+          "end_time": 86.10487,
+          "step_id": 18,
+          "step_name": "carefully open the test tube seal paper",
+          "step_description": "Remove the test tube seal from the test tube",
+          "is_essential": true,
+          "step_unique_id": 832
+        },
+        {
+          "start_time": 86.1382,
+          "end_time": 88.29895015,
+          "step_id": 17,
+          "step_name": "Position the covid 19 test tube on the box",
+          "step_description": "Place the test tube in an erect position on the covid test box, but do not seat it fully",
+          "is_essential": true,
+          "step_unique_id": 863
+        },
+        {
+          "start_time": 88.29895015,
+          "end_time": 90.93986699999999,
+          "step_id": 17,
+          "step_name": "Position the covid 19 test tube on the box",
+          "step_description": "Move the test tube onto the covid test box and set it upright (erect) as intended",
+          "is_essential": true,
+          "step_unique_id": 863
+        },
+        {
+          "start_time": 90.97319699999998,
+          "end_time": 112.61340699999998,
+          "step_id": 16,
+          "step_name": "Locate and unwrap the collection swab",
+          "step_description": "Remove the nasal swab from its package",
+          "is_essential": true,
+          "step_unique_id": 830
+        },
+        {
+          "start_time": 112.68006699999998,
+          "end_time": 115.24629699999998,
+          "step_id": 25,
+          "step_name": "Slowly insert the tip of the swab into the nose",
+          "step_description": "Insert the tip of the nasal swab into the left nostril",
+          "is_essential": true,
+          "step_unique_id": 838
+        },
+        {
+          "start_time": 115.27962699999999,
+          "end_time": 127.38216699999998,
+          "step_id": 26,
+          "step_name": "Rotate and swirl the swab around for 5-10 times",
+          "step_description": "Rotate the nasal swab inside the left nostril",
+          "is_essential": true,
+          "step_unique_id": 839
+        },
+        {
+          "start_time": 127.41550699999999,
+          "end_time": 127.84779699999999,
+          "step_id": 27,
+          "step_name": "Slowly extract the swab from the nostril",
+          "step_description": "Remove the nasal swab from the left nostril",
+          "is_essential": true,
+          "step_unique_id": 840
+        },
+        {
+          "start_time": 127.88112699999999,
+          "end_time": 141.70476699999998,
+          "step_id": 28,
+          "step_name": "Repeat the process with the other nostril",
+          "step_description": "Collect sample from the right nostril with the nasal swab",
+          "is_essential": true,
+          "step_unique_id": 841
+        },
+        {
+          "start_time": 143.77433699999997,
+          "end_time": 146.68747699999997,
+          "step_id": 36,
+          "step_name": "Dip the swab into the testing tube",
+          "step_description": "Insert the nasal swab into the test tube",
+          "is_essential": true,
+          "step_unique_id": 847
+        },
+        {
+          "start_time": 146.72081699999998,
+          "end_time": 173.221767,
+          "step_id": 42,
+          "step_name": "Rotate and swirl the swab around for 5-10 times",
+          "step_description": "Rotate the nasal swab in the test tube",
+          "is_essential": true,
+          "step_unique_id": 839
+        },
+        {
+          "start_time": 173.255767,
+          "end_time": 178.96840699999998,
+          "step_id": 49,
+          "step_name": "Remove the swab from the testing tube",
+          "step_description": "Remove the nasal swab from the test tube",
+          "is_essential": true,
+          "step_unique_id": 860
+        },
+        {
+          "start_time": 179.001737,
+          "end_time": 180.87649699999997,
+          "step_id": 52,
+          "step_name": "Position the covid 19 test tube on the box",
+          "step_description": "Place the test tube in an erect position on the covid test box",
+          "is_essential": true,
+          "step_unique_id": 863
+        },
+        {
+          "start_time": 180.90982699999998,
+          "end_time": 212.38106699999997,
+          "step_id": 70,
+          "step_name": "Dispose waste",
+          "step_description": "Dispose used covid test materials and packages into the ziplock waste bag",
+          "is_essential": false,
+          "step_unique_id": 869
+        },
+        {
+          "start_time": 212.41439699999998,
+          "end_time": 220.177937,
+          "step_id": 40,
+          "step_name": "cover the test tube",
+          "step_description": "Cover the test tube with its cap",
+          "is_essential": true,
+          "step_unique_id": 834
+        },
+        {
+          "start_time": 220.177937,
+          "end_time": 237.483397,
+          "step_id": 80,
+          "step_name": "Locate and unwrap the test plate",
+          "step_description": "Remove the covid test plate from its package",
+          "is_essential": true,
+          "step_unique_id": 833
+        },
+        {
+          "start_time": 237.51672699999997,
+          "end_time": 255.188687,
+          "step_id": 39,
+          "step_name": "Apply a few drops of the testing solution to the testing plate",
+          "step_description": "Apply drops of testing solution inside the test tube onto the covid test plate",
+          "is_essential": true,
+          "step_unique_id": 850
+        },
+        {
+          "start_time": 255.222017,
+          "end_time": 293.672437,
+          "step_id": 70,
+          "step_name": "Dispose waste",
+          "step_description": "Dispose the test tube and covid test plate in the ziplock waste bag",
+          "is_essential": false,
+          "step_unique_id": 869
+        },
+        {
+          "start_time": 293.705767,
+          "end_time": 320.628047,
+          "step_id": 59,
+          "step_name": "Dispose waste",
+          "step_description": "Put away the used covid test items and the ziplock waste bag into the covid test box",
+          "is_essential": false,
+          "step_unique_id": 869
+        }
+      ]
+    }
+  ]
+}

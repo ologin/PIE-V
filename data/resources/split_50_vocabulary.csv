@@ -1,0 +1,959 @@
+step_description_id,step_description
+1,Unbox covid test package
+2,Arrange test material on the table
+3,Read the test instruction sheet.
+4,Return a test kit item to the package
+5,Get the test vial
+6,Fill the test vial with the solution
+7,Read the test instruction sheet
+8,Unwrap unused swab
+9,Insert the test swab into her nostril
+10,Rotate the test swab around her nostril
+11,Extract the test swab from her nostril
+12,Repeat the process with the other nostril
+13,Dip the test swab into the test vial
+14,Rotate the test swab around the test vial
+15,Read the instruction sheet
+16,Unwrap test indicator
+17,Read instruction sheet
+18,Wait for the test vial to incubation time
+19,Remove the swab from the test vial
+20,Insert the collection swab in its pack for disposal
+21,Cover the test vial with the lid
+22,Apply few drops of test solution into the test indicator
+23,Arrange test materials on the table for disposal
+24,Waits for 1-2 minutes
+25,Check the test indicator
+26,Unbox the test pack onto the table
+27,Read the instruction sheet on the table
+28,Locate and unwrap the test indicator
+29,Unwrap the test vial from its packaging
+30,Position the covid test vial on the test pack
+31,Tear off the seal paper on covid test vial on the test pack
+32,Locate and unwrap the test swab
+33,Insert the tip of the test swab into the right nostril
+34,Rotate the test swab in the right nostril
+35,Extract the test swab from the right nostril
+36,Dip the test swab into the test vial on the test pack
+37,Rotate the test swab in the test vial on the test pack
+38,Wait for the test solution incubation time
+39,Locate and unwrap the cap of the test vial
+40,Remove the test swab from the test vial
+41,Cover the test vial with its cap
+42,Apply a few drops of the test solution to the test indicator
+43,Position the test vial on the test pack
+44,Wait for few minutes for the test results
+45,Fold the instruction sheet on the table
+46,Unbox the test materials from the covid test box onto a table
+47,Read the covid test instruction sheet
+48,Put away the covid test instruction sheet on the table
+49,Remove the test tube seal from the test tube
+50,Place the test tube in an erect position on the covid test box
+51,Remove the nasal swab from its package
+52,Insert the tip of the nasal swab into the left nostril
+53,Rotate the nasal swab inside the left nostril
+54,Remove the nasal swab from the left nostril
+55,Collect sample from the right nostril with the nasal swab
+56,Insert the nasal swab into the test tube
+57,Rotate the nasal swab in the test tube
+58,Remove the nasal swab from the test tube
+59,Dispose used covid test materials and packages into the ziplock waste bag
+60,Cover the test tube with its cap
+61,Remove the covid test plate from its package
+62,Apply drops of testing solution inside the test tube onto the covid test plate
+63,Dispose the test tube and covid test plate in the ziplock waste bag
+64,Put away the used covid test items and the ziplock waste bag into the covid test box
+65,Open up the covid test instruction sheet
+66,Remove the dust cap from the valve stem
+67,Deflate the wheel using a deflating needle
+68,Get a tire lever to remove the tube
+69,Run the tire lever around the rim to remove the tire with tube from the wheel rim
+70,Seperate the inner tube from the tire
+71,Fit the inner tube into the tire
+72,Push the tire back into place on the wheel rim
+73,Inflate the tube to check if the tire bead is properly seated in the rim
+74,Cover the valve stem with the dust cap
+75,Insert the valve stem into the hole on the rim
+76,Insert the tire lever between the tire and wheel rim
+77,Pry out a section of the tire with the tire lever
+78,Get a tire lever from the pocket
+79,Separate the outer tire from the wheel rim with the tire lever
+80,Check the inner tube for any damage
+81,Check the tire for any damage
+82,Get an inner tube from the inner tube box
+83,Remove the valve cap from the inner tube
+84,Inflate the inner tube a little with an air compressor
+85,Fit the outer tire to the rim
+86,Fit the tire to the wheel
+87,Partially inflate the tube to check the bead is properly seated
+88,Pull out the inner tube from the wheel
+89,Inflate the tube with an air compressor
+90,Fit the inner tube to the wheel
+91,pick a tire lever from the apron
+92,insert the tire lever in the rim
+93,engage the tire lever around the rim
+94,pull the tire out of the bicycle rim
+95,pull the inner tube out of the tire
+96,check the thread of the tire for any damage
+97,fix the tire to the bicycle wheel
+98,get a pack of new inner tube from the carton
+99,unwrap the new inner tube
+100,unscrew the valve cap
+101,inflate the inner tube a little with a pump
+102,fit the inner tube to the bicycle wheel
+103,push the valve through its hole
+104,inflate the tire fully with the pump
+105,Pick a wrench from a work table.
+106,Loosen the axle nuts with the wrench.
+107,Get a mallet from a tool rack.
+108,Loosen the axle nuts using a wrench and a mallet.
+109,Pick a wrench from the work table.
+110,Loosen the axle nuts with the wrenches.
+111,Move the rear derailleur back to slacken the chain.
+112,Pull the release lever.
+113,Get an appropriate wrench
+114,Loosen the axle nut using a wrench pull
+115,Remove the wheel from the bicycle frame
+116,get a tripod wrench
+117,loosen the nuts of the derailleur with a tripod wrench
+118,get a socket wrench
+119,remove wheel
+120,Position the wheel correctly into the fork
+121,Tighten the both axle nuts with hand
+122,Get a wrench from the tool stand
+123,Tighten the both axle nuts with a wrench
+124,Put the wrench back in the tool stand
+125,Unscrew the axle nuts on the sides.
+126,Set the wheel into the fork
+127,Tighten the both axle nuts with hands
+128,Get the appropriate wrenches from the table
+129,Tighten both axle nuts with the wrench
+130,Connect the brake noodle to the rim
+131,Return the wrenches to the table
+132,Tighten the brake cable with hands
+133,Press the brake to check if it's active
+134,Roll the wheel to check if it's not stuck
+135,Position the wheel into the fork
+136,Tighten both axle nuts using hands
+137,Get socket wrench from the apron
+138,Tighten both axle nuts using a socket wrench
+139,Return socket wrench back to the apron
+140,Tighten the brake cable to the rear axle
+141,Press the brake
+142,Roll the wheel
+143,Get the chain lube from the work table.
+144,Check the bicycle hand brake.
+145,Rotate the bicycle pedal.
+146,Move the bicycle pedal.
+147,Apply chain lube to the bicycle chain.
+148,Get a cloth from the work table.
+149,Place the cloth on the bicycle chain.
+150,Rotate the bicycle pedal and place the cloth underneath the bicycle chain.
+151,Get a chain lube from the table
+152,Slowly backpedal the chain while applying the chain lube to each individual roller
+153,Get a cloth from the table
+154,Wipe the chain lube droppings on the bike with the cloth
+155,Wipe the chain with the cloth to dry off any liquid while backpedaling
+156,Get the toothbrushes from the floor.
+157,Hold the toothbrushes to the chain as you backpedal with your other hand
+158,Get the chain lube from the floor
+159,"Slowly move the chain by backpedaling with your other hand, applying lube into the rollers, one by one"
+160,call for help
+161,tap patient to confirm consciousness
+162,check if the patient is breathing
+163,compress the chest of the patient with hand
+164,check the breath of patient for response
+165,kneel down beside the patient's chest
+166,tap the patient on the shoulder to check consciousness
+167,perform artificial respiration to the patient
+168,press straight down on the chest of the patient with both hands clamped together
+169,press down on the patient's chest at a consistent rate
+170,check the patient's breathing
+171,place one hand over the other hand to clamp them together
+172,Tap the patient's shoulders to check for consciousness
+173,Loudly ask if the patient is okay
+174,Place the interlock hands at the center of the patient's chest
+175,Call for assistances
+176,Press down with both hands to perform a chest compression
+177,Get knife with left hand from the chopping board on the kitchen countertop
+178,Cut cucumber stalk region with knife on the chopping board
+179,Place cut cucumber stalk region in the kitchen sink
+180,Chop cucumber with knife on the chopping board
+181,Cut cucumber blossom region with knife on the chopping board
+182,Place cut cucumber blossom region in the kitchen sink
+183,Get tomato with left hand from the container on the gas cooker
+184,Remove tomato stalk with knife
+185,Dice tomato with knife on the chopping board
+186,Get paper towel with left hand from the holder on the kitchen countertop
+187,Get bowl from the cabinet
+188,Get cucumber from the fridge
+189,Get tomato from the fridge
+190,Get chopping board from the countertop
+191,Cut cucumber on the chopping board
+192,Get peeler from the cabinet
+193,Peel cucumber
+194,Add cucumber to the mixing bowl
+195,Cut tomato on the chopping board
+196,Add tomatoes to the mixing bowl
+197,Put away knife and peeler
+198,Put away cucumber and tomato
+199,Dispose trash in the trash can
+200,Put away chopping board
+201,Get salt from the countertop
+202,Add salt to the mixing bowl
+203,Put away salt
+204,Add sugar to the mixing bowl
+205,Toss the salad in the mixing bowl
+206,Get cherry tomato from the refrigerator
+207,Get cucumber from the refrigerator
+208,Get bowl from the kitchen cabinet
+209,Wash cherry tomato with water
+210,Wash hands with water
+211,Wash cucumber with water
+212,Get knife from knife block on the kitchen countertop
+213,Wash knife with water
+214,Add chopped cucumber into the bowl
+215,Chop cherry tomato with knife on the chopping board
+216,Add chopped cherry tomato into the bowl
+217,Add cherry chopped tomato into the bowl
+218,Wash chopsticks with water
+219,Get pink salt from the kitchen countertop
+220,Add pink salt to salad in the bowl
+221,Get black pepper from the kitchen countertop
+222,Add black pepper to salad in the bowl
+223,Get soy sauce from the kitchen cabinet
+224,Add soy sauce to salad in the bowl
+225,Get oil from the kitchen countertop
+226,Add oil to salad in the bowl
+227,Stir salad in the bowl with chopstick
+228,Wash hand with water
+229,Get a crate of eggs from the fridge
+230,Get skillet from the compartment
+231,Place the skillet on the stove
+232,Get butter from the counter top
+233,Turn on the stove
+234,Get a knife from the drawer
+235,Add butter to skillet with a knife
+236,Get spatula from the counter top
+237,Stir the butter in the skillet with a spatula
+238,Get salt from the compartment
+239,Get dried herbs from the compartment
+240,Get a bowl from the compartment
+241,Crack eggs into a mixing bowl
+242,Get a fork from the drawer
+243,Whisk until the egg whites and yolks are well integrated with a fork
+244,Add salt to a mixing bowl
+245,Add dried herbs to a mixing bowl
+246,Pour egg mixture into a skillet
+247,Gently push cooked portions toward the center of the skillet using a spatula as eggs set around the edge of the skillet.
+248,"Gently move spatula across bottom and side of skillet to form large,soft curds."
+249,Get plate from the compartment
+250,Serve scrambled eggs to plate
+251,Turn on the stove knob
+252,Get egg from the crate of eggs
+253,Crack egg into the mixing bowl
+254,Dispose egg shell in the sink
+255,Whisk the egg white and yolk until it is well integrated.
+256,Whisk egg until it is well integrated
+257,Get oil from the countertop
+258,Add oil to the skillet
+259,Spread oil in the skillet
+260,Adjust the stove heat from the knob
+261,Pour egg mixture into the skillet
+262,Get spatula from the countertop
+263,Stir egg mixture with spatula to form large soft curds
+264,Serve the scrambled egg in the bowl
+265,Pour the egg mixture from a bowl into a  frying pan.
+266,Turn the stove knob to adjust the stove heat
+267,Move the spatula across the bottom and side of the frying pan
+268,Transfer the scrambled eggs from the frying pan to a plate
+269,Get celery from the chafer pan
+270,Wash celery in the sink
+271,Get parsley from the chafer pan
+272,Wash fresh parsley in the sink
+273,Get carrot from the chafer pan
+274,Wash carrot in the sink
+275,Get peeler from the countertop
+276,Remove out layer of the carrot with the peeler
+277,Put away carrot peels in the small chafer pan
+278,Dice carrot on the chopping board
+279,Dice red bell pepper on the chopping board
+280,Dice onion on the chopping board
+281,Cut off celery blossom end and tip to the small chafer pan
+282,Dice celery on the chopping board
+283,Get scallion from the nylon
+284,Cut scallion on the chopping board
+285,Get mixing bowl from the countertop
+286,Pour chopped vegetables into the mixing bowl
+287,Wipe hand with napkin
+288,Add almonds to the mixing bowl
+289,Add sesame seed to the mixing bowl
+290,Get mayonnaise from the countertop
+291,Add mayonnaise to the mixing bowl
+292,Get spoon from the countertop
+293,Stir the undressed salad in the mixing bowl
+294,Get a bowl from the countertop
+295,Serve the salad in a bowl
+296,Wipe the chopping board with napkin
+297,Get celery from the kitchen sink
+298,Rinse celery with water from the kitchen tap
+299,Get lettuce from the kitchen sink
+300,Slice onion with knife on the cutting board
+301,Chop pepper with knife on the cutting board
+302,Cut out the stem of the cucumber with knife
+303,Chop carrot with knife on the cutting board
+304,Cut out the stalk of the celery with knife on the cutting board
+305,Chop the celery with knife on the cutting board
+306,Chop lettuce with knife on the cutting board
+307,Dry hand with the kitchen napkin
+308,Get a mixing bowl from the kitchen countertop
+309,Add chopped ingredients into the mixing bowl
+310,Add fresh ginger to the salad in the mixing bowl
+311,Add turmeric powder to the salad in the mixing bowl
+312,Add mayonnaise to the salad in the mixing bowl
+313,Get a plate from the kitchen countertop
+314,Stir the salad mixture with spoon
+315,Dish the salad into the plate
+316,Wash hand in the kitchen sink
+317,Wash a cabbage in the kitchen sink
+318,Wash a carrot in the kitchen sink
+319,Wash fresh cilantro in the kitchen sink
+320,Wipe hands with a paper towel
+321,Cut the cabbage on the cutting board
+322,Cut a red bell pepper on the cutting board
+323,Cut an onion on the cutting board
+324,Peel the flesh of the carrot with a peeler
+325,Trash the peeled carrot flesh in a trash bowl
+326,Cut the peeled carrot on the cutting board
+327,Get a spoon from a bowl on the kitchen counter
+328,Get a mixing bowl from the kitchen counter
+329,Add the prepared mix of cut vegetables from the cutting board to the mixing bowl
+330,Add sesame seeds to the salad mixture in the bowl
+331,Add slat to the salad mixture in the mixing bowl
+332,Add sesame seeds to the salad mixture in the mixing bowl
+333,Add mustard to the salad mixture in the mixing bowl
+334,Stir the salad mixture in the mixing bowl with the spoon
+335,Get a bowl from the kitchen counter
+336,Transfer the salad mixture from the mixing bowl to the bowl
+337,Get the fresh cilantro from a tray on the kitchen counter
+338,Cut the fresh cilantro on the cutting board
+339,Add the cut fresh cilantro from the cutting board to the salad mixture bowl
+340,Add the cut carrots from the cutting board to the mixing bowl
+341,Get noodles from a pack of noodles on the countertop
+342,Boil noodles in the hot water in the saucepan
+343,Put away the noodles pack on the countertop
+344,Get a spoon from the countertop
+345,Stir the noodles in the saucepan
+346,Get spring onion from the chopping board
+347,Cut the spring onions on the chopping board
+348,Get a garlic from the chopping board
+349,Peel the skin of the garlic
+350,Cut the garlic on the chopping board
+351,Add more water to the noodles in the saucepan from a bowl on the countertop
+352,Get a plate from the countertop
+353,Transfer the spring onion and garlic slices into the plate
+354,Strain the noodles with a mesh strainer
+355,Turn off the stove
+356,Wash noodles in the saucepan in the sink
+357,Strain the noodles into a mesh strainer
+358,Pour the noodles into a bowl
+359,Get an oil bottle from the countertop
+360,Add oil into the skillet on the stove
+361,Spread the oil in the skillet
+362,Add garlic and spring onion slices into the skillet
+363,Stir the spring onion and garlic slices in the skillet
+364,Add salt to the spring onion and garlic slices
+365,Get oyster sauce from the countertop
+366,Add oyster sauce to the garlic and spring onion slices
+367,Mix the salt and oyster sauce with the cooked garlic and spring onion slices
+368,Add the cooked spring onions and garlic slices to the noodles in the bowl
+369,Wash the skillet in the sink
+370,Add oyster sauce to the noodles and spring onion and garlic sauce
+371,Mix the noodles and added ingredients
+372,Mix the noodles with the added ingredients with the spoon
+373,Serve the food in the plate on the countertop
+374,Rinse the saucepan in the sink
+375,Get noodles from the cutting board on the countertop
+376,Add noodles into the boiling water
+377,Stir the noodles in the pot with a spoon
+378,Get a napkin from the countertop
+379,Feel the noodles with hands to check for doneness
+380,Get garlic cloves from the countertop
+381,Get spring onions from the countertop
+382,Get celeries from the countertop
+383,Drain the noodles using a sieve
+384,Turn the stove knob to regulate the heat
+385,Heat the skillet over medium heat
+386,Place the knife over the garlic clove on the cutting board and give the knife a sharp whack with hands
+387,Peel garlic cloves with hands
+388,Cut spring onion on the cutting board with a knife
+389,Get bottle of oil from the countertop
+390,Tilt the skillet to allow oil flow into empty spaces
+391,"Add spring onion, celeries and garlic to the skillet"
+392,Get soy sauce from the countertop
+393,Add boiled noodles from the sieve into the skillet
+394,Wash hands in the kitchen sink
+395,Wipe hands with a kitchen towel
+396,Toss the noodles with the ingredients in the skillet
+397,Stir the noodles with the ingredients in the skillet with a spoon
+398,Add soy sauce to the noodles in the skillet
+399,Mix the soy sauce with the noodles and ingredients in the skillet with a spoon
+400,Transfer the noodles to a bowl
+401,Cut garlic with a knife on the cutting board
+402,Cut celeries on the cutting board with a knife
+403,Check heat of the skillet
+404,Toss the ingredients in the skillet
+405,Toss the ingredients in the skillet and open the soy sauce
+406,Get noodles from the pack
+407,Add the noodles to the boiling water
+408,Place the skillet on the gas burner
+409,Place the spoon on the chopping board
+410,Clean hands with the napkin
+411,Get oil container from the kitchen countertop
+412,Clean hand with the napkin
+413,Regulate the heat of the gas burner
+414,Heat the skillet on the gas burner
+415,Get garlic cloves
+416,Slice the mustard leaves with the knife
+417,Peel the garlic cloves skin with the knife
+418,Dice the garlic cloves with the knife
+419,Add sliced mustard leaves to the tray
+420,Dispose the garlic cloves skin
+421,Add diced garlic to the tray
+422,Add diced onion to the tray
+423,Place the oil container on the kitchen countertop
+424,Spread oil round the skillet
+425,Add a mix of vegetables to the oil in the skillet
+426,Add diced garlic cloves to the skillet
+427,Stir the mix of vegetables in the skillet
+428,Place the tray on the chopping board
+429,Pour the boiled noodles into the strainer
+430,Add boiled noodles to the skillet
+431,Stir fry the noodles in the skillet with a spoon
+432,Put the strainer in the kitchen sink
+433,Place the pot in the kitchen sink
+434,Add soy sauce to the boiled noodles in the skillet
+435,Stir fry the noodles in the skillet
+436,Place the soy sauce container on the kitchen countertop
+437,Stir the noodles in the skillet
+438,Serve the noodle into the plate
+439,Fill the skillet with water
+440,Get a plate from the kitchen cabinet
+441,Wash the plate in the kitchen sink
+442,Get a can of fish from the kitchen counter
+443,Get a pair of chopsticks from a kitchen drawer
+444,Add fish from the can to the plate using the pair of chopsticks
+445,Get a jar of tamari from the refrigerator
+446,Get a fork from the kitchen drawer
+447,Add tamari to the fish in the plate using the fork
+448,Check the recipe on the phone
+449,Add rice vinegar to the mix of ingredients in the plate
+450,Place a sheet of dried seaweed on a rolling mat
+451,Turn off the electric rice cooker
+452,Get a cooking spoon from the dishwasher
+453,Spread a thin layer of sushi rice from the rice cooker onto the sheet of dried seaweed
+454,Add the sushi seasoning mixture from the plate to the sushi rice on the sheet of dried seaweed
+455,Roll up the sushi using the rolling mat
+456,Wet a knife with water from the kitchen tap
+457,Cut the sushi roll into smaller pieces on the cutting board
+458,Transfer the cut sushi rolls from the cutting board to the plate
+459,Check the recipe on a phone
+460,put the tea bag into the cup on the countertop
+461,get the milk container from the countertop
+462,pour milk into the tea bags in the cup
+463,get the sugar bag from the countertop
+464,pour sugar into the milk in the cup
+465,pour hot water into the cup
+466,stir the milk tea with a stirrer to steep the tea
+467,turn on the electric kettle to boil water
+468,get a sachet of tea bag from the counter top
+469,open the sachet of the tea bag
+470,add tea bag into a cup on the counter top
+471,dispose the tea bag sachet into the waste bin
+472,get milk from the counter top
+473,add milk into the cup on the counter top
+474,return the milk to the counter top
+475,get a pack of sugar from the counter top
+476,add sugar into the cup on the counter top
+477,return the the pack of sugar to the counter top
+478,pour hot water into cup on the counter top
+479,get a chopstick from the rack on the counter top
+480,stir the tea in the cup with the chopstick
+481,get a cup
+482,Place the pot on the stove
+483,Add milk to the pot
+484,Add water to the pot
+485,Add tea to the pot
+486,Add sugar to the pot
+487,Add ginger to the pot
+488,Swirl the pot with a pot holder
+489,Serve milk tea in a cup
+490,Cut the onions
+491,Light the stove with a gas lighter
+492,Get eggs from the cabinet
+493,Add onions to a mixing bowl
+494,Cut the pepper
+495,Add pepper to a mixing bowl
+496,Add oil to skillet
+497,Whisk until the egg whites and yolks are well integrated
+498,Get plate from the cabinet
+499,Flip the egg to cook evenly on both sides
+500,Slide the omelet onto the plate
+501,Ignite the stove with a gas lighter
+502,Get a frying pan from a kitchenware rack
+503,Turn the stove knob to adjust the heat
+504,Get cooking oil container from a cabinet
+505,Add some oil to the frying pan
+506,Put the cooking oil container on the cabinet
+507,Get a chopping board from a rack
+508,Get onion from the cabinet
+509,Get green chilies from the cabinet
+510,Cut onions on the chopping board with knife
+511,Cut green chilies on the chopping board with knife
+512,Get a bowl from cabinet
+513,Get an egg from a bowl on the cabinet
+514,Get a spoon from a cutlery rack
+515,Crack the egg into the bowl with the spoon.
+516,Add the onions into the bowl
+517,Add the green chilies to the bowl
+518,Get a salt container from the cabinet
+519,Add some salt to the egg
+520,Place the salt container on the cabinet
+521,Pick chili powder container from the cabinet
+522,Add some chili powder to the egg
+523,Place the chili powder container on the cabinet
+524,Stir the ingredients well with the spoon
+525,Turn the knob to adjust the stove heat
+526,Tilt the frying pan to spread the oil
+527,Pour the egg mixture into the frying pan
+528,Place the bowl on the countertop
+529,Get a plate from a plate rack
+530,Get a spatula from the utensil rack
+531,Gently move the egg towards the center of the frying pan with the spatula
+532,Flip the egg with the spatula
+533,Flip the egg over with the spatula
+534,Stir fry the egg mixture in the frying pan
+535,Flip the egg with spatula
+536,Turn the knob to put off the stove
+537,Move the omelet from the frying pan to the plate with the spatula
+538,Get an egg from a crate
+539,Crack the egg with a fork
+540,Pour the egg into a mug
+541,Wash her hands under the kitchen tap
+542,Add salt into the cup of egg mixture
+543,Add chili powder into the cup of egg mixture
+544,Heat the skillet over a medium heat
+545,Get a jar of oil from the cabinet
+546,Add a portion of the oil into the skillet
+547,Whisk the egg mixture with a fork
+548,Rotate the skillet to allow the oil flow into an empty space
+549,Pour the egg mixture into the skillet
+550,Rotate the skillet to allow the uncooked egg spread into an empty space
+551,Gently push the uncooked portion of the egg into an empty space with a fork
+552,Regulate the temperature of the electric stove
+553,Get a plate from the drawer
+554,Flip the egg with a spatula
+555,Turn off the electric stove
+556,Transfer the omelet into a plate
+557,Turn on the stove to heat a pot
+558,Get a bottle of water from the counter top
+559,Pour water from the bottle into the pot on the stove
+560,Get a milk pack from the counter top
+561,Pour milk into the water in the pot
+562,Get a small spoon from the chopping board
+563,Stir the milk and water in the pot with the small spoon
+564,Wait until the milk boils with the water
+565,Get cardamom container from the cabinet
+566,Add cardamom into the milk in the pot
+567,Return the cardamom container into the cabinet
+568,Get white pepper from its container on the counter top
+569,Rinse white pepper under the running faucet
+570,Add the white pepper into the milk in the pot
+571,Wipe hands with a cloth
+572,Stir the chai tea in the pot with a spoon
+573,Get tea leave container from the cabinet
+574,Add tea leaves into the milk in the pot
+575,Return the tea leave container to the cabinet
+576,Get cinnamon powder container from the cabinet
+577,Regulate the heat of the stove
+578,Shake the chai tea in the pot to mix well
+579,Add cinnamon powder into the pot of chai tea
+580,Stir the chai tea with spoon to mix well with the cinnamon powder
+581,Return  cinnamon powder container to the cabinet
+582,Wait for chai tea in the pot to steep
+583,Stir the chai tea in the pot with the small spoon
+584,Pour the tea into the cup through the fine-mesh sieve
+585,Place a fine-mesh sieve on a mug cup
+586,Get the small spoon the chopping board
+587,Turn on the cooker with the press of a button
+588,Press the button of the cooker to adjust the heat temperature
+589,Turn off the cooker
+590,Turn on the cooker
+591,Get and empty the contents in a saucepan
+592,Rinse the saucepan under running tap
+593,Place the saucepan on the cooker
+594,Get a glass cup from the countertop
+595,Fill the glass cup with water from the running tap
+596,Fill the saucepan on the cooker with the water from the glass cup
+597,Check the heat of the saucepan with hand
+598,Wait for the water in the saucepan to boil
+599,Get a jar of tea leaves from the shelf
+600,Get a jar of cinnamon sticks from the shelf
+601,Get a jar of fresh thyme from the shelf
+602,Get a small bowl of peeled ginger from the countertop
+603,Wait while the water boils in the saucepan
+604,Place right hand over saucepan to check the heat
+605,Add peeled ginger to the water in the saucepan
+606,Add cinnamon sticks to the water in saucepan
+607,Add thyme to the tea in the saucepan
+608,Get a measuring spoon from the countertop
+609,Add tea leaves to hot water in the saucepan
+610,Stir the tea with a spoon in the saucepan
+611,Wait until the tea in the saucepan
+612,Wait while the tea boils in the saucepan
+613,Get a jar of sugar from the countertop
+614,Add sugar to the tea in the saucepan
+615,Get a carton of milk from the large bowl on the countertop
+616,Get kitchen shears from the rack to pierce the carton of milk
+617,Stir the tea in the saucepan with the spoon
+618,Pour milk into the tea in the saucepan
+619,Stir the tea in the saucepan with a spoon
+620,Throw the used carton of milk in the trash can
+621,Wipe the countertop with the kitchen towel
+622,Get a cup from the countertop
+623,Press the button to turn off the cooker
+624,Get a fine-mesh sieve from the countertop
+625,Pour the tea into the cup through the sieve
+626,Fill a measuring cup with water
+627,Check the recipe instruction paper
+628,Fill a saucepan with water
+629,Get a carton of milk from a bowl on the countertop
+630,Pour milk into a cup
+631,Get a jar of cinnamon stick from the kitchen pantry
+632,Pour milk into the saucepan
+633,Add cinnamon stick to the milk in the saucepan
+634,Add ginger to the milk in the saucepan
+635,Get thyme from the kitchen pantry
+636,Add fresh thyme to the milk in the saucepan
+637,Place the saucepan on the stove
+638,Get tea leaves from the kitchen pantry
+639,Get sugar from the countertop
+640,Stir milk with a spoon to mix well with water
+641,Adjust the stove heat
+642,Get measuring spoons from the countertop
+643,Open the lid of the tea leaves jar
+644,Add tea leaves to the boiling milk in the saucepan
+645,Stir the tea in the pot with a spoon
+646,Place a lid on the jar of tea leaves
+647,Put away the sugar
+648,Wash a measuring spoon under running water
+649,Get a fine-mesh sieve from the contertop
+650,Put away the saucepan with a fine-mesh sieve
+651,Put away tea leaves
+652,Get flour from the kitchen shelf.
+653,Add flour to the surface of the countertop.
+654,Get egg from the crate of eggs in the refrigerator
+655,Crack an egg on the flour on the countertop.
+656,Throw eggshells in the trash can.
+657,Get salt from the kitchen shelf.
+658,Add salt to flour and egg on the countertop.
+659,Get a spoon from the kitchen island cabinet.
+660,Mix the egg and flour mixture with a spoon on the countertop.
+661,Make a dough with the flour on the countertop.
+662,Get a spoon from the kitchen island.
+663,Add water with a spoon to flour on the countertop.
+664,Add water to the dough on the countertop
+665,Add water to the dough on the countertop.
+666,Wash both hands under the running water from the faucet in the kitchen sink.
+667,Wipe both hands on the kitchen towel on the kitchen stove.
+668,"Add flour to the surface of the countertop,"
+669,Get a rolling pin on the kitchen island.
+670,Add flour to the rolling pin on the countertop.
+671,Rub the rolling pin with flour on the countertop.
+672,Flatten the dough with a roller pin on the countertop.
+673,Get the pastry cutter from the kitchen island cabinet.
+674,Use cutter to slice through the flattened dough on the countertop.
+675,Get pasta from the countertop.
+676,Returns flour to the kitchen shelf.
+677,Whisk the egg with a spoon on the countertop.
+678,Get flour container from the kitchen cabinet
+679,Get salt from the cabinet
+680,Check the recipe instruction on a phone
+681,Get egg crate from the refrigerator
+682,Get measuring spoon from the cabinet
+683,Get wooden rolling pin from the cabinet
+684,Get pizza knife from the cabinet
+685,Get chopping board from the counter top
+686,Get a mixing bowl from the cabinet
+687,Get measuring cup from the cabinet
+688,Get cutlery knife from the cabinet
+689,Measure flour from the flour container into the measuring cup
+690,Check the recipe instruction on the phone
+691,Pour the measured flour in the measuring cup into mixing bowl
+692,Add salt
+693,Get small bowl from the cabinet
+694,Get an egg from the egg crate on the counter top
+695,Crack the egg into the small bowl
+696,Dispose the egg shell into the trash can
+697,Wash hands under the running faucet with soap and water
+698,Wipe hands with the kitchen hand towel
+699,Beat the egg in the small bowl with a fork
+700,Create hole in flour in the mixing bowl with a spoon
+701,Add the beaten egg into flour hole in the mixing bowl
+702,Mix the egg and flour in the mixing bowl together with a spoon
+703,Mix the egg and flour in the mixing bowl together with the spoon
+704,Rinse hand under running faucet
+705,Add water into the bowl of egg and flour with a measuring spoon
+706,"Mix the water, egg and flour in the mixing bowl with the fork"
+707,Add water into the bowl flour mixture with the  measuring spoon
+708,Mix the water and flour mixture in the mixing bowl with the fork
+709,Add water into the bowl flour mixture with the measuring spoon
+710,Coat the chopping board with the flour in the measuring cup
+711,Knead the dough in the bowl with hands
+712,Flatten the dough with hands on the chopping board
+713,Roll out the dough on the chopping board  with the rolling pin
+714,Coat the flattened dough with the flour in the measuring cup
+715,Cut pasta into strips with the pizza knife
+716,Knead the dough on the chopping board with hands
+717,Add the flour in the measuring cup to the surface of the chopping board
+718,Flatten the dough with hand on the chopping board
+719,Get a pack of flour from the shelf
+720,Get a jar of salt from the shelf
+721,Get a measuring cup from the kitchen drawer
+722,Get a crate of eggs from the refrigerator
+723,Measure out flour to the rolling board with a measuring cup
+724,Add salt to the flour on the rolling board
+725,Mix the flour together with a fork
+726,Make a hole in the flour with hand
+727,Crack egg into the flour on the rolling board
+728,Throw the egg shells in the trash can
+729,Mix flour with egg mixture with the fork
+730,Knead the dough with both hands
+731,Get a spoon from the kitchen drawer
+732,Make hole in dough with left hand
+733,Add water to the flour from running tap with the spoon in hand
+734,Wash hands under running tap
+735,Sprinkle flour to the rolling board
+736,Roll out dough on the rolling board with the rolling pin
+737,Get a cutter from the kitchen drawer
+738,Cut through the dough into pasta sizes with a cutter
+739,Check paper recipe
+740,Rinse chopping board in the kitchen sink
+741,Get knife from the countertop
+742,Rinse knife in the kitchen sink
+743,Get tomato from the container on the countertop
+744,Rinse tomato in the kitchen sink
+745,Cut the stem end of the tomato with the knife
+746,Slice the tomatoes with the knife
+747,Add sliced tomatoes to the plate
+748,Slice the tomato with the knife
+749,Get tomato from the container
+750,Rinse hands in the kitchen sink
+751,Rinse the knife in the kitchen sink
+752,Get scallion from the container on the countertop
+753,Rinse scallion in the kitchen sink
+754,Dice scallion with the knife
+755,Get a whisk from the countertop
+756,Rinse whisk in the kitchen sink
+757,Rinse the bowl in the kitchen sink
+758,Get eggs from the container on the countertop
+759,Wash eggs in the kitchen sink
+760,Wipe hands with the tissue paper
+761,Crack the eggs on the countertop into the mixing bowl
+762,Get salt container from the countertop
+763,Add salt to the mixing bowl from the salt container
+764,Put away salt container to the countertop
+765,Wipe hands with tissue paper
+766,Mix until the egg whites and yolks are well integrated with the whisk
+767,Wipe the countertop with tissue paper
+768,Put away whisk to the kitchen sink
+769,Put away tissue paper to the bin on the countertop
+770,Get frying pan from the countertop
+771,Rinse frying pan in the kitchen sink
+772,Place the frying pan on the stovetop
+773,Put on the stove
+774,Get tissue paper from the countertop
+775,Wipe the frying pan with the tissue paper
+776,Rinse the spatula in the kitchen sink
+777,Check heat of the frying pan with the hand
+778,Adjust the stove heat temperature
+779,Check the paper recipe in the container on the countertop
+780,Check paper recipe in the container
+781,Get measuring cup from the countertop
+782,Rinse measuring cup in the kitchen sink
+783,Add water to the measuring cup from the kitchen sink
+784,Put away spatula to the countertop
+785,Check heat of the frying pan with the hands
+786,Get oil bottle from the countertop
+787,Add oil to the frying pan from the oil bottle
+788,Tilt and rotate the skillet to allow oil spread into empty space.
+789,Add sliced tomatoes to the frying pan from the plate
+790,Tilt the frying pan to stir the tomatoes
+791,Stir the tomatoes with the spatula
+792,Add water to the frying pan from the measuring cup
+793,Press the stove button to regulate heat temperature
+794,Press the stove knob to regulate heat temperature
+795,Transfer the cooked tomatoes to the plate
+796,Add egg mixture into the frying pan from the bowl
+797,Stir the egg in the frying pan with the spatula
+798,Add cooked tomatoes into the frying pan from the plate
+799,Add salt to frying pan from the salt container
+800,Get sugar container from the countertop
+801,Add sugar to the frying pan from the sugar container
+802,Stir the tomatoes and egg with the spatula
+803,Put off the stove
+804,Transfer the tomatoes and egg to the plate
+805,Add diced scallion to the plate
+806,Check paper recipe in the container on the countertop
+807,Allow the tomatoes to cook in the frying pan
+808,Get a skillet from the countertop
+809,Turn on the stove with a lighter
+810,Get butter from the pantry
+811,Get a chopping board from the pantry
+812,Cut a piece of butter on a chopping board with a knife
+813,Get a tomato from the pantry
+814,Cut tomato on the chopping board with a knife
+815,Get an onion from the pantry
+816,Add cut tomato to the skillet
+817,Add cut tomatoes  to the skillet
+818,Cut an onion on a chopping board with a knife
+819,Get an egg from the pantry
+820,Get green chili pepper from the pantry
+821,Get a bowl from the kitchen cabinet
+822,Cut green chili pepper on a chopping board with a knife
+823,Add cut green chili pepper to a mixing bowl
+824,Crack an egg into a mixing bowl
+825,Add cut onions to the egg in the mixing bowl
+826,Get salt from the pantry
+827,Add salt to the egg in a mixing bowl
+828,Get red pepper powder from the pantry
+829,Get turmeric from the pantry
+830,Add red pepper powder to the egg in a mixing bowl
+831,Add turmeric to the egg in the mixing bowl
+832,Get a spoon from the kitchen cabinet
+833,Whisk the egg mixture with a spoon
+834,Pour the egg mixture into a skillet with a spoon
+835,Tilt and rotate skillet with a kitchen towel to allow uncooked egg to flow into empty spaces
+836,Close the skillet with a stainless bowl
+837,Cut butter on a chopping board with a knife
+838,Get a spatula from the kitchen cabinet
+839,Lift the bowl off the skillet
+840,Gently slide the spatula beneath cooked potions of the egg in the skillet
+841,Cook until the egg is cooked
+842,Lift the stainless bowl off the skillet
+843,Add butter to the tomato and egg in the skillet
+844,Transfer the tomato and egg to a plate with a spatula
+845,Wipe hands with napkin
+846,Turn on the gas cooker
+847,Add oil to the frying pan
+848,Get bowl from the dish washer rack
+849,Turn knob to regulate heat of the gas cooker
+850,Get fork from the dish washer rack
+851,Get egg from the refrigerator
+852,Return crate of egg into the refrigerator
+853,Get tomato from the refrigerator
+854,Crack egg into the bowl
+855,Dispose egg shell in the trash bin
+856,Wash hands with soap and water
+857,Wipe kitchen countertop with paper towel
+858,Dispose used paper towel in the trash bin
+859,Whisk egg mixture in the bowl with fork till they are well integrated
+860,Tilt the frying pan to allow oil flow evenly in it
+861,Add salt to egg mixture in the bowl
+862,Cut out the tomato pedicel with knife on the chopping board
+863,Dispose cut tomato pedicel in the thrash bin
+864,Slice tomato with knife on the chopping board
+865,Pour egg mixture into the frying pan
+866,Place the bowl in the kitchen sink
+867,Stir egg mixture in the frying pan with spatula to form soft curds
+868,Get plate from the kitchen countertop
+869,Serve scrambled egg in the plate
+870,Add sliced tomato to the frying pan
+871,Stir tomato in the frying pan with spatula
+872,Wait till tomato in the frying pan cooks
+873,Add salt to tomato in the frying pan
+874,Stir tomato in the frying pan
+875,Break the scrambled egg in the plate into pieces with spatula
+876,Add water to the tomato in the frying pan
+877,Add the scrambled egg into the tomato mixture in the frying pan
+878,Cover frying pan with lid to cook tomato and egg mixture
+879,Stir with spatula to combine tomato and egg in the frying pan
+880,Add water into tomato and egg mixture in the frying pan
+881,Lift the lid of the frying pan
+882,Clean the plate with paper towel
+883,Turn off the gas cooker
+884,Serve food in the plate
+885,Get parsley from the refrigerator
+886,Return remaining parsley to the refrigerator
+887,Garnish the food in the plate with parsley
+888,Dispose remaining parsley in the trash bin
+889,pour the coffee into cup
+890,add milk to coffee in cup
+891,get spoon from the cabinet drawer
+892,stir the coffee in the cup
+893,Get coffee grounds from the kitchen countertop
+894,Add coffee grounds to the coffee maker filter
+895,Add water to the coffee maker reservoir
+896,Close the lid of the coffee maker
+897,Turn on the coffee maker
+898,Get cup from the kitchen countertop
+899,Get milk from the refrigerator
+900,Wait while the coffee in the coffee maker brews
+901,Pour milk into the cup
+902,Return milk container into the refrigerator
+903,Turn off the coffee maker
+904,Pour coffee into milk in the cup
+905,Get a coffee cup from the countertop.
+906,Get a pot from the cabinet.
+907,Get cups from the countertop.
+908,Get water with the cup from the tap.
+909,Place the pot of water on the stove.
+910,Turn on the stove with a lighter.
+911,Get milk from the countertop.
+912,Pour milk into the cup from the milk container.
+913,Heat the cup of milk on the stove.
+914,Heat the pot of water on the stove.
+915,Get a sachet of coffee from the countertop.
+916,Get a spoon from the dishwasher.
+917,Add coffee into the coffee cup on the countertop with the spoon.
+918,Put away the sachet of coffee on the countertop.
+919,Adjust the heat of the pot of water and cup of milk.
+920,Turn off the heat of the pot of water.
+921,Add hot water into the coffee cup.
+922,Put away the pot in the sink.
+923,Stir the cup of milk.
+924,Place the napkin on the countertop.
+925,Regulate the heat of the cup of milk.
+926,Remove the cup of milk from the stove.
+927,Stir the coffee in the coffee cup.
+928,Pour the coffee into the cup.
+929,Add hot milk into the coffee in the cup on the countertop.
+930,Put away the cup of milk into the sink.
+931,Put away the napkin on the countertop.
+932,Put away the coffee cup into the sink.
+933,Put away the pot into the sink.
+934,Arrange the test materials on the table
+935,Unbox the covid test kit box
+936,Place test materials on the table
+937,Return the instruction sheet into the covid test kit box
+938,Unwrap the test tube
+939,Dispose the test tube wrap into a plastic bag
+940,Unwrap the test tube from its pack
+941,Fold the covid test kit box on the table
+942,Carefully open the test tube seal paper
+943,Dispose the seal paper into the plastic bag
+944,Position the covid 19 test tube on the box
+945,Locate and unwrap the test plate
+946,Arrange test materials in the plastic bag for disposal
+947,Locate and unwrap the collection swab
+948,Insert the tip of the swab into the right nostril
+949,Rotate the collection swab in the right nostril
+950,Extract the collection swab from the right nostril
+951,Repeat the process with the left nostril
+952,Dip the collection swab in the test tube
+953,Rotate the collection swab in the test tube
+954,Locate and unwrap test tube cap
+955,Apply a few drops of the testing solution to the test plate
+956,Wait for a few minutes
+957,Checks the test plate for the results
+958,Arrange materials for disposal

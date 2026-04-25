@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use PIE-V, please cite the paper."
+title: "How to Correctly Make Mistakes: A Framework for Constructing and Benchmarking Mistake Aware Egocentric Procedural Videos"
+authors:
+  - family-names: Loginova
+    given-names: Olga
+  - family-names: Keller
+    given-names: Frank
+date-released: 2026-04-16
+url: "https://github.com/ologin/PIE-V"
+repository-code: "https://github.com/ologin/PIE-V"
+identifiers:
+  - type: doi
+    value: "10.48550/arXiv.2604.15134"
+  - type: url
+    value: "https://arxiv.org/abs/2604.15134"
+preferred-citation:
+  type: article
+  title: "How to Correctly Make Mistakes: A Framework for Constructing and Benchmarking Mistake Aware Egocentric Procedural Videos"
+  authors:
+    - family-names: Loginova
+      given-names: Olga
+    - family-names: Keller
+      given-names: Frank
+  year: 2026
+  journal: "arXiv preprint arXiv:2604.15134"
+  identifiers:
+    - type: doi
+      value: "10.48550/arXiv.2604.15134"
