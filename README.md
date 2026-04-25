@@ -7,7 +7,7 @@ recovery corrections, validated text rewrites, and video edit specifications.
 
 Paper: [How to Correctly Make Mistakes](https://arxiv.org/abs/2604.15134)  
 Project page: [ologin.github.io/PIE-V](https://ologin.github.io/PIE-V/)  
-CVPRW 2026 release: [cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw26)
+EgoVis CVPR Workshop 2026 release: [cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw26)
 
 ## What Is Included
 
@@ -16,7 +16,7 @@ CVPRW 2026 release: [cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw
 - A correction simulator that samples detection, action, latency, and repair type.
 - LLM writer and judge stages for cascade-consistent procedure rewrites.
 - Semantic-role resources used by the planner and validator.
-- Aggregated human annotation summaries exported from the annotation workbook.
+- Aggregated human annotation summaries and the public annotation template.
 - Example PIE-V outputs for the 50-scenario Ego-Exo4D subset.
 
 Raw Ego-Exo4D videos, original Ego-Exo4D annotation files, and generated MP4 media
@@ -35,7 +35,7 @@ configs/                  Default local path configuration
 data/resources/           Semantic role resources and SemRep cache
 data/manifests/           Take-name list for the 50-scenario Ego-Exo4D subset
 data/examples/            Example PIE-V plans, judged rewrites, and annotations
-data/annotations/         Aggregated human annotation summary
+data/annotations/         Aggregated human annotation summary and template
 examples/video_generation Case-study notes for video editing scripts
 docs/                     Static project page for GitHub Pages
 ```
@@ -132,6 +132,9 @@ piev-judge-instructions \
 paper-scale text plan: 50 takes, 102 mistakes, and 27 corrections. The committed
 annotation table is an aggregated export from the `DATA` sheet of the project
 annotation workbook and omits individual annotator columns.
+
+`data/annotations/PIE-V_Annotation_Template.xlsx` is the public template for the
+rubric fields used in the human evaluation.
 
 `data/manifests/take_names.txt` contains one Ego-Exo4D `take_name` per line. The
 Ego-Exo4D `split_50.json` and `keystep_train.json` files remain local inputs.
