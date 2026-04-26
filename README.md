@@ -35,7 +35,7 @@ prep/                     Data preparation and semantic representation helpers
 analysis/                 Rubric/agreement analysis utilities
 baselines/freeform/       Freeform LLM baseline and diagnostics
 configs/                  Default local path configuration
-data/resources/           Semantic role resources and SemRep cache
+data/resources/           Semantic role resources and SRL cache
 data/manifests/           Take-name list for the 50-scenario Ego-Exo4D subset
 data/examples/            Example PIE-V plans, judged rewrites, and annotations
 data/annotations/         Aggregated human annotation summary and template
@@ -70,7 +70,7 @@ python -m compileall -q src prep analysis baselines examples/video_generation/sc
 python -m pytest -q
 ```
 
-For OpenAI-backed SemRep generation, writing, or judging:
+For OpenAI-backed SRL generation, writing, or judging:
 
 ```bash
 export OPENAI_API_KEY="..."
