@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import textwrap
 
 try:
     from PIL import Image, ImageDraw, ImageFont
@@ -27,9 +26,13 @@ COLORS = ["#c9241c", "#2e7d32", "#6b4dbb", "#00838a", "#9a6a00", "#005bbb"]
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
     candidates = [
-        "/System/Library/Fonts/Supplemental/Arial Bold.ttf" if bold else "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+        if bold
+        else "/System/Library/Fonts/Supplemental/Arial.ttf",
         "/Library/Fonts/Arial Bold.ttf" if bold else "/Library/Fonts/Arial.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+        if bold
+        else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
     for path in candidates:
         if Path(path).exists():
@@ -47,7 +50,15 @@ FONT_STAT_LABEL = font(27, True)
 FONT_TAG = font(24, True)
 
 
-def draw_wrapped(draw: ImageDraw.ImageDraw, xy: tuple[int, int], text: str, width: int, fnt, fill: str, line_gap: int = 6) -> None:
+def draw_wrapped(
+    draw: ImageDraw.ImageDraw,
+    xy: tuple[int, int],
+    text: str,
+    width: int,
+    fnt,
+    fill: str,
+    line_gap: int = 6,
+) -> None:
     words = text.split()
     lines: list[str] = []
     cur = ""
@@ -86,7 +97,9 @@ def main() -> None:
     draw = ImageDraw.Draw(img)
     draw_grid(draw)
 
-    draw.text((92, 84), "Psychologically Inspired Error Injection for Video", font=FONT_TITLE, fill=INK)
+    draw.text(
+        (92, 84), "Psychologically Inspired Error Injection for Video", font=FONT_TITLE, fill=INK
+    )
     draw.text(
         (96, 166),
         "Structured mistakes, recovery traces, and video edits for egocentric procedural benchmarks",
@@ -107,7 +120,9 @@ def main() -> None:
     cw, ch, gap = 244, 300, 34
     for i, (num, title, body) in enumerate(cards):
         x = x0 + i * (cw + gap)
-        draw.rounded_rectangle((x, y0, x + cw, y0 + ch), radius=24, fill=WHITE, outline=LINE, width=3)
+        draw.rounded_rectangle(
+            (x, y0, x + cw, y0 + ch), radius=24, fill=WHITE, outline=LINE, width=3
+        )
         draw.rounded_rectangle((x + 22, y0 + 22, x + 82, y0 + 84), radius=20, fill=COLORS[i])
         draw.text((x + 52, y0 + 53), num, font=FONT_NUM, fill=WHITE, anchor="mm")
         draw_wrapped(draw, (x + 23, y0 + 118), title, cw - 46, FONT_CARD_TITLE, INK, line_gap=4)
@@ -117,7 +132,13 @@ def main() -> None:
 
     band = (96, 650, W - 96, 920)
     draw.rounded_rectangle(band, radius=28, fill=DARK)
-    stats = [("17", "tasks"), ("50", "scenarios"), ("102", "mistakes"), ("27", "corrections"), ("9", "rubric metrics")]
+    stats = [
+        ("17", "tasks"),
+        ("50", "scenarios"),
+        ("102", "mistakes"),
+        ("27", "corrections"),
+        ("9", "rubric metrics"),
+    ]
     stat_x = [180, 520, 850, 1150, 1440]
     for (value, label), x in zip(stats, stat_x):
         draw.text((x, 755), value, font=FONT_STAT, fill=YELLOW, anchor="mm")

@@ -24,13 +24,13 @@ Notes:
 import argparse
 import json
 import os
-import random
 import re
 import sys
+
 # from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Set
+from typing import Any, Dict, List, Optional, Tuple
 from collections import defaultdict
 
 SRC_DIR = Path(__file__).resolve().parents[2] / "src"
@@ -62,6 +62,7 @@ except Exception:
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
 
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="Rewrite procedures by injecting plausible errors directly via an LLM (no simulator)."
@@ -76,10 +77,14 @@ def parse_args() -> argparse.Namespace:
         default=str(REPO_ROOT / "local" / "outputs" / "split_50_llm_freeform_errors.json"),
         help="Output JSON path with rewrites per take.",
     )
-    p.add_argument("--model", required=True, choices=["openai", "qwen"], help="Which backend to use")
+    p.add_argument(
+        "--model", required=True, choices=["openai", "qwen"], help="Which backend to use"
+    )
     p.add_argument("--max_takes", type=int, default=0, help="If >0, process only first N takes")
     p.add_argument("--take_uid", default="", help="If set, process only this take_uid")
-    p.add_argument("--seed", type=int, default=123, help="Random seed (used only for ordering/subsampling)")
+    p.add_argument(
+        "--seed", type=int, default=123, help="Random seed (used only for ordering/subsampling)"
+    )
     p.add_argument("--temperature", type=float, default=0.6, help="Sampling temperature")
     p.add_argument(
         "--max_new_tokens",
@@ -120,10 +125,12 @@ def parse_args() -> argparse.Namespace:
 #         return ""
 #     return re.sub(r"\s+", " ", s).strip()
 
+
 def norm_text(s: str) -> str:
     s = s if isinstance(s, str) else ""
     s = re.sub(r"\s+", " ", s).strip().lower()
     return s
+
 
 def token_jaccard(a: str, b: str) -> float:
     ta = set(re.findall(r"[a-z0-9']+", norm_text(a)))
@@ -133,6 +140,7 @@ def token_jaccard(a: str, b: str) -> float:
     if not ta or not tb:
         return 0.0
     return len(ta & tb) / float(len(ta | tb))
+
 
 def build_retry_prompt(base_prompt: str, failure_reason: str) -> str:
     """
@@ -155,6 +163,7 @@ def build_retry_prompt(base_prompt: str, failure_reason: str) -> str:
         "- If mod='i', inserted text MUST NOT duplicate the anchor step.\n"
     )
     return base_prompt + retry_notice
+
 
 def _iter_json_object_candidates(text: str) -> List[Dict[str, Any]]:
     """
@@ -202,7 +211,7 @@ def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
     Robust JSON extraction:
     - Prefer the LAST candidate that looks like our expected schema.
     - Fallback to the last parseable JSON object.
-     """
+    """
     candidates = _iter_json_object_candidates(text)
     if not candidates:
         return None
@@ -248,9 +257,11 @@ def _auto_suffix_out_path(base_out: str, model_choice: str) -> str:
     ext = ext or ".json"
     return f"{root}_{model_choice}{ext}"
 
+
 # -----------------------------
 # Input loading (split_50.json)
 # -----------------------------
+
 
 def load_split50_annotations(path: str) -> List[Dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as f:
@@ -294,7 +305,10 @@ def segments_to_steps(segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 # Prompt building (no simulator)
 # -----------------------------
 
-def build_prompt(take_uid: str, scenario: str, steps: List[Dict[str, Any]], model_choice: str) -> str:
+
+def build_prompt(
+    take_uid: str, scenario: str, steps: List[Dict[str, Any]], model_choice: str
+) -> str:
     """
     Prompt designed for "procedure editing", not story writing.
     No planned error plan is provided. The LLM selects 1-3 errors itself.
@@ -333,7 +347,7 @@ def build_prompt(take_uid: str, scenario: str, steps: List[Dict[str, Any]], mode
         f"### HARD CONSTRAINTS\n"
         f"1) VERBATIM PRESERVATION: Keep most steps unchanged unless directly edited.\n"
         f"2) IMPERATIVE STYLE: Use direct imperative commands. No story.\n"
-        f"3) SOURCE INDEX RANGE: Every meta source_idx MUST be a valid original index in [0, {len(steps)-1}]. Never use -1.\n"
+        f"3) SOURCE INDEX RANGE: Every meta source_idx MUST be a valid original index in [0, {len(steps) - 1}]. Never use -1.\n"
         f"4) PHYSICAL PLAUSIBILITY: Do not use tools/ingredients/objects before they appear earlier in the procedure.\n"
         f"5) METADATA ALIGNMENT: 'final_steps' and 'meta' must have the exact same length.\n\n"
         f"6) UNCHANGED MEANS VERBATIM: If mod='u', the final step text MUST match the original step text exactly.\n"
@@ -369,6 +383,7 @@ def build_prompt(take_uid: str, scenario: str, steps: List[Dict[str, Any]], mode
 # -----------------------------
 # Backends
 # -----------------------------
+
 
 @dataclass
 class LLMBackend:
@@ -457,7 +472,7 @@ class QwenLocalBackend(LLMBackend):
 
         decoded = self.tokenizer.decode(out[0], skip_special_tokens=True)
         if decoded.startswith(text):
-            decoded = decoded[len(text):].strip()
+            decoded = decoded[len(text) :].strip()
         return decoded.strip()
 
 
@@ -472,6 +487,7 @@ def make_backend(model_choice: str) -> LLMBackend:
 # -----------------------------
 # Output validation (compact format)
 # -----------------------------
+
 
 def validate_model_output(
     obj: Dict[str, Any],
@@ -495,7 +511,6 @@ def validate_model_output(
     has_any_error = False
     allowed_mod = {"u", "we", "s", "ms", "mt", "c", "i"}
     move_eid_counts: Dict[str, Dict[str, int]] = defaultdict(lambda: {"ms": 0, "mt": 0})
-
 
     EID_RE = re.compile(r"^E\d{2}$")
     CID_RE = re.compile(r"^C\d{2}$")
@@ -532,28 +547,43 @@ def validate_model_output(
         # Unchanged must be verbatim.
         if mod == "u":
             if final != original:
-                return False, f"meta[{i}] mod='u' but final_steps[{i}] is not verbatim of INPUT.steps[{src_idx}]"
+                return (
+                    False,
+                    f"meta[{i}] mod='u' but final_steps[{i}] is not verbatim of INPUT.steps[{src_idx}]",
+                )
 
         # Transposition: moved steps should remain verbatim (they are moved, not edited).
         if mod in {"ms", "mt"}:
             if final != original:
-                return False, f"meta[{i}] mod='{mod}' but text differs from source step {src_idx} (moved steps must be verbatim)"
+                return (
+                    False,
+                    f"meta[{i}] mod='{mod}' but text differs from source step {src_idx} (moved steps must be verbatim)",
+                )
             move_eid_counts[eid.strip()][mod] += 1
 
         # Edited must actually differ (at least a bit).
         if mod in {"we", "s"}:
             if norm_text(final) == norm_text(original):
-                return False, f"meta[{i}] mod='{mod}' but text is IDENTICAL to original step {src_idx}"
+                return (
+                    False,
+                    f"meta[{i}] mod='{mod}' but text is IDENTICAL to original step {src_idx}",
+                )
             # optional: require meaningful difference (prevents tiny punctuation tweaks)
             if token_jaccard(final, original) > 0.92:
-                return False, f"meta[{i}] mod='{mod}' but change is too small (token Jaccard > 0.92)"
+                return (
+                    False,
+                    f"meta[{i}] mod='{mod}' but change is too small (token Jaccard > 0.92)",
+                )
 
         # Insertion must not be identical to the anchor step text.
         # It MAY repeat some other earlier step (that's a plausible insertion),
         # but it must not claim to be inserted while copying the anchor verbatim.
         if mod == "i":
             if norm_text(final) == norm_text(original):
-                return False, f"meta[{i}] mod='i' but inserted text duplicates anchor source step {src_idx}"
+                return (
+                    False,
+                    f"meta[{i}] mod='i' but inserted text duplicates anchor source step {src_idx}",
+                )
 
         # Correction step should not be a verbatim copy of the anchor either.
         if mod == "c":
@@ -566,7 +596,10 @@ def validate_model_output(
     # transposition: each error_id must have exactly one 'ms' and one 'mt'
     for eid, counts in move_eid_counts.items():
         if counts.get("ms", 0) != 1 or counts.get("mt", 0) != 1:
-            return False, f"transposition_eid_must_have_exactly_one_ms_and_one_mt: {eid} has ms={counts.get('ms',0)} mt={counts.get('mt',0)}"
+            return (
+                False,
+                f"transposition_eid_must_have_exactly_one_ms_and_one_mt: {eid} has ms={counts.get('ms', 0)} mt={counts.get('mt', 0)}",
+            )
 
     # require at least 1 actual error (since prompt demands 1-3)
     if not has_any_error and (not deletions):
@@ -593,9 +626,9 @@ def validate_model_output(
 # Main
 # -----------------------------
 
+
 def main() -> None:
     args = parse_args()
-    rng = random.Random(int(args.seed))
 
     take_uid_filter = str(args.take_uid or "").strip()
 
@@ -685,7 +718,9 @@ def main() -> None:
 
             if obj is None:
                 last_fail_status = "parse_failed"
-                last_fail_reason = "Could not extract a valid JSON object with keys: final_steps, meta, del"
+                last_fail_reason = (
+                    "Could not extract a valid JSON object with keys: final_steps, meta, del"
+                )
                 continue
 
             # Attach identifiers (do not affect validation)

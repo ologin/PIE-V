@@ -15,9 +15,13 @@ SETTINGS = load_settings()
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Build a unique step-description vocabulary from split_50.json.")
+    p = argparse.ArgumentParser(
+        description="Build a unique step-description vocabulary from split_50.json."
+    )
     p.add_argument("--input", default=str(SETTINGS.split50_path))
-    p.add_argument("--out", default=str(REPO_ROOT / "data" / "resources" / "split_50_vocabulary.csv"))
+    p.add_argument(
+        "--out", default=str(REPO_ROOT / "data" / "resources" / "split_50_vocabulary.csv")
+    )
     return p.parse_args()
 
 
@@ -53,6 +57,7 @@ def main():
 
     print(f"Written: {out_path}")
     print(f"Unique step_descriptions: {len(vocab)}")
+
 
 if __name__ == "__main__":
     main()

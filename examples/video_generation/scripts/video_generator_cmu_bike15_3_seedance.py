@@ -44,7 +44,12 @@ DEFAULT_TAKE = "cmu_bike15_3"
 
 DEFAULT_OUT_DIR = str(REPO_ROOT / "local" / "outputs" / "video_generation" / "seedance")
 DEFAULT_NEW_ANNOTATIONS_OUT = str(
-    REPO_ROOT / "local" / "outputs" / "video_generation" / "new_annotations" / "cmu_bike15_3_seedance.json"
+    REPO_ROOT
+    / "local"
+    / "outputs"
+    / "video_generation"
+    / "new_annotations"
+    / "cmu_bike15_3_seedance.json"
 )
 
 DEFAULT_MODEL_ID = "seedance-1-5-pro-251215"
@@ -60,18 +65,12 @@ INFLATE_SRC_DESC = "Inflate the tube to check if the tire bead is properly seate
 FINAL_DUSTCAP_DESC = "Cover the valve stem with the dust cap"
 
 # New descriptions
-DEF_ERR_DESC = (
-    "Deflate the wheel using a deflating needle, but only press it briefly so the wheel barely deflates."
-)
+DEF_ERR_DESC = "Deflate the wheel using a deflating needle, but only press it briefly so the wheel barely deflates."
 DEF_FIX_DESC = (
     "Stop and fix it: press the deflating needle properly until the wheel is fully deflated."
 )
-FIT_ERR_DESC = (
-    "Fit the inner tube into the tire, but leave part of the tube twisted and not fully tucked inside."
-)
-FIT_FIX_DESC = (
-    "Stop and fix it: pull the tube back out, untwist it, and fit the inner tube into the tire evenly."
-)
+FIT_ERR_DESC = "Fit the inner tube into the tire, but leave part of the tube twisted and not fully tucked inside."
+FIT_FIX_DESC = "Stop and fix it: pull the tube back out, untwist it, and fit the inner tube into the tire evenly."
 VALVE_LATE_DESC = "Perform the missed step now: insert the valve stem into the hole on the rim."
 
 # Prompt templates
@@ -313,7 +312,7 @@ def sanitize_fades(durs: List[float], fades: List[float], margin: float = 0.05) 
         max_f = max(0.01, min(durs[i], durs[i + 1]) - margin)
         if f > max_f:
             print(
-                f"WARNING: fade[{i}]={f:.3f}s too long for clips ({durs[i]:.3f}s, {durs[i+1]:.3f}s). "
+                f"WARNING: fade[{i}]={f:.3f}s too long for clips ({durs[i]:.3f}s, {durs[i + 1]:.3f}s). "
                 f"Using {max_f:.3f}s."
             )
             out.append(max_f)
@@ -370,29 +369,33 @@ def concat_with_variable_crossfade(
     fc.append(f"{v_prev}trim=0:{expected:.6f},setpts=PTS-STARTPTS[vout]")
     fc.append(f"{a_prev}atrim=0:{expected:.6f},asetpts=PTS-STARTPTS[aout]")
 
-    cmd = ["ffmpeg", "-y", "-loglevel", "error"] + inputs + [
-        "-filter_complex",
-        ";".join(fc),
-        "-map",
-        "[vout]",
-        "-map",
-        "[aout]",
-        "-c:v",
-        "libx264",
-        "-preset",
-        "veryfast",
-        "-crf",
-        "18",
-        "-c:a",
-        "aac",
-        "-ar",
-        "48000",
-        "-ac",
-        "2",
-        "-b:a",
-        "192k",
-        out_mp4,
-    ]
+    cmd = (
+        ["ffmpeg", "-y", "-loglevel", "error"]
+        + inputs
+        + [
+            "-filter_complex",
+            ";".join(fc),
+            "-map",
+            "[vout]",
+            "-map",
+            "[aout]",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "18",
+            "-c:a",
+            "aac",
+            "-ar",
+            "48000",
+            "-ac",
+            "2",
+            "-b:a",
+            "192k",
+            out_mp4,
+        ]
+    )
     _run(cmd)
 
 
@@ -431,7 +434,9 @@ def find_segment_by_desc(segs: List[dict], desc: str) -> dict:
 
 def print_segments_table(segs: List[dict]) -> None:
     for s in segs:
-        print(f"[{s['position']:02d}] {float(s['start_time']):8.3f}–{float(s['end_time']):8.3f} | {s.get('step_description')}")
+        print(
+            f"[{s['position']:02d}] {float(s['start_time']):8.3f}–{float(s['end_time']):8.3f} | {s.get('step_description')}"
+        )
 
 
 def write_single_take_split_like_json(
@@ -528,16 +533,37 @@ def parse_args():
     p.add_argument("--take_name", default=DEFAULT_TAKE)
     p.add_argument("--out_dir", default=DEFAULT_OUT_DIR)
     p.add_argument("--new_annotations_out", default=DEFAULT_NEW_ANNOTATIONS_OUT)
-    p.add_argument("--workdir", default="", help="Optional explicit workdir. Else out_dir/take_name/run_id.")
+    p.add_argument(
+        "--workdir", default="", help="Optional explicit workdir. Else out_dir/take_name/run_id."
+    )
 
     # Time anchors from user instructions
-    p.add_argument("--step1_keep_until", type=float, default=12.0, help="Keep original until this time before GenA.")
-    p.add_argument("--step1_fix_start", type=float, default=16.0, help="Resume original deflation from this time.")
-    p.add_argument("--step2_gen_start", type=float, default=58.0, help="Start GenB at this time inside FitTube step.")
+    p.add_argument(
+        "--step1_keep_until",
+        type=float,
+        default=12.0,
+        help="Keep original until this time before GenA.",
+    )
+    p.add_argument(
+        "--step1_fix_start",
+        type=float,
+        default=16.0,
+        help="Resume original deflation from this time.",
+    )
+    p.add_argument(
+        "--step2_gen_start",
+        type=float,
+        default=58.0,
+        help="Start GenB at this time inside FitTube step.",
+    )
 
     # Crossfades
-    p.add_argument("--fade_short", type=float, default=0.12, help="Default fade on regular boundaries.")
-    p.add_argument("--fade_valve", type=float, default=3.0, help="Fade before and after moved valve clip.")
+    p.add_argument(
+        "--fade_short", type=float, default=0.12, help="Default fade on regular boundaries."
+    )
+    p.add_argument(
+        "--fade_valve", type=float, default=3.0, help="Fade before and after moved valve clip."
+    )
 
     # Seedance API
     p.add_argument("--api_key_env", default="ARK_API_KEY")
@@ -545,9 +571,23 @@ def parse_args():
     p.add_argument("--base_url", default="", help="Override base URL.")
     p.add_argument("--model", default=DEFAULT_MODEL_ID)
     p.add_argument("--resolution", default="720p", choices=["480p", "720p", "1080p"])
-    p.add_argument("--ratio", default="adaptive", choices=["16:9", "4:3", "1:1", "3:4", "9:16", "21:9", "adaptive"])
-    p.add_argument("--duration_a", type=int, default=0, help="Seedance duration for GenA (0 => auto from window).")
-    p.add_argument("--duration_b", type=int, default=0, help="Seedance duration for GenB (0 => auto from window).")
+    p.add_argument(
+        "--ratio",
+        default="adaptive",
+        choices=["16:9", "4:3", "1:1", "3:4", "9:16", "21:9", "adaptive"],
+    )
+    p.add_argument(
+        "--duration_a",
+        type=int,
+        default=0,
+        help="Seedance duration for GenA (0 => auto from window).",
+    )
+    p.add_argument(
+        "--duration_b",
+        type=int,
+        default=0,
+        help="Seedance duration for GenB (0 => auto from window).",
+    )
     p.add_argument("--seed", type=int, default=0, help="0 => random seed.")
     p.add_argument("--generate_audio", action="store_true", help="Ask Seedance to generate audio.")
     p.add_argument("--camera_fixed", action="store_true", default=True)
@@ -584,9 +624,13 @@ if __name__ == "__main__":
 
     api_key = os.environ.get(args.api_key_env)
     if not api_key:
-        raise RuntimeError(f"Missing API key in env var {args.api_key_env}. Example: export {args.api_key_env}='...'")
+        raise RuntimeError(
+            f"Missing API key in env var {args.api_key_env}. Example: export {args.api_key_env}='...'"
+        )
 
-    base_url = args.base_url.strip() or os.environ.get(args.base_url_env, "").strip() or DEFAULT_BASE_URL
+    base_url = (
+        args.base_url.strip() or os.environ.get(args.base_url_env, "").strip() or DEFAULT_BASE_URL
+    )
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -612,9 +656,13 @@ if __name__ == "__main__":
     seg_final_dustcap = find_segment_by_desc(segs, FINAL_DUSTCAP_DESC)
 
     seg_get_lever = find_segment_by_desc(segs, "Get a tire lever to remove the tube")
-    seg_insert_lever = find_segment_by_desc(segs, "Insert the tire lever between the tire and wheel rim")
+    seg_insert_lever = find_segment_by_desc(
+        segs, "Insert the tire lever between the tire and wheel rim"
+    )
     seg_pry = find_segment_by_desc(segs, "Pry out a section of the tire with the tire lever")
-    seg_run_lever = find_segment_by_desc(segs, "Run the tire lever around the rim to remove the tire with tube from the wheel rim")
+    seg_run_lever = find_segment_by_desc(
+        segs, "Run the tire lever around the rim to remove the tire with tube from the wheel rim"
+    )
     seg_separate = find_segment_by_desc(segs, "Seperate the inner tube from the tire")
 
     def_start = float(seg_def["start_time"])
@@ -642,7 +690,9 @@ if __name__ == "__main__":
             f"Bad step2 anchor: need {fit_start:.3f} < step2_gen_start < {fit_end:.3f}, got {fit_gen_start:.3f}"
         )
     if not (valve_start < valve_end <= push_start < push_end <= inflate_start < video_end):
-        raise RuntimeError("Unexpected ordering for valve/push/inflate segments in source annotations.")
+        raise RuntimeError(
+            "Unexpected ordering for valve/push/inflate segments in source annotations."
+        )
 
     replaced_len_a = float(fix_start - keep_until)
     replaced_len_b = float(fit_end - fit_gen_start)
@@ -659,7 +709,9 @@ if __name__ == "__main__":
         f"  TO   '{DEF_FIX_DESC}'"
     )
     print(f"Annotated step #1 time: {def_start:.3f}–{def_end:.3f}")
-    print(f"Replace window #1 (absolute): {keep_until:.3f}–{fix_start:.3f} (len={replaced_len_a:.3f}s)")
+    print(
+        f"Replace window #1 (absolute): {keep_until:.3f}–{fix_start:.3f} (len={replaced_len_a:.3f}s)"
+    )
 
     print(
         f"\nReplacing step #2:\n"
@@ -668,7 +720,9 @@ if __name__ == "__main__":
         f"  TO   '{FIT_FIX_DESC}'"
     )
     print(f"Annotated step #2 time: {fit_start:.3f}–{fit_end:.3f}")
-    print(f"Replace window #2 (absolute): {fit_gen_start:.3f}–{fit_end:.3f} (len={replaced_len_b:.3f}s)")
+    print(
+        f"Replace window #2 (absolute): {fit_gen_start:.3f}–{fit_end:.3f} (len={replaced_len_b:.3f}s)"
+    )
 
     print(
         f"\nMoved correction step:\n"
@@ -718,8 +772,16 @@ if __name__ == "__main__":
             "model": args.model,
             "content": [
                 {"type": "text", "text": PROMPT_DEF},
-                {"type": "image_url", "image_url": {"url": file_to_data_url(str(a_first_png))}, "role": "first_frame"},
-                {"type": "image_url", "image_url": {"url": file_to_data_url(str(a_last_png))}, "role": "last_frame"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": file_to_data_url(str(a_first_png))},
+                    "role": "first_frame",
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {"url": file_to_data_url(str(a_last_png))},
+                    "role": "last_frame",
+                },
             ],
             "resolution": args.resolution,
             "ratio": args.ratio,
@@ -767,8 +829,16 @@ if __name__ == "__main__":
             "model": args.model,
             "content": [
                 {"type": "text", "text": PROMPT_FIT},
-                {"type": "image_url", "image_url": {"url": file_to_data_url(str(b_first_png))}, "role": "first_frame"},
-                {"type": "image_url", "image_url": {"url": file_to_data_url(str(b_last_png))}, "role": "last_frame"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": file_to_data_url(str(b_first_png))},
+                    "role": "first_frame",
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {"url": file_to_data_url(str(b_last_png))},
+                    "role": "last_frame",
+                },
             ],
             "resolution": args.resolution,
             "ratio": args.ratio,
@@ -985,11 +1055,15 @@ if __name__ == "__main__":
         )
     )
 
-    new_segments = sorted(new_segments, key=lambda s: (float(s["start_time"]), float(s["end_time"])))
+    new_segments = sorted(
+        new_segments, key=lambda s: (float(s["start_time"]), float(s["end_time"]))
+    )
 
     print("\nNew segments (chronological):")
     for i, s in enumerate(new_segments):
-        print(f"[{i:02d}] {float(s['start_time']):8.3f}–{float(s['end_time']):8.3f} | {s.get('step_description')}")
+        print(
+            f"[{i:02d}] {float(s['start_time']):8.3f}–{float(s['end_time']):8.3f} | {s.get('step_description')}"
+        )
 
     take_out = dict(take)
     take_out["segments"] = new_segments

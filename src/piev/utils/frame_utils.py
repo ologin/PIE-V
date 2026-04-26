@@ -6,12 +6,11 @@ from __future__ import annotations
 import base64
 import json
 import mimetypes
-import os
 import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 from piev.config import load_settings
 
@@ -22,6 +21,7 @@ from piev.config import load_settings
 _DEFAULT_SETTINGS = load_settings()
 DEFAULT_VIDEO_ROOT = _DEFAULT_SETTINGS.videos_root
 DEFAULT_FRAMES_ROOT = _DEFAULT_SETTINGS.frames_root
+
 
 @dataclass
 class FrameRequest:
@@ -94,11 +94,16 @@ class EgoVideoFrameCache:
         cmd = [
             "ffmpeg",
             "-hide_banner",
-            "-loglevel", "error",
-            "-ss", f"{t:.3f}",
-            "-i", str(video),
-            "-frames:v", "1",
-            "-q:v", str(self.jpg_qv),
+            "-loglevel",
+            "error",
+            "-ss",
+            f"{t:.3f}",
+            "-i",
+            str(video),
+            "-frames:v",
+            "1",
+            "-q:v",
+            str(self.jpg_qv),
             "-y",
             str(out),
         ]
@@ -128,7 +133,10 @@ class EgoVideoFrameCache:
 # Optional: split_50.json lookup (if you ever need it)
 # -------------------------
 
-def find_segment_times_in_split50(split50_path: str | Path, take_name: str, old_index: int) -> Optional[Tuple[float, float]]:
+
+def find_segment_times_in_split50(
+    split50_path: str | Path, take_name: str, old_index: int
+) -> Optional[Tuple[float, float]]:
     """
     split_50.json structure: {"annotations":[{"take_name":..., "segments":[...]}]}
     Segments are not chronological; we match by segment["step_id"] if possible,

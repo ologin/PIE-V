@@ -45,7 +45,7 @@ import time
 import sys
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Union, Set
+from typing import Any, Dict, List, Optional, Tuple, Set
 from collections import defaultdict
 import logging
 
@@ -67,6 +67,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 DEFAULT_OPENAI_MODEL_ID = SETTINGS.openai_model
 DEFAULT_QWEN_MODEL_ID = SETTINGS.qwen_text_model
+
 
 def _auto_suffix_out_path(base_out: str, model_choice: str) -> str:
     """
@@ -97,16 +98,23 @@ except Exception:
 
 
 # -------------------------
-# SemRep auto-extension 
+# SemRep auto-extension
 # -------------------------
 try:
-    from piev.utils.semrep_utils import SemRepAutoExtender, build_semrep_step_to_id as _helper_build_semrep_step_to_id
+    from piev.utils.semrep_utils import (
+        SemRepAutoExtender,
+        build_semrep_step_to_id as _helper_build_semrep_step_to_id,
+    )
 except ImportError:
     try:
-        from semrep_utils import SemRepAutoExtender, build_semrep_step_to_id as _helper_build_semrep_step_to_id
+        from semrep_utils import (
+            SemRepAutoExtender,
+            build_semrep_step_to_id as _helper_build_semrep_step_to_id,
+        )
     except Exception:
         SemRepAutoExtender = None
         _helper_build_semrep_step_to_id = None
+
 
 def _build_semrep_step_to_id_fallback(semrep_map: Dict[str, Dict[str, str]]) -> Dict[str, str]:
     """
@@ -126,14 +134,17 @@ def _build_semrep_step_to_id_fallback(semrep_map: Dict[str, Dict[str, str]]) -> 
                     m[k] = sid
     return m
 
+
 build_semrep_step_to_id = _helper_build_semrep_step_to_id or _build_semrep_step_to_id_fallback
 
 # -------------------------
 # Small utilities
 # -------------------------
 
+
 def normalize_ws(s: str) -> str:
     return re.sub(r"\s+", " ", s.strip())
+
 
 def normalize_lookup_key(s: str) -> str:
     """
@@ -146,8 +157,10 @@ def normalize_lookup_key(s: str) -> str:
     s = s.rstrip(".!?:;")
     return s.lower()
 
+
 def tokenize_simple(s: str) -> List[str]:
     return re.findall(r"[a-z0-9]+", s.lower())
+
 
 def jaccard_similarity(a: str, b: str) -> float:
     sa, sb = set(tokenize_simple(a)), set(tokenize_simple(b))
@@ -157,12 +170,12 @@ def jaccard_similarity(a: str, b: str) -> float:
         return 0.0
     return len(sa & sb) / len(sa | sb)
 
+
 def normalize_step_text(s: str) -> str:
     s = (s or "").lower()
     s = re.sub(r"[^a-z0-9\s]", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
     return s
-
 
 
 def load_vocab_csv(path: str) -> Dict[str, str]:
@@ -203,6 +216,7 @@ def load_vocab_csv(path: str) -> Dict[str, str]:
         raise RuntimeError(f"Failed to load vocab csv: {path} ({e})")
     return m
 
+
 def load_semrep_json(path: str) -> Dict[str, Dict[str, str]]:
     """
     semrep json format:
@@ -226,6 +240,7 @@ def load_semrep_json(path: str) -> Dict[str, Dict[str, str]]:
         return out
     except Exception as e:
         raise RuntimeError(f"Failed to load semrep json: {path} ({e})")
+
 
 def resolve_step_id_from_text(
     step_txt: str,
@@ -265,6 +280,7 @@ def resolve_step_id_from_text(
 # -------------------------
 _REVERSE_SEMREP_MAP: Dict[str, str] = {}
 
+
 def init_reverse_semrep_map(semrep_map: Dict[str, Dict[str, str]]) -> None:
     """
     Build normalized_text -> semrep_string.
@@ -282,17 +298,24 @@ def init_reverse_semrep_map(semrep_map: Dict[str, Dict[str, str]]) -> None:
             # Collision handling: keep the FIRST value for stability and warn if SR differs.
             if key in _REVERSE_SEMREP_MAP:
                 if _REVERSE_SEMREP_MAP[key] != val:
-                    preview = (raw_text.strip()[:140] + "…") if len(raw_text.strip()) > 140 else raw_text.strip()
+                    preview = (
+                        (raw_text.strip()[:140] + "…")
+                        if len(raw_text.strip()) > 140
+                        else raw_text.strip()
+                    )
                     logger.warning(
                         "SemRep reverse-map collision for normalized step text (sid=%s). "
                         "Keeping the first SR and ignoring this one. Text preview='%s'",
-                        str(_sid), preview
+                        str(_sid),
+                        preview,
                     )
                 continue
             _REVERSE_SEMREP_MAP[key] = val
 
+
 def find_semrep_exact(step_text: str) -> Optional[str]:
     return _REVERSE_SEMREP_MAP.get(normalize_step_text(step_text))
+
 
 def compute_semrep_focus_indices(take: Dict[str, Any]) -> Set[int]:
     """
@@ -306,18 +329,22 @@ def compute_semrep_focus_indices(take: Dict[str, Any]) -> Set[int]:
     steps = take.get("steps", []) or []
     n = len(steps) if isinstance(steps, list) else 0
 
-    for e in (take.get("errors", []) or []):
+    for e in take.get("errors", []) or []:
         if not isinstance(e, dict):
             continue
         s = e.get("step_index")
-        t = e.get("spec", {}).get("transposition_target") if isinstance(e.get("spec"), dict) else None
+        t = (
+            e.get("spec", {}).get("transposition_target")
+            if isinstance(e.get("spec"), dict)
+            else None
+        )
         for v in (s, t):
             if isinstance(v, int):
                 for w in (v - 1, v, v + 1):
                     if 0 <= w < n:
                         idxs.add(w)
 
-    for c in (take.get("corrections", []) or []):
+    for c in take.get("corrections", []) or []:
         if not isinstance(c, dict):
             continue
         a = c.get("detect_at_step_index")
@@ -327,6 +354,7 @@ def compute_semrep_focus_indices(take: Dict[str, Any]) -> Set[int]:
                     idxs.add(w)
 
     return idxs
+
 
 def is_too_similar_substitution(original: str, substituted: str) -> bool:
     a = set(tokenize_simple(original))
@@ -338,6 +366,7 @@ def is_too_similar_substitution(original: str, substituted: str) -> bool:
     s = normalize_step_text(substituted)
     containment = (o in s) or (s in o)
     return containment or (j >= 0.78)
+
 
 def extract_json_object(text: str) -> Dict[str, Any]:
     """
@@ -385,8 +414,10 @@ def extract_json_object(text: str) -> Dict[str, Any]:
 
     raise ValueError("No valid JSON object found in response.")
 
+
 def safe_get(d: Dict[str, Any], k: str, default: Any) -> Any:
     return d[k] if k in d else default
+
 
 def now_ms() -> int:
     return int(time.time() * 1000)
@@ -410,7 +441,9 @@ def parse_args() -> argparse.Namespace:
             "If left as default, suffix _openai/_qwen will be added automatically."
         ),
     )
-    p.add_argument("--model", required=True, choices=["openai", "qwen"], help="Which backend to use")
+    p.add_argument(
+        "--model", required=True, choices=["openai", "qwen"], help="Which backend to use"
+    )
     p.add_argument("--max_takes", type=int, default=0, help="If >0, process only first N takes")
     p.add_argument(
         "--take_name",
@@ -421,9 +454,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--seed", type=int, default=123, help="Random seed")
     p.add_argument("--temperature", type=float, default=0.2)
     p.add_argument("--max_retries", type=int, default=2)
-    p.add_argument("--retry_temp_decay", type=float, default=0.15, help="Temperature decay per retry attempt")
+    p.add_argument(
+        "--retry_temp_decay", type=float, default=0.15, help="Temperature decay per retry attempt"
+    )
     p.add_argument("--max_new_tokens", type=int, default=8000)
- 
+
     # Optional semrep support (external resources)
     p.add_argument(
         "--include_semrep",
@@ -440,8 +475,9 @@ def parse_args() -> argparse.Namespace:
         default=str(REPO_ROOT / "data" / "resources" / "semantic_representations_split_50.json"),
         help="Path to semantic_representations_split_50.json (keyed by step_description_id).",
     )
- 
+
     return p.parse_args()
+
 
 # -------------------------
 # Validation helpers
@@ -449,8 +485,12 @@ def parse_args() -> argparse.Namespace:
 
 # Only actions that behave like "possession/state toggles".
 NON_REPEATABLE_ACTION_PREFIXES = (
-    "return ", "put away ", "put back ", "dispose ",
+    "return ",
+    "put away ",
+    "put back ",
+    "dispose ",
 )
+
 
 def is_near_duplicate_step(a: str, b: str) -> bool:
     a_n, b_n = normalize_ws(a).lower(), normalize_ws(b).lower()
@@ -458,9 +498,11 @@ def is_near_duplicate_step(a: str, b: str) -> bool:
         return True
     return jaccard_similarity(a_n, b_n) >= 0.85
 
+
 def is_nonrepeatable_action(step: str) -> bool:
     s = normalize_ws(step).lower()
     return s.startswith(NON_REPEATABLE_ACTION_PREFIXES)
+
 
 def _same_step_text_loose(a: str, b: str) -> bool:
     """
@@ -468,11 +510,13 @@ def _same_step_text_loose(a: str, b: str) -> bool:
     """
     return normalize_step_text(a) == normalize_step_text(b)
 
+
 # -------------------------
 # Minimal SemRep parsing (ONLY for your existing SemRep format)
 # -------------------------
 
 _SEMREP_RE = re.compile(r"^\s*([A-Za-z0-9_]+)\s*\((.*)\)\s*$")
+
 
 def _split_top_level_commas(s: str) -> List[str]:
     parts: List[str] = []
@@ -495,11 +539,13 @@ def _split_top_level_commas(s: str) -> List[str]:
         parts.append(tail)
     return parts
 
+
 def _norm_semrep_value(v: str) -> str:
     s = (v or "").strip().strip('"').strip("'").lower()
     s = " ".join(s.split())
     s = s.replace(" ", "_")
     return s
+
 
 def parse_semrep_minimal(semrep: str) -> Optional[Tuple[str, Dict[str, str]]]:
     """
@@ -527,6 +573,7 @@ def parse_semrep_minimal(semrep: str) -> Optional[Tuple[str, Dict[str, str]]]:
                 roles[k] = v
     return pred, roles
 
+
 def _roles_norm_excluding(roles: Dict[str, str], exclude: Set[str]) -> Dict[str, str]:
     out: Dict[str, str] = {}
     for k, v in roles.items():
@@ -535,6 +582,7 @@ def _roles_norm_excluding(roles: Dict[str, str], exclude: Set[str]) -> Dict[str,
             continue
         out[kk] = _norm_semrep_value(str(v))
     return out
+
 
 def _semrep_for_original_idx(
     take: Dict[str, Any],
@@ -572,6 +620,7 @@ def _semrep_for_original_idx(
         return ""
     return ""
 
+
 def _semrep_for_step_text(
     step_text: str,
     vocab_map: Optional[Dict[str, str]],
@@ -598,6 +647,7 @@ def _semrep_for_step_text(
     out = (rec.get("semantic_representation") or "").strip()
     return out or None
 
+
 def validate_location_continuity_semrep(
     final_steps: List[str],
     vocab_map: Dict[str, str],
@@ -606,25 +656,25 @@ def validate_location_continuity_semrep(
 ) -> List[str]:
     """
     SemRep-based Location Consistency.
-    
+
     Logic:
     1. Tracks the last known location of an Object based on 'Destination' roles in previous steps.
     2. If a subsequent step explicitly specifies a 'Location' (or 'Container') role for that Object,
        it must match the tracked location.
-    
+
     This detects: "Add noodles to sink" -> "Stir noodles in pot" (sink != pot).
     It does NOT use hardcoded lists of "bad" locations; it strictly checks continuity.
     """
     issues: List[str] = []
-    
+
     # Map: object_name -> location_name
     # We use simple normalized strings for tracking.
     obj_loc_tracker: Dict[str, str] = {}
-    
+
     # Roles that imply setting a new location
     # Note: We rely on standard SemRep roles.
     DEST_ROLES = {"Destination", "Into", "To", "On", "In"}
-    
+
     # Roles that imply checking the current location
     LOC_ROLES = {"Location", "Container", "In", "At"}
 
@@ -632,20 +682,20 @@ def validate_location_continuity_semrep(
         # Helper to extract the main entity from a SemRep value (e.g. "pot" from "pot(large)")
         ents = _extract_required_entities_from_role_value(str(role_val))
         if ents:
-            return sorted(list(ents))[0] # deterministic pick
+            return sorted(list(ents))[0]  # deterministic pick
         return None
 
     for i, step_text in enumerate(final_steps):
         sr = _semrep_for_step_text(step_text, vocab_map, semrep_map, semrep_step_to_id)
         if not sr:
             continue
-        
+
         parsed = parse_semrep_minimal(sr)
         if not parsed:
             continue
-        
+
         pred, roles = parsed
-        
+
         # 1. Identify the main Object(s) of this step
         # Usually defined by 'Object' or 'Theme' role
         objs_in_step = set()
@@ -654,7 +704,7 @@ def validate_location_continuity_semrep(
             if val:
                 ents = _extract_required_entities_from_role_value(str(val))
                 objs_in_step.update(ents)
-        
+
         if not objs_in_step:
             continue
 
@@ -666,7 +716,7 @@ def validate_location_continuity_semrep(
                 current_loc_val = get_first_entity(roles[r])
                 if current_loc_val:
                     break
-        
+
         if current_loc_val:
             for obj in objs_in_step:
                 # If we tracked this object previously, and the location differs
@@ -688,7 +738,7 @@ def validate_location_continuity_semrep(
                 # Object is now in hand; previous location is irrelevant/cleared
                 if obj in obj_loc_tracker:
                     del obj_loc_tracker[obj]
-        
+
         else:
             # Check for explicitly setting a destination
             new_dest_val = None
@@ -697,12 +747,13 @@ def validate_location_continuity_semrep(
                     new_dest_val = get_first_entity(roles[r])
                     if new_dest_val:
                         break
-            
+
             if new_dest_val:
                 for obj in objs_in_step:
                     obj_loc_tracker[obj] = new_dest_val
 
     return issues
+
 
 def _inventory_missing_records_from_semrep_sequence(
     n_steps: int,
@@ -719,7 +770,9 @@ def _inventory_missing_records_from_semrep_sequence(
     If check_indices is provided, we still PROCESS all steps to maintain HAVE state,
     but only RETURN records for indices in the reporting window (check_indices +/-1).
     """
-    roles_to_require = set(require_roles) if require_roles is not None else set(_DEFAULT_REQUIRE_ROLES)
+    roles_to_require = (
+        set(require_roles) if require_roles is not None else set(_DEFAULT_REQUIRE_ROLES)
+    )
     have: Set[str] = set()
     records: List[Dict[str, Any]] = []
     report_idxs: Optional[Set[int]] = None
@@ -731,8 +784,10 @@ def _inventory_missing_records_from_semrep_sequence(
             for j in (i - 1, i, i + 1):
                 if 0 <= j < n_steps:
                     report_idxs.add(j)
+
     def _should_report(i: int) -> bool:
         return (report_idxs is None) or (i in report_idxs)
+
     for i in range(n_steps):
         sr = get_semrep_at(i) or ""
         if not sr:
@@ -757,13 +812,15 @@ def _inventory_missing_records_from_semrep_sequence(
                 continue
             for ent in _extract_required_entities_from_role_value(str(v or "")):
                 if ent not in have and _should_report(i):
-                    records.append({
-                        "idx": i,
-                        "pred": pred,
-                        "role": role_name,
-                        "ent": ent,
-                        "step": str(get_step_text_at(i) or ""),
-                    })
+                    records.append(
+                        {
+                            "idx": i,
+                            "pred": pred,
+                            "role": role_name,
+                            "ent": ent,
+                            "step": str(get_step_text_at(i) or ""),
+                        }
+                    )
         # release
         if pred in _RELEASE_PREDS:
             for role_name in ("Object", "Instrument"):
@@ -771,6 +828,8 @@ def _inventory_missing_records_from_semrep_sequence(
                 for ent in _extract_required_entities_from_role_value(str(v or "")):
                     have.discard(ent)
     return records
+
+
 def validate_inventory_semrep_delta_against_original(
     take: Dict[str, Any],
     original_steps: List[str],
@@ -821,7 +880,9 @@ def validate_inventory_semrep_delta_against_original(
     n_final = len(final_steps)
     final_records = _inventory_missing_records_from_semrep_sequence(
         n_steps=n_final,
-        get_semrep_at=lambda i: _semrep_for_step_text(final_steps[i], vocab_map, semrep_map, semrep_step_to_id),
+        get_semrep_at=lambda i: _semrep_for_step_text(
+            final_steps[i], vocab_map, semrep_map, semrep_step_to_id
+        ),
         get_step_text_at=lambda i: final_steps[i] if 0 <= i < n_final else "",
         check_indices=check_indices,
         require_roles=require_roles,
@@ -847,6 +908,7 @@ def validate_inventory_semrep_delta_against_original(
         )
     return issues
 
+
 def validate_error_realization_minimal(
     take: Dict[str, Any],
     original_steps: List[str],
@@ -866,7 +928,7 @@ def validate_error_realization_minimal(
     issues: List[str] = []
 
     planned: Dict[str, str] = {}
-    for e in (take.get("errors") or []):
+    for e in take.get("errors") or []:
         if not isinstance(e, dict):
             continue
         eid = str(e.get("event_id") or e.get("error_id") or "").strip()
@@ -905,7 +967,9 @@ def validate_error_realization_minimal(
         # Optional SemRep sanity when available
         if include_semrep:
             sr_old = _semrep_for_original_idx(take, old, vocab_map, semrep_map)
-            sr_new = _semrep_for_step_text(final_steps[new], vocab_map, semrep_map, semrep_step_to_id)
+            sr_new = _semrep_for_step_text(
+                final_steps[new], vocab_map, semrep_map, semrep_step_to_id
+            )
             p_old = parse_semrep_minimal(sr_old) if sr_old else None
             p_new = parse_semrep_minimal(sr_new) if sr_new else None
             if p_old and p_new:
@@ -933,12 +997,13 @@ def validate_error_realization_minimal(
 
     return issues
 
+
 def validate_adjacent_duplicates(final_steps: List[str]) -> List[str]:
     issues: List[str] = []
     for i in range(1, len(final_steps)):
         if is_near_duplicate_step(final_steps[i - 1], final_steps[i]):
             issues.append(
-                f"adjacent_duplicate: near-duplicate steps at {i-1},{i}: "
+                f"adjacent_duplicate: near-duplicate steps at {i - 1},{i}: "
                 f"'{final_steps[i - 1]}' ~ '{final_steps[i]}'"
             )
     return issues
@@ -951,6 +1016,7 @@ def validate_adjacent_duplicates(final_steps: List[str]) -> List[str]:
 DEGREE_FULL_VALUES: Set[str] = {"fully", "well", "completely"}
 DEGREE_PARTIAL_VALUES: Set[str] = {"partially", "a_little", "slightly", "incompletely"}
 
+
 def _roles_norm_except_degree(roles: Dict[str, str]) -> Dict[str, str]:
     out: Dict[str, str] = {}
     for k, v in roles.items():
@@ -959,6 +1025,7 @@ def _roles_norm_except_degree(roles: Dict[str, str]) -> Dict[str, str]:
             continue
         out[kk] = _norm_semrep_value(str(v))
     return out
+
 
 def _extract_pred_obj_degree(semrep: str) -> Optional[Tuple[str, str, str, Dict[str, str]]]:
     parsed = parse_semrep_minimal(semrep)
@@ -972,6 +1039,7 @@ def _extract_pred_obj_degree(semrep: str) -> Optional[Tuple[str, str, str, Dict[
     deg = _norm_semrep_value(str(roles.get("Degree") or ""))
     roles_no_deg = _roles_norm_except_degree(roles)
     return pred, obj, deg, roles_no_deg
+
 
 # -------------------------
 # Inventory via SemRep (NO word allowlists; roles-only)
@@ -988,11 +1056,13 @@ _DEFAULT_REQUIRE_ROLES: Set[str] = {"Object", "Instrument"}
 # Structural tokens of the SemRep value grammar (NOT domain words)
 _STRUCT_TOKENS: Set[str] = {"of", "from", "in", "into", "on", "onto", "to", "with", "at", "for"}
 
+
 def _semrep_value_tokens(v: str) -> List[str]:
     s = (v or "").strip().strip('"').strip("'").lower()
     # keep underscores; just normalize whitespace
     s = re.sub(r"\s+", " ", s)
     return re.findall(r"[a-z0-9_]+", s)
+
 
 def _extract_required_entities_from_role_value(v: str) -> Set[str]:
     """
@@ -1025,9 +1095,12 @@ def _extract_required_entities_from_role_value(v: str) -> Set[str]:
     m = re.search(r"\((.*)\)", s, flags=re.DOTALL)
     inside = m.group(1) if m else ""
     inside_toks = _semrep_value_tokens(inside)
-    inside_toks = [t for t in inside_toks if t and t not in _STRUCT_TOKENS and len(t) >= 3 and not t.isdigit()]
+    inside_toks = [
+        t for t in inside_toks if t and t not in _STRUCT_TOKENS and len(t) >= 3 and not t.isdigit()
+    ]
 
     return set(inside_toks)
+
 
 def validate_inventory_semrep(
     final_steps: List[str],
@@ -1054,7 +1127,9 @@ def validate_inventory_semrep(
     issues: List[str] = []
     have: Set[str] = set()
 
-    roles_to_require = set(require_roles) if require_roles is not None else set(_DEFAULT_REQUIRE_ROLES)
+    roles_to_require = (
+        set(require_roles) if require_roles is not None else set(_DEFAULT_REQUIRE_ROLES)
+    )
 
     n = len(final_steps)
     report_idxs: Optional[Set[int]] = None
@@ -1118,6 +1193,7 @@ def validate_inventory_semrep(
 
     return issues
 
+
 def validate_degree_consistency_semrep_adjacent(
     final_steps: List[str],
     vocab_map: Dict[str, str],
@@ -1169,6 +1245,7 @@ def validate_degree_consistency_semrep_adjacent(
 
     return issues
 
+
 # -------------------------
 # Ordering constraints (same object) — ported from error_simulator_new.py
 # -------------------------
@@ -1193,9 +1270,15 @@ ORDERING_CONSTRAINTS_SAME_OBJECT = [
 ]
 
 ORDERING_ENFORCED_DEPENDENTS = {
-    "RETURN", "PUT_AWAY", "PUT_BACK",
-    "CLOSE", "COVER", "TURN_OFF", "DEFLATE",
-    "READ", "FIT",
+    "RETURN",
+    "PUT_AWAY",
+    "PUT_BACK",
+    "CLOSE",
+    "COVER",
+    "TURN_OFF",
+    "DEFLATE",
+    "READ",
+    "FIT",
 }
 
 # Text triggers for predicates in ORDERING_CONSTRAINTS_SAME_OBJECT (heuristic).
@@ -1225,6 +1308,7 @@ _PRED_TO_PREFIXES: Dict[str, Tuple[str, ...]] = {
 }
 
 _STOP_TOKENS = {"of", "in", "on", "from", "to", "with", "and", "or", "into", "onto", "at", "for"}
+
 
 def _detect_predicate_and_object(step_text: str) -> Tuple[Optional[str], Optional[str]]:
     """
@@ -1259,7 +1343,7 @@ def _detect_predicate_and_object(step_text: str) -> Tuple[Optional[str], Optiona
     if pred is None or used_prefix is None:
         return None, None
 
-    rest = s[len(used_prefix):].strip()
+    rest = s[len(used_prefix) :].strip()
     if not rest:
         return pred, None
 
@@ -1300,8 +1384,10 @@ def check_ordering_constraints_same_object(
         dep_to_prereqs[dep].add(pre)
         prereq_to_deps[pre].add(dep)
 
-    seen_dep: Dict[Tuple[str, str], bool] = defaultdict(bool)     # (dep,obj)
-    unlocked: Dict[Tuple[str, str], bool] = defaultdict(bool)     # (dep,obj) prereq seen since last dep
+    seen_dep: Dict[Tuple[str, str], bool] = defaultdict(bool)  # (dep,obj)
+    unlocked: Dict[Tuple[str, str], bool] = defaultdict(
+        bool
+    )  # (dep,obj) prereq seen since last dep
 
     for i, step in enumerate(final_steps):
         pred, obj = _detect_predicate_and_object(step)
@@ -1334,6 +1420,7 @@ def check_ordering_constraints_same_object(
 
     return issues
 
+
 def find_global_nonrepeatable_duplicates(final_steps: List[str]) -> List[str]:
     """
     Disallow repeats of non-repeatable actions anywhere in the procedure,
@@ -1355,6 +1442,7 @@ def find_global_nonrepeatable_duplicates(final_steps: List[str]) -> List[str]:
         else:
             seen[key] = i
     return issues
+
 
 def validate_rewrite(
     original_steps: List[str],
@@ -1381,7 +1469,9 @@ def validate_rewrite(
 
         if mod == "e":
             if etype not in {"wrong_execution", "substitution"}:
-                issues.append(f"meta[{i}] mod='e' requires etype in {{wrong_execution, substitution}} (got {etype})")
+                issues.append(
+                    f"meta[{i}] mod='e' requires etype in {{wrong_execution, substitution}} (got {etype})"
+                )
 
         elif mod == "i":
             if etype != "insertion":
@@ -1407,10 +1497,9 @@ def validate_rewrite(
 
     def _nonempty_str(x: Any) -> bool:
         return isinstance(x, str) and x.strip() != ""
+
     move_counts: Dict[str, Dict[str, int]] = defaultdict(lambda: {"ms": 0, "mt": 0})
 
-    # Meta -> final_steps index consistency
-    new_indices = []
     for i, m in enumerate(meta):
         if "new" not in m or "old" not in m or "mod" not in m:
             issues.append(f"meta[{i}] missing required keys.")
@@ -1422,11 +1511,15 @@ def validate_rewrite(
         # Require eid for any error-bearing / adjusted / moved / deletion steps
         if mod in {"e", "i", "a", "ms", "mt", "d"}:
             if not _nonempty_str(m.get("eid")):
-                issues.append(f"meta[{i}] mod='{mod}' requires non-empty eid (use plan error_id string)")
+                issues.append(
+                    f"meta[{i}] mod='{mod}' requires non-empty eid (use plan error_id string)"
+                )
         # Require cid for corrections
         if mod == "c":
             if not _nonempty_str(m.get("cid")):
-                issues.append(f"meta[{i}] mod='c' requires non-empty cid (use plan correction_id string)")
+                issues.append(
+                    f"meta[{i}] mod='c' requires non-empty cid (use plan correction_id string)"
+                )
 
         # Deletion must have new="" and old=int
         if mod == "d":
@@ -1434,7 +1527,7 @@ def validate_rewrite(
                 issues.append(f"meta[{i}] mod='d' must have new=''")
             if not isinstance(m.get("old"), int):
                 issues.append(f"meta[{i}] mod='d' must have int old")
-                
+
         # Insertion/correction must have old=""
         if mod in {"i", "c"}:
             if m.get("old") not in ("", None):
@@ -1464,7 +1557,9 @@ def validate_rewrite(
                     if normalize_ws(final_steps[new]) != normalize_ws(original_steps[old]):
                         issues.append(f"meta[{i}] {mod} must be verbatim ORIGINAL[{old}]")
                 else:
-                    issues.append(f"meta[{i}] {mod} old/new out of range (old={old}, new={new}, final_len={len(final_steps)})")
+                    issues.append(
+                        f"meta[{i}] {mod} old/new out of range (old={old}, new={new}, final_len={len(final_steps)})"
+                    )
 
         newv = m["new"]
         if newv == "" or newv is None:
@@ -1476,7 +1571,9 @@ def validate_rewrite(
     # Each transposition eid must have exactly one ms and one mt
     for eid, cts in move_counts.items():
         if cts.get("ms", 0) != 1 or cts.get("mt", 0) != 1:
-            issues.append(f"transposition eid={eid} must have exactly one ms and one mt (ms={cts.get('ms',0)} mt={cts.get('mt',0)})")
+            issues.append(
+                f"transposition eid={eid} must have exactly one ms and one mt (ms={cts.get('ms', 0)} mt={cts.get('mt', 0)})"
+            )
 
     # Unchanged steps must match source text exactly (ignoring whitespace)
     for i, m in enumerate(meta):
@@ -1487,7 +1584,9 @@ def validate_rewrite(
                 issues.append(f"meta[{i}] mod='u' must have int old and int new.")
                 continue
             if not (0 <= new < len(final_steps)):
-                issues.append(f"meta[{i}] new index {new} out of range for final_steps (len={len(final_steps)}).")
+                issues.append(
+                    f"meta[{i}] new index {new} out of range for final_steps (len={len(final_steps)})."
+                )
                 continue
             if old < 0 or old >= len(original_steps):
                 issues.append(f"meta[{i}] old out of range for mod='u': {old}.")
@@ -1503,17 +1602,25 @@ def validate_rewrite(
                 issues.append(f"meta[{i}] insertion index {new} out of range.")
                 continue
             cur = final_steps[new]
-            prev = final_steps[new-1] if new-1 >= 0 else None
-            nxt = final_steps[new+1] if new+1 < len(final_steps) else None
+            prev = final_steps[new - 1] if new - 1 >= 0 else None
+            nxt = final_steps[new + 1] if new + 1 < len(final_steps) else None
             if prev and is_near_duplicate_step(cur, prev):
-                issues.append(f"insertion at final_steps[{new}] is near-duplicate of previous step.")
+                issues.append(
+                    f"insertion at final_steps[{new}] is near-duplicate of previous step."
+                )
             if nxt and is_near_duplicate_step(cur, nxt):
                 issues.append(f"insertion at final_steps[{new}] is near-duplicate of next step.")
 
     # Corrections must not be empty filler (Continue/Proceed/etc.)
     BAD_CORR_PREFIXES = (
-        "continue", "proceed", "go on", "carry on", "keep going",
-        "then continue", "next", "move on"
+        "continue",
+        "proceed",
+        "go on",
+        "carry on",
+        "keep going",
+        "then continue",
+        "next",
+        "move on",
     )
     for i, m in enumerate(meta):
         if m.get("mod") != "c":
@@ -1525,13 +1632,15 @@ def validate_rewrite(
             continue
         txt = normalize_ws(final_steps[new]).lower()
         if len(txt.split()) <= 2 or txt.startswith(BAD_CORR_PREFIXES):
-            issues.append(f"correction at final_steps[{new}] looks like filler: '{final_steps[new]}'")
+            issues.append(
+                f"correction at final_steps[{new}] looks like filler: '{final_steps[new]}'"
+            )
 
     # Non-repeatable exact repetitions next to each other
     for i in range(1, len(final_steps)):
-        a, b = final_steps[i-1], final_steps[i]
+        a, b = final_steps[i - 1], final_steps[i]
         if is_nonrepeatable_action(a) and is_near_duplicate_step(a, b):
-            issues.append(f"adjacent non-repeatable duplicate steps at {i-1},{i}: '{a}' ~ '{b}'.")
+            issues.append(f"adjacent non-repeatable duplicate steps at {i - 1},{i}: '{a}' ~ '{b}'.")
 
     # Ordering constraints (same object) — heuristic text check
     changed_new = changed_new or set()
@@ -1564,6 +1673,7 @@ def validate_rewrite(
 
     return (len(issues) == 0), issues
 
+
 def check_ordering_constraints_same_object_semrep(
     final_steps: List[str],
     vocab_map: Dict[str, str],
@@ -1582,8 +1692,8 @@ def check_ordering_constraints_same_object_semrep(
         dep_to_prereqs[dep].add(pre)
         prereq_to_deps[pre].add(dep)
 
-    seen_dep: Dict[Tuple[str, str], bool] = defaultdict(bool)   # (dep,obj_entity)
-    unlocked: Dict[Tuple[str, str], bool] = defaultdict(bool)   # prereq seen since last dep
+    seen_dep: Dict[Tuple[str, str], bool] = defaultdict(bool)  # (dep,obj_entity)
+    unlocked: Dict[Tuple[str, str], bool] = defaultdict(bool)  # prereq seen since last dep
 
     for i, step_text in enumerate(final_steps):
         sr = _semrep_for_step_text(step_text, vocab_map, semrep_map, semrep_step_to_id)
@@ -1632,6 +1742,7 @@ def check_ordering_constraints_same_object_semrep(
 
     return issues
 
+
 def validate_plan_coverage(take: Dict[str, Any], meta: List[Dict[str, Any]]) -> List[str]:
     issues: List[str] = []
     errors = take.get("errors", []) or []
@@ -1674,7 +1785,9 @@ def validate_plan_coverage(take: Dict[str, Any], meta: List[Dict[str, Any]]) -> 
         if etype == "transposition":
             cts = msmt_counts.get(eid, {"ms": 0, "mt": 0})
             if cts.get("ms", 0) != 1 or cts.get("mt", 0) != 1:
-                issues.append(f"plan_coverage: transposition eid={eid} must have exactly one ms and one mt (ms={cts.get('ms',0)} mt={cts.get('mt',0)})")
+                issues.append(
+                    f"plan_coverage: transposition eid={eid} must have exactly one ms and one mt (ms={cts.get('ms', 0)} mt={cts.get('mt', 0)})"
+                )
 
         # deletion must be realized as mod='d' and must delete src or an allowed alternate
         if etype == "deletion":
@@ -1694,7 +1807,9 @@ def validate_plan_coverage(take: Dict[str, Any], meta: List[Dict[str, Any]]) -> 
             if not realized:
                 issues.append(f"plan_coverage: deletion eid={eid} missing mod='d' meta entry")
             elif len(realized) != 1:
-                issues.append(f"plan_coverage: deletion eid={eid} must delete exactly one step (got olds={realized})")
+                issues.append(
+                    f"plan_coverage: deletion eid={eid} must delete exactly one step (got olds={realized})"
+                )
             else:
                 old_del = realized[0]
                 if allowed and old_del not in allowed:
@@ -1715,6 +1830,7 @@ def validate_plan_coverage(take: Dict[str, Any], meta: List[Dict[str, Any]]) -> 
             issues.append(f"plan_coverage: correction cid={cid} appears {n} times (must be 1)")
 
     return issues
+
 
 def validate_old_index_coverage(original_steps: List[str], meta: List[Dict[str, Any]]) -> List[str]:
     """
@@ -1745,9 +1861,10 @@ def validate_old_index_coverage(original_steps: List[str], meta: List[Dict[str, 
 
     return issues
 
+
 def validate_transposition_realized(take: Dict[str, Any], meta: List[Dict[str, Any]]) -> List[str]:
     issues: List[str] = []
-    for e in (take.get("errors") or []):
+    for e in take.get("errors") or []:
         if not isinstance(e, dict):
             continue
         etype = str(e.get("type") or e.get("error_type") or "").strip().lower()
@@ -1768,9 +1885,11 @@ def validate_transposition_realized(take: Dict[str, Any], meta: List[Dict[str, A
         if not isinstance(src, int) or not isinstance(tgt, int):
             continue
 
-        msmt = [m for m in meta if (m.get("eid") or "").strip() == eid and m.get("mod") in {"ms", "mt"}]
+        msmt = [
+            m for m in meta if (m.get("eid") or "").strip() == eid and m.get("mod") in {"ms", "mt"}
+        ]
         if len(msmt) != 2:
-            continue 
+            continue
 
         old_to_new: Dict[int, int] = {}
         for m in msmt:
@@ -1786,7 +1905,9 @@ def validate_transposition_realized(take: Dict[str, Any], meta: List[Dict[str, A
         if planned_pair is not None and set(olds) != set(planned_pair):
             logger.warning(
                 "transposition_shift: eid=%s planned_pair=%s realized_pair=%s",
-                eid, planned_pair, tuple(olds)
+                eid,
+                planned_pair,
+                tuple(olds),
             )
 
         # Require reversal of order for the realized pair (whatever it is).
@@ -1801,6 +1922,7 @@ def validate_transposition_realized(take: Dict[str, Any], meta: List[Dict[str, A
             )
 
     return issues
+
 
 def build_retry_prompt(user_prompt: str, last_raw: str, error_msg: str) -> str:
     """
@@ -1818,7 +1940,7 @@ def build_retry_prompt(user_prompt: str, last_raw: str, error_msg: str) -> str:
             "You MUST include exactly one meta entry mod='c' for EACH of these correction_id values:\n"
             + "\n".join(f"- {c}" for c in missing_cids)
             + "\nEach such meta entry must set cid to the exact string above.\n"
-        )    
+        )
     return (
         user_prompt
         + "\n\nRETRY NOTICE:\n"
@@ -1835,6 +1957,7 @@ def build_retry_prompt(user_prompt: str, last_raw: str, error_msg: str) -> str:
         + "\nPREVIOUS OUTPUT (debug only, do not repeat):\n"
         + tail
     )
+
 
 def canonicalize_meta_new_indices(meta: List[Dict[str, Any]], final_steps: List[str]) -> None:
     """
@@ -1857,10 +1980,7 @@ def canonicalize_meta_new_indices(meta: List[Dict[str, Any]], final_steps: List[
         )
 
     idxs = [m.get("new") for m in non_del]
-    has_perm = (
-        all(isinstance(i, int) for i in idxs)
-        and set(idxs) == set(range(len(final_steps)))
-    )
+    has_perm = all(isinstance(i, int) for i in idxs) and set(idxs) == set(range(len(final_steps)))
 
     # Case A: meta.new is a clean permutation -> reorder steps into meta order
     if has_perm:
@@ -1882,6 +2002,7 @@ def canonicalize_meta_new_indices(meta: List[Dict[str, Any]], final_steps: List[
             f"meta_non_del={new_i} vs len(final_steps)={len(final_steps)}"
         )
 
+
 def compute_changed_new_indices(meta: List[Dict[str, Any]]) -> Set[int]:
     """
     Indices in final_steps that were generated/modified by the model (not pure 'u').
@@ -1894,6 +2015,7 @@ def compute_changed_new_indices(meta: List[Dict[str, Any]]) -> Set[int]:
         if mod in {"e", "a", "i", "c"} and isinstance(new, int):
             out.add(new)
     return out
+
 
 def expand_inventory_check_indices_for_get_substitutions(
     take: Dict[str, Any],
@@ -1948,6 +2070,7 @@ def expand_inventory_check_indices_for_get_substitutions(
 
     return out
 
+
 def enforce_verbatim_for_u_and_moves(
     original_steps: List[str],
     final_steps: List[str],
@@ -1968,9 +2091,11 @@ def enforce_verbatim_for_u_and_moves(
         if 0 <= old < len(original_steps) and 0 <= new < len(final_steps):
             final_steps[new] = original_steps[old]
 
+
 # -------------------------
 # Prompting
 # -------------------------
+
 
 def format_steps_for_prompt(
     steps: List[Dict[str, Any]],
@@ -1998,7 +2123,10 @@ def format_steps_for_prompt(
         out.append(line)
     return "\n".join(out)
 
-def format_error_plan_for_prompt(errors: List[Dict[str, Any]], corrections: List[Dict[str, Any]]) -> str:
+
+def format_error_plan_for_prompt(
+    errors: List[Dict[str, Any]], corrections: List[Dict[str, Any]]
+) -> str:
     out = []
     corr_by_eid: Dict[str, List[Dict[str, Any]]] = {}
     for c in corrections:
@@ -2024,7 +2152,7 @@ def format_error_plan_for_prompt(errors: List[Dict[str, Any]], corrections: List
             alt = e.get("alternate_src_indices")
             if alt:
                 extra.append(f"alt_del={alt}")
-        
+
         extra_s = ("; " + ", ".join(extra)) if extra else ""
         out.append(f"{eid}: {etype} at src={src}{extra_s}")
 
@@ -2040,6 +2168,7 @@ def format_error_plan_for_prompt(errors: List[Dict[str, Any]], corrections: List
                 out.append(f"  - {cid}: {ctype} after src={cpos}")
     return "\n".join(out)
 
+
 # SYSTEM_PROMPT = """You are a careful procedure rewriter.
 # You will receive:
 # (1) an ORIGINAL step list with indices and phases
@@ -2049,11 +2178,11 @@ def format_error_plan_for_prompt(errors: List[Dict[str, Any]], corrections: List
 # - but remains logically coherent and physically plausible enough to follow.
 # If a plan instruction conflicts with basic feasibility (e.g., for transposition "pour mixture into a closed pan"), you MUST still keep an error of the requested type, but choose the closest feasible variant (e.g., transpose two different feasible steps, or adjust other steps with the new object if an object or instrument was substituted) while keeping the error near the requested location.
 
-# The produced errors of each type must correspond to the following human behaviour and nature: 
+# The produced errors of each type must correspond to the following human behaviour and nature:
 # - Substitution (wrong step / wrong object, but a plausible one) represents an erraneous step due to confusion between similar steps.
 # - Wrong Execution represents execution slips due to unfamiliarity or motor learning, associative errors like using a wrong tool, container, etc.
 # - Deletion represents omissions and skipped steps due to lapses from memory overload.
-# - Insertion represents an extra step with a mistake because of the confusion. Sometimes it could be a partial repetition like adding the same ingredient twice. 
+# - Insertion represents an extra step with a mistake because of the confusion. Sometimes it could be a partial repetition like adding the same ingredient twice.
 # - Transposition (sequence/order error) represents a sequencing failure or a planning slip through the swapped order of two actions.
 # Each change of the procedure by the plan (i, d, e, ms, mt), must contain an error of this type or be a correction (c) or a cascading adjustment (a) in order to keep the overall procedure feasible in real world.
 # For instence, if in a particular step a person mistakenly used a knife instead of a spoon to scoop a jelly (wrong execution), then the knife (and not the spoon!) must be used in the following steps like spread the jelly on a toast with the knife (and not the spoon).
@@ -2098,7 +2227,7 @@ def format_error_plan_for_prompt(errors: List[Dict[str, Any]], corrections: List
 #   occurred in between (since the last dependent(Object)).
 #   If the same dependent appears with multiple prerequisites in the list, ANY of those prerequisites is sufficient.
 
-# ADJUSTMENTS: 
+# ADJUSTMENTS:
 # Tool/Object consistency (HARD):
 # If an error step changes or introduces a tool/object by substitution or wrong execuption, you MUST update every later step that refers to the old tool/object to match what the person now has/uses.
 # Every such updated later step MUST be mod="a" and must reuse the SAME eid as the causing error.
@@ -2354,21 +2483,19 @@ Use them to keep edits physically plausible and not breaking the overall procedu
 - For cascade repairs (mod='a'): the cascade repairs are needed to keep the sense of the whole procedure considering the main step changes; keep the cascaded step as original in all but the changes necessary for the repair; avoid rewriting the whole step.
 """
 
+
 def build_user_prompt(
     take: Dict[str, Any],
     include_semrep: bool = False,
     vocab_map: Optional[Dict[str, str]] = None,
     semrep_map: Optional[Dict[str, Dict[str, str]]] = None,
-    semrep_extender = None,
+    semrep_extender=None,
     semrep_step_to_id: Optional[Dict[str, str]] = None,
 ) -> str:
 
     # High-level domain hint for the model (must NOT appear in output JSON)
     scenario_name = str(
-        take.get("take_name")
-        or take.get("name")
-        or take.get("takeName")
-        or ""
+        take.get("take_name") or take.get("name") or take.get("takeName") or ""
     ).strip()
     scenario_name = normalize_ws(scenario_name) if scenario_name else ""
     steps = take.get("steps") or take.get("raw_steps") or []
@@ -2444,12 +2571,20 @@ Now produce the rewritten procedure JSON.
 # Backends
 # -------------------------
 
+
 @dataclass
 class LLMBackend:
     name: str
-    def generate(self, messages: List[Dict[str, str]], temperature: float, max_new_tokens: int,
-                 json_schema: Optional[Dict[str, Any]] = None) -> str:
+
+    def generate(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float,
+        max_new_tokens: int,
+        json_schema: Optional[Dict[str, Any]] = None,
+    ) -> str:
         raise NotImplementedError
+
 
 class OpenAIBackend(LLMBackend):
     def __init__(self) -> None:
@@ -2459,7 +2594,9 @@ class OpenAIBackend(LLMBackend):
         self.client = OpenAI(api_key=OPENAI_API_KEY)
         self.model_id = DEFAULT_OPENAI_MODEL_ID
 
-    def generate(self, messages, temperature, max_new_tokens, json_schema: Optional[Dict[str, Any]] = None):
+    def generate(
+        self, messages, temperature, max_new_tokens, json_schema: Optional[Dict[str, Any]] = None
+    ):
         try:
             text_format = None
             if json_schema is not None:
@@ -2496,6 +2633,7 @@ class OpenAIBackend(LLMBackend):
             # If you want schema also in fallback:
             chat = self.client.chat.completions.create(**cc_kwargs)
             return chat.choices[0].message.content or ""
+
 
 class QwenLocalBackend(LLMBackend):
     def __init__(self, model_id: str = DEFAULT_QWEN_MODEL_ID) -> None:
@@ -2539,7 +2677,7 @@ class QwenLocalBackend(LLMBackend):
         except Exception:
             # Fallback: simple concatenation if chat template fails.
             prompt_text = "\n\n".join(
-                [f"{m.get('role','user').upper()}: {m.get('content','')}" for m in messages]
+                [f"{m.get('role', 'user').upper()}: {m.get('content', '')}" for m in messages]
             )
 
         # 2) Tokenize and move to model device.
@@ -2605,6 +2743,7 @@ def make_backend(model_choice: str) -> LLMBackend:
 # Main generation loop
 # -------------------------
 
+
 def generate_for_take(
     take: Dict[str, Any],
     backend: LLMBackend,
@@ -2615,7 +2754,7 @@ def generate_for_take(
     include_semrep: bool = False,
     vocab_map: Optional[Dict[str, str]] = None,
     semrep_map: Optional[Dict[str, Dict[str, str]]] = None,
-    semrep_extender = None,
+    semrep_extender=None,
     semrep_step_to_id: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     user_prompt = build_user_prompt(
@@ -2627,7 +2766,7 @@ def generate_for_take(
 
     # Prepare ORIGINAL text list once
     original_steps_txt: List[str] = []
-    for s in (take.get("steps") or take.get("raw_steps") or []):
+    for s in take.get("steps") or take.get("raw_steps") or []:
         if not isinstance(s, dict):
             original_steps_txt.append("")
             continue
@@ -2659,8 +2798,7 @@ def generate_for_take(
 
         # If we failed on "fake error" or adjacency duplication, prefer lower temperature retries.
         if attempt > 0 and any(
-            k in (last_err or "")
-            for k in ("error_realization:", "adjacent_duplicate:")
+            k in (last_err or "") for k in ("error_realization:", "adjacent_duplicate:")
         ):
             t = min(t, 0.05)
 
@@ -2671,7 +2809,9 @@ def generate_for_take(
 
         messages = base_messages
         if attempt > 0:
-            retry_user = build_retry_prompt(user_prompt, last_raw, last_err or "unknown_validation_error")
+            retry_user = build_retry_prompt(
+                user_prompt, last_raw, last_err or "unknown_validation_error"
+            )
             messages = [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": retry_user},
@@ -2688,7 +2828,9 @@ def generate_for_take(
             final_steps = obj.get("final_steps")
             meta = obj.get("meta")
 
-            if not isinstance(final_steps, list) or not all(isinstance(x, str) for x in final_steps):
+            if not isinstance(final_steps, list) or not all(
+                isinstance(x, str) for x in final_steps
+            ):
                 raise ValueError("final_steps must be list[str].")
             if not isinstance(meta, list) or not all(isinstance(x, dict) for x in meta):
                 raise ValueError("meta must be list[dict].")
@@ -2725,20 +2867,20 @@ def generate_for_take(
 
                 if isinstance(m.get("etype"), str):
                     _x = m["etype"].strip()
-                    m["etype"] = (_x.lower() if _x else None)
+                    m["etype"] = _x.lower() if _x else None
                 if isinstance(m.get("eid"), str):
                     _x = m["eid"].strip()
-                    m["eid"] = (_x if _x else None)
+                    m["eid"] = _x if _x else None
                 if isinstance(m.get("cid"), str):
                     _x = m["cid"].strip()
-                    m["cid"] = (_x if _x else None)
+                    m["cid"] = _x if _x else None
 
                 # Ensure correction steps always carry an explicit etype.
                 # This keeps downstream consumers simple (no special-casing etype=null for mod='c').
                 if mod == "c":
                     m["etype"] = "correction"
 
-                #insertion/correction are NEW steps (no old index)
+                # insertion/correction are NEW steps (no old index)
                 if mod in {"i", "c"}:
                     m["old"] = ""
 
@@ -2772,7 +2914,9 @@ def generate_for_take(
                 semrep_step_to_id = semrep_extender.step_to_id
                 init_reverse_semrep_map(semrep_map)
 
-            ok, issues = validate_rewrite(original_steps_txt, final_steps, meta, changed_new=changed_new)
+            ok, issues = validate_rewrite(
+                original_steps_txt, final_steps, meta, changed_new=changed_new
+            )
             issues.extend(validate_plan_coverage(take, meta))
             issues.extend(validate_old_index_coverage(original_steps_txt, meta))
             issues.extend(validate_transposition_realized(take, meta))
@@ -2847,7 +2991,7 @@ def generate_for_take(
                         check_indices=changed_new,
                     )
                 )
-                
+
             # Save the last parsed+canonicalized version (even if it does not pass validation)
             last_parsed_rewrite = {
                 "final_steps": final_steps,
@@ -2866,7 +3010,7 @@ def generate_for_take(
                         "changed_new_indices": sorted(list(changed_new)),
                     },
                 }
- 
+
             last_err = " ; ".join(issues)
 
         except Exception as e:
@@ -2889,7 +3033,6 @@ def generate_for_take(
     }
 
 
-
 def main() -> None:
     args = parse_args()
 
@@ -2908,7 +3051,12 @@ def main() -> None:
 
     # Enable SemRep auto-extension when SemRep resources are loaded (i.e., --include_semrep)
     # and SemRepAutoExtender is available, so we can validate semrep-dependent constraints for generated steps.
-    if bool(getattr(args, "include_semrep", False)) and semrep_map is not None and SemRepAutoExtender is not None and args.semrep_json:
+    if (
+        bool(getattr(args, "include_semrep", False))
+        and semrep_map is not None
+        and SemRepAutoExtender is not None
+        and args.semrep_json
+    ):
         # Prefix ids by backend to avoid confusing mixed provenance in semrep ids
         id_prefix = f"{args.model}_ext"
         semrep_extender = SemRepAutoExtender(
@@ -2941,13 +3089,9 @@ def main() -> None:
     if getattr(args, "take_name", None):
         want = {str(x).strip() for x in (args.take_name or []) if str(x).strip()}
         if want:
+
             def _take_name_of(t: Dict[str, Any]) -> str:
-                return str(
-                    t.get("take_name")
-                    or t.get("name")
-                    or t.get("takeName")
-                    or ""
-                ).strip()
+                return str(t.get("take_name") or t.get("name") or t.get("takeName") or "").strip()
 
             take_ids = [tid for tid in take_ids if _take_name_of(takes.get(tid, {}) or {}) in want]
 
@@ -2964,12 +3108,7 @@ def main() -> None:
         take = takes[tid]
 
         # Try common name fields; keep empty string if missing.
-        take_name = (
-            take.get("take_name")
-            or take.get("name")
-            or take.get("takeName")
-            or ""
-        )
+        take_name = take.get("take_name") or take.get("name") or take.get("takeName") or ""
 
         result = generate_for_take(
             take=take,

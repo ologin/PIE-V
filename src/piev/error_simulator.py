@@ -43,6 +43,7 @@ PHASE_ERROR_RATE_MODEL = {
     "phase_3": 0.14,
 }
 
+
 def phase_rate_multipliers(model: Dict[str, float]) -> Dict[str, float]:
     vals = [float(v) for v in model.values() if isinstance(v, (int, float))]
     if not vals:
@@ -90,11 +91,11 @@ ORDERING_CONSTRAINTS_SAME_OBJECT = [
     ("COMBINE", "ADD"),
     ("ADD", "GET"),
     ("STIR", "POUR"),
-    ("CUT", "GET")
+    ("CUT", "GET"),
 ]
 
-UNLOCK_PREDS = {"GET","TAKE","RETRIEVE","PICK_UP","GRAB","REMOVE"}
-STOP_TOKENS = {"of","in","on","from","to","with","and","or"}
+UNLOCK_PREDS = {"GET", "TAKE", "RETRIEVE", "PICK_UP", "GRAB", "REMOVE"}
+STOP_TOKENS = {"of", "in", "on", "from", "to", "with", "and", "or"}
 
 
 ROLE_VALUE_PRED_RE = re.compile(r"\b([A-Z][a-zA-Z_]*)\s*:\s*([A-Z_]+)\s*\(")
@@ -107,6 +108,7 @@ FUTURE_USE_ROLES = ("Object", "Instrument", "Destination", "Origin", "Coobject")
 # -----------------------------
 # Utility: JSON / CSV loading
 # -----------------------------
+
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -185,24 +187,28 @@ def normalize_step_text(s: Any) -> str:
         return ""
     return " ".join(s.strip().lower().split())
 
+
 def tokens(val: str) -> Set[str]:
     toks = set(re.findall(r"[a-z_]+", val.lower()))
     return {t for t in toks if t not in STOP_TOKENS}
+
 
 def object_tokens(obj: Any) -> Set[str]:
     if not isinstance(obj, str):
         return set()
     return tokens(obj.strip())
 
+
 def required_entities(step: dict) -> Set[str]:
     rtv = step.get("role_to_value") or {}
     out = set()
     if isinstance(rtv, dict):
-        for role in ("Instrument","Object","Coobject"):
+        for role in ("Instrument", "Object", "Coobject"):
             v = rtv.get(role)
             if isinstance(v, str):
                 out |= tokens(v)
     return out
+
 
 def introduced_entities(step: dict) -> Set[str]:
     pred = (step.get("predicate") or "").upper()
@@ -279,6 +285,7 @@ def is_step_essential(
 # Semantic parsing & complexity
 # -----------------------------
 
+
 def semantic_complexity(representation: str) -> float:
     """
     Complexity proxy based on:
@@ -334,7 +341,7 @@ def parse_semantic_representation(rep: str) -> Tuple[Optional[str], Dict[str, st
     if start == -1 or end == -1 or end <= start:
         return predicate, {}
 
-    inside = rep[start + 1:end].strip()
+    inside = rep[start + 1 : end].strip()
     if not inside:
         return predicate, {}
 
@@ -397,6 +404,7 @@ def minmax_normalize(values: Sequence[float]) -> List[float]:
 # Taxonomy block resolution
 # -----------------------------
 
+
 @dataclass
 class TaxNode:
     node_id: int
@@ -406,7 +414,9 @@ class TaxNode:
     unique_id: Optional[int]
 
 
-def build_taxonomy_index(taxonomy_for_scenario: Dict[str, Any]) -> Tuple[Dict[int, TaxNode], Dict[int, int]]:
+def build_taxonomy_index(
+    taxonomy_for_scenario: Dict[str, Any],
+) -> Tuple[Dict[int, TaxNode], Dict[int, int]]:
     """Build indices for a single scenario taxonomy."""
     nodes_by_id: Dict[int, TaxNode] = {}
     leaf_unique_to_node_id: Dict[int, int] = {}
@@ -435,7 +445,9 @@ def build_taxonomy_index(taxonomy_for_scenario: Dict[str, Any]) -> Tuple[Dict[in
             except Exception:
                 unique_id = None
 
-        tn = TaxNode(node_id=node_id, name=name, parent_id=parent_id, is_leaf=is_leaf, unique_id=unique_id)
+        tn = TaxNode(
+            node_id=node_id, name=name, parent_id=parent_id, is_leaf=is_leaf, unique_id=unique_id
+        )
         nodes_by_id[node_id] = tn
 
         if is_leaf and unique_id is not None:
@@ -444,7 +456,9 @@ def build_taxonomy_index(taxonomy_for_scenario: Dict[str, Any]) -> Tuple[Dict[in
     return nodes_by_id, leaf_unique_to_node_id
 
 
-def resolve_top_level_block(node_id: int, nodes_by_id: Dict[int, TaxNode]) -> Tuple[Optional[int], Optional[str], List[str]]:
+def resolve_top_level_block(
+    node_id: int, nodes_by_id: Dict[int, TaxNode]
+) -> Tuple[Optional[int], Optional[str], List[str]]:
     """
     Resolve leaf node to top-level block under scenario root (parent_id == 0).
     Returns (block_id, block_name, path_names_root_to_leaf)
@@ -481,6 +495,7 @@ def resolve_top_level_block(node_id: int, nodes_by_id: Dict[int, TaxNode]) -> Tu
 # Phase assignment using load
 # -----------------------------
 
+
 def assign_phases_by_load(step_loads: List[float]) -> List[str]:
     """Assign phase_1/2/3 by splitting cumulative load into thirds."""
     if not step_loads:
@@ -512,6 +527,7 @@ def assign_phases_by_load(step_loads: List[float]) -> List[str]:
 # Procedure-level risk -> K errors
 # -----------------------------
 
+
 @dataclass
 class ProcRiskFeatures:
     n_steps: int
@@ -520,7 +536,9 @@ class ProcRiskFeatures:
     density_steps_per_min: float
 
 
-def compute_proc_features(step_durations: List[float], step_complexities: List[float]) -> ProcRiskFeatures:
+def compute_proc_features(
+    step_durations: List[float], step_complexities: List[float]
+) -> ProcRiskFeatures:
     n_steps = len(step_durations)
     total_duration_s = float(sum(step_durations)) if step_durations else 0.0
     total_complexity = float(sum(step_complexities)) if step_complexities else 0.0
@@ -560,6 +578,7 @@ def sample_k_errors(
 # -----------------------------
 # Wrong execution parameterization
 # -----------------------------
+
 
 def impact_weight(impact: str) -> float:
     impact = (impact or "").lower()
@@ -642,6 +661,7 @@ def choose_wrong_execution_scope(rng: random.Random, role: str) -> str:
 # Transposition + Deletion guards
 # -----------------------------
 
+
 def violates_ordering_constraints(
     pred_a: Optional[str],
     obj_a: Optional[str],
@@ -667,9 +687,9 @@ def swap_respects_constraints(steps: List[Dict[str, Any]], i: int, j: int) -> bo
         return False
     a, b = (i, j) if i < j else (j, i)
 
-    seg = steps[a:b+1]
+    seg = steps[a : b + 1]
     seg2 = seg[:]  # shallow copy
-    seg2[i-a], seg2[j-a] = seg2[j-a], seg2[i-a]
+    seg2[i - a], seg2[j - a] = seg2[j - a], seg2[i - a]
 
     preds = [((s.get("predicate") or "").upper(), s.get("object_value")) for s in seg2]
 
@@ -679,18 +699,18 @@ def swap_respects_constraints(steps: List[Dict[str, Any]], i: int, j: int) -> bo
             pred_y, obj_y = preds[y]
             if violates_ordering_constraints(pred_x, obj_x, pred_y, obj_y):
                 return False
-    
+
     first_unlock = {}
     for idx, st in enumerate(seg2):
         for ent in introduced_entities(st):
             first_unlock.setdefault(ent, idx)
-    
+
     for idx, st in enumerate(seg2):
         req = required_entities(st)
         for ent in req:
             if ent in first_unlock and idx < first_unlock[ent]:
                 return False
-                
+
     return True
 
 
@@ -768,9 +788,13 @@ def get_transposition_candidates(i: int, steps: List[Dict[str, Any]], window: in
     si = steps[i]
     pred_i = (si.get("predicate") or "").upper()
     block_i = si.get("taxonomy_block_name")
-    
+
     # 1. Prepare identity data for Step I
-    id_i = str(si.get("step_description_id")).strip() if si.get("step_description_id") is not None else None
+    id_i = (
+        str(si.get("step_description_id")).strip()
+        if si.get("step_description_id") is not None
+        else None
+    )
     raw_text_i = si.get("step_description", "")
     text_i = raw_text_i.strip().lower() if isinstance(raw_text_i, str) else ""
     sem_i = si.get("semantic_representation", None)
@@ -786,11 +810,15 @@ def get_transposition_candidates(i: int, steps: List[Dict[str, Any]], window: in
     for j in range(lo, hi + 1):
         if j == i:
             continue
-        
+
         sj = steps[j]
-        
+
         # 2. Prepare identity data for Step J
-        id_j = str(sj.get("step_description_id")).strip() if sj.get("step_description_id") is not None else None
+        id_j = (
+            str(sj.get("step_description_id")).strip()
+            if sj.get("step_description_id") is not None
+            else None
+        )
         raw_text_j = sj.get("step_description", "")
         text_j = raw_text_j.strip().lower() if isinstance(raw_text_j, str) else ""
         sem_j = sj.get("semantic_representation", None)
@@ -806,9 +834,9 @@ def get_transposition_candidates(i: int, steps: List[Dict[str, Any]], window: in
             is_same = True
         if sem_i and sem_j and sem_i == sem_j:
             is_same = True
-            
+
         if is_same:
-            continue # Skip identical steps
+            continue  # Skip identical steps
 
         # 3. Taxonomy and safety
         pred_j = (sj.get("predicate") or "").upper()
@@ -832,13 +860,18 @@ def get_transposition_candidates(i: int, steps: List[Dict[str, Any]], window: in
 
     return candidates
 
-def choose_transposition_partner_from_candidates(rng: random.Random, candidates: List[int]) -> Optional[int]:
+
+def choose_transposition_partner_from_candidates(
+    rng: random.Random, candidates: List[int]
+) -> Optional[int]:
     if not candidates:
         return None
     return rng.choice(candidates)
 
 
-def _step_uses_object_in_roles(step: Dict[str, Any], obj: str, roles: Tuple[str, ...] = FUTURE_USE_ROLES) -> bool:
+def _step_uses_object_in_roles(
+    step: Dict[str, Any], obj: str, roles: Tuple[str, ...] = FUTURE_USE_ROLES
+) -> bool:
     """
     True if 'obj' appears as a token match inside specified semantic roles or matches object_value.
     Token matching avoids substring false positives.
@@ -848,16 +881,16 @@ def _step_uses_object_in_roles(step: Dict[str, Any], obj: str, roles: Tuple[str,
     ot = object_tokens(obj)
     if not ot:
         return False
-    
+
     # direct object_value equality (kept as a strong signal)
     ov = step.get("object_value")
     if isinstance(ov, str) and ov.strip() == obj.strip():
         return True
-    
+
     rtv = step.get("role_to_value", {}) or {}
     if not isinstance(rtv, dict):
         return False
-    
+
     for role in roles:
         v = rtv.get(role)
         if isinstance(v, str) and (ot & tokens(v)):
@@ -884,6 +917,7 @@ def _object_used_soon_after(steps: List[Dict[str, Any]], idx: int, max_lookahead
 
     return False
 
+
 def find_first_future_use_index(
     steps: List[Dict[str, Any]],
     idx: int,
@@ -905,6 +939,7 @@ def find_first_future_use_index(
         if _step_uses_object_in_roles(steps[j], obj, roles=FUTURE_USE_ROLES):
             return j
     return None
+
 
 def compute_unlock_prior_by_predicate(
     takes_intermediate: List[Dict[str, Any]],
@@ -1084,6 +1119,7 @@ def is_guarded_deletion_step(
 # Error event specification
 # -----------------------------
 
+
 def severity_from_roles(roles: List[str], role_to_impact: Dict[str, str]) -> str:
     impacts = [role_to_impact.get(r, "medium").lower() for r in roles]
     if any(i == "high" for i in impacts):
@@ -1103,10 +1139,12 @@ def choose_error_type_for_step(
 ) -> str:
 
     if phase not in PHASE_ERROR_TYPE_PRIORS:
-        raise KeyError(f"Unknown phase='{phase}'. Expected one of: {list(PHASE_ERROR_TYPE_PRIORS.keys())}")
+        raise KeyError(
+            f"Unknown phase='{phase}'. Expected one of: {list(PHASE_ERROR_TYPE_PRIORS.keys())}"
+        )
 
     prior = np.array(PHASE_ERROR_TYPE_PRIORS[phase]["PRIOR_WEIGHTS"], dtype=float)
-    props = prior / float(prior.sum())    
+    props = prior / float(prior.sum())
     modifiers = np.ones_like(props)
 
     if disallow_types:
@@ -1149,7 +1187,6 @@ def choose_error_type_with_retries(
 
     disallow = set(ERROR_TYPES_ORDER) - feasible_types
 
-
     for _ in range(int(max_tries)):
         t = choose_error_type_for_step(
             rng_np=rng_np,
@@ -1171,6 +1208,7 @@ def choose_error_type_with_retries(
 # -----------------------------
 # Main simulation per take
 # -----------------------------
+
 
 def simulate_take(
     rng_np: np.random.Generator,
@@ -1200,9 +1238,10 @@ def simulate_take(
     indexed.sort(key=lambda x: (float(x[1].get("start_time", 0.0) or 0.0), x[0]))
     segments = [seg for _k, seg in indexed]
 
-
     scenario_tax = taxonomy_root.get(scenario, {})
-    nodes_by_id, leaf_unique_to_node_id = build_taxonomy_index(scenario_tax if isinstance(scenario_tax, dict) else {})
+    nodes_by_id, leaf_unique_to_node_id = build_taxonomy_index(
+        scenario_tax if isinstance(scenario_tax, dict) else {}
+    )
 
     steps_out: List[Dict[str, Any]] = []
     complexities: List[float] = []
@@ -1223,7 +1262,9 @@ def simulate_take(
 
         comp = semantic_complexity(rep) if isinstance(rep, str) else 0.0
 
-        predicate, role_to_value = parse_semantic_representation(rep) if isinstance(rep, str) else (None, {})
+        predicate, role_to_value = (
+            parse_semantic_representation(rep) if isinstance(rep, str) else (None, {})
+        )
         predicate = predicate.upper() if isinstance(predicate, str) else predicate
         obj_value = extract_main_object(role_to_value)
 
@@ -1309,6 +1350,7 @@ def enforce_max_consecutive(selected_indices: List[int], max_consecutive: int) -
         else:
             run = 1
     return True
+
 
 def max_consecutive_run_from_set(idxs: Set[int]) -> int:
     """Max length of consecutive run in a set of ints."""
@@ -1399,7 +1441,7 @@ def pick_nonviolating_type(
         # violates the consecutive cap, we must reject ALL types including transposition.
         if would_violate_consecutive_cap(affected_set, {int(anchor_idx)}, cap):
             continue
-         # Anchor feasibility already ensured here; for transposition the partner is checked later.
+        # Anchor feasibility already ensured here; for transposition the partner is checked later.
         ok_types.add(t)
 
     if not ok_types:
@@ -1500,15 +1542,15 @@ def apply_event_spec(
             strategies += ["replace_step_semantically_related"]
 
         event["spec"] = {
-           "original_predicate": predicate,
-           "original_object": object_value,          
-           "substitution_strategies": strategies,
-           "preference": {
-               # optional: you already enforce same-block for transposition;
-               # for substitution you can *prefer* same taxonomy block, but not hard constrain
-               "prefer_same_taxonomy_block": True
-           },
-           "notes": "policy-only substitution; no role-argument swaps here (those belong to wrong_execution)"
+            "original_predicate": predicate,
+            "original_object": object_value,
+            "substitution_strategies": strategies,
+            "preference": {
+                # optional: you already enforce same-block for transposition;
+                # for substitution you can *prefer* same taxonomy block, but not hard constrain
+                "prefer_same_taxonomy_block": True
+            },
+            "notes": "policy-only substitution; no role-argument swaps here (those belong to wrong_execution)",
         }
         return
 
@@ -1600,7 +1642,8 @@ def build_error_events_for_take(
                 window=int(transposition_window),
             )
             transposition_candidates = [
-                j for j in transposition_candidates
+                j
+                for j in transposition_candidates
                 if j not in selected_set
                 and j not in used_anchor_indices
                 and j not in transposition_involved_indices
@@ -1662,17 +1705,25 @@ def build_error_events_for_take(
         partner_index: Optional[int] = None
         if etype == "transposition":
             for _ in range(10):
-                cand = choose_transposition_partner_from_candidates(rng_py, transposition_candidates)
+                cand = choose_transposition_partner_from_candidates(
+                    rng_py, transposition_candidates
+                )
                 if cand is None:
                     break
 
                 add_set = affected_indices_for_event("transposition", step_idx, int(cand))
-                if would_violate_consecutive_cap(affected_set, add_set, int(max_consecutive_errors)):
+                if would_violate_consecutive_cap(
+                    affected_set, add_set, int(max_consecutive_errors)
+                ):
                     continue
 
                 a, b = int(step_idx), int(cand)
                 pair = (min(a, b), max(a, b))
-                if a in transposition_involved_indices or b in transposition_involved_indices or pair in transposition_pairs:
+                if (
+                    a in transposition_involved_indices
+                    or b in transposition_involved_indices
+                    or pair in transposition_pairs
+                ):
                     continue
 
                 partner_index = int(cand)
@@ -1721,7 +1772,9 @@ def build_error_events_for_take(
             etype = etype3
             partner_index = None
             add_set_final = affected_indices_for_event(str(etype), step_idx, partner_index)
-            if would_violate_consecutive_cap(affected_set, add_set_final, int(max_consecutive_errors)):
+            if would_violate_consecutive_cap(
+                affected_set, add_set_final, int(max_consecutive_errors)
+            ):
                 continue
 
         # Commit event
@@ -1767,15 +1820,15 @@ def build_error_events_for_take(
         )
 
         # Populate alternate deletion candidates (same phase, nearby, preferably non-essential).
-        if etype == 'deletion':
-            src_phase = steps[step_idx].get('phase')
+        if etype == "deletion":
+            src_phase = steps[step_idx].get("phase")
             cand = []
-            for j in (step_idx-2, step_idx-1, step_idx+1, step_idx+2):
-                if 0 <= j < n_steps and steps[j].get('phase') == src_phase and j != step_idx:
-                     # Avoid proposing deletion of steps that are heavily referenced later.
-                     if not is_step_essential(steps, j, min_future_refs=2):
-                         cand.append(int(j))
-            event['alternate_src_indices'] = cand[:4]
+            for j in (step_idx - 2, step_idx - 1, step_idx + 1, step_idx + 2):
+                if 0 <= j < n_steps and steps[j].get("phase") == src_phase and j != step_idx:
+                    # Avoid proposing deletion of steps that are heavily referenced later.
+                    if not is_step_essential(steps, j, min_future_refs=2):
+                        cand.append(int(j))
+            event["alternate_src_indices"] = cand[:4]
         events.append(event)
 
     # Debug log
@@ -1796,7 +1849,7 @@ def build_error_events_for_take(
     for i, st in enumerate(steps):
         ph = st.get("phase", "phase_1")
         sd = st.get("step_description", "")
-        prefix = f"[Step {i+1:02d} / {total_steps}] ({ph})"
+        prefix = f"[Step {i + 1:02d} / {total_steps}] ({ph})"
         if i in error_by_index:
             labels: List[str] = []
             seen: Set[str] = set()
@@ -1810,7 +1863,7 @@ def build_error_events_for_take(
                     spec = ev.get("spec", {}) or {}
                     src = spec.get("transposition_source")
                     tgt = spec.get("transposition_target")
-                    lab = f"transposition({(src+1) if isinstance(src,int) else '?'}->{(tgt+1) if isinstance(tgt,int) else '?'})"
+                    lab = f"transposition({(src + 1) if isinstance(src, int) else '?'}->{(tgt + 1) if isinstance(tgt, int) else '?'})"
                     if lab not in seen:
                         labels.append(lab)
                         seen.add(lab)
@@ -1843,24 +1896,54 @@ def build_error_events_for_take(
 # Entry point
 # -----------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="PIE-V error simulator (policy-only).")
     parser.add_argument("--split50", required=True, help="Path to split_50.json")
     parser.add_argument("--vocab_csv", required=True, help="Path to split_50_vocabulary.csv")
-    parser.add_argument("--semrep_json", required=True, help="Path to semantic_representations_split_50.json")
+    parser.add_argument(
+        "--semrep_json", required=True, help="Path to semantic_representations_split_50.json"
+    )
     parser.add_argument("--roles_csv", required=True, help="Path to semantic_roles.csv")
-    parser.add_argument("--roles_by_predicate_csv", required=True, help="Path to semantic_roles_by_predicate.csv")
+    parser.add_argument(
+        "--roles_by_predicate_csv", required=True, help="Path to semantic_roles_by_predicate.csv"
+    )
     parser.add_argument("--keystep", required=True, help="Path to keystep_train.json")
     parser.add_argument("--out", required=True, help="Path to output JSON")
     parser.add_argument("--seed", type=int, required=True, help="Random seed for reproducibility")
-    parser.add_argument("--wc", type=float, default=0.6, help="Weight for normalized complexity in step_load")
-    parser.add_argument("--wt", type=float, default=0.4, help="Weight for normalized duration in step_load")
-    parser.add_argument("--max_errors", type=int, default=5, help="Hard cap on number of errors per take")
-    parser.add_argument("--max_consecutive_errors", type=int, default=3, help="Max consecutive error steps")
-    parser.add_argument("--transposition_window", type=int, default=6, help="Local window size for transposition partner search")
-    parser.add_argument("--deletion_guard_threshold", type=float, default=0.8, help="Guard: disallow deletion if learned unlock prior >= threshold and object used soon after")
-    parser.add_argument("--deletion_guard_max_lookahead", type=int, default=10, help="Lookahead for deletion guard")
-    parser.add_argument("--deletion_guard_min_support", type=int, default=50, help="Min predicate support for applying deletion guard")
+    parser.add_argument(
+        "--wc", type=float, default=0.6, help="Weight for normalized complexity in step_load"
+    )
+    parser.add_argument(
+        "--wt", type=float, default=0.4, help="Weight for normalized duration in step_load"
+    )
+    parser.add_argument(
+        "--max_errors", type=int, default=5, help="Hard cap on number of errors per take"
+    )
+    parser.add_argument(
+        "--max_consecutive_errors", type=int, default=3, help="Max consecutive error steps"
+    )
+    parser.add_argument(
+        "--transposition_window",
+        type=int,
+        default=6,
+        help="Local window size for transposition partner search",
+    )
+    parser.add_argument(
+        "--deletion_guard_threshold",
+        type=float,
+        default=0.8,
+        help="Guard: disallow deletion if learned unlock prior >= threshold and object used soon after",
+    )
+    parser.add_argument(
+        "--deletion_guard_max_lookahead", type=int, default=10, help="Lookahead for deletion guard"
+    )
+    parser.add_argument(
+        "--deletion_guard_min_support",
+        type=int,
+        default=50,
+        help="Min predicate support for applying deletion guard",
+    )
     args = parser.parse_args()
 
     if args.wc < 0.0 or args.wt < 0.0:

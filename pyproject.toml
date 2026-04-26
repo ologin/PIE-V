@@ -71,3 +71,13 @@ where = ["src"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[tool.ruff.lint.per-file-ignores]
+"baselines/freeform/llm_error_plan_freeform_writer.py" = ["E402"]
+"prep/**/*.py" = ["E402"]
+"src/piev/error_instruction_judge.py" = ["E402"]
+"src/piev/error_instruction_writer.py" = ["E402"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -23,6 +23,7 @@ Usage:
     --rewrite data/examples/split_50_error_instructions_openai.json
 
 """
+
 from __future__ import annotations
 import argparse
 import hashlib
@@ -46,7 +47,9 @@ if str(SRC_DIR) not in sys.path:
 from piev.config import REPO_ROOT
 
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-5.2")
-DEFAULT_BASE_SEMREP_JSON = REPO_ROOT / "data" / "resources" / "semantic_representations_split_50.json"
+DEFAULT_BASE_SEMREP_JSON = (
+    REPO_ROOT / "data" / "resources" / "semantic_representations_split_50.json"
+)
 DEFAULT_OUT_DIR = REPO_ROOT / "data" / "resources"
 
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "15"))
@@ -111,13 +114,34 @@ OUTPUT_SCHEMA = {
     "additionalProperties": False,
 }
 
+
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Wrapper: extend base semantic representations with new steps from rewrites.")
-    p.add_argument("--rewrite", required=True, help="Path to split_50_error_instructions_{openai|qwen}.json",)
-    p.add_argument("--base_semrep", default=str(DEFAULT_BASE_SEMREP_JSON), help="Base semantic representation JSON.")
-    p.add_argument("--out_dir", default=str(DEFAULT_OUT_DIR), help="Directory for semantic_representations_split_50_{tag}_extended.json.")
-    p.add_argument("--limit_steps", type=int, default=0, help="Optional limit of NEW steps to generate (0=no limit)")
+    p = argparse.ArgumentParser(
+        description="Wrapper: extend base semantic representations with new steps from rewrites."
+    )
+    p.add_argument(
+        "--rewrite",
+        required=True,
+        help="Path to split_50_error_instructions_{openai|qwen}.json",
+    )
+    p.add_argument(
+        "--base_semrep",
+        default=str(DEFAULT_BASE_SEMREP_JSON),
+        help="Base semantic representation JSON.",
+    )
+    p.add_argument(
+        "--out_dir",
+        default=str(DEFAULT_OUT_DIR),
+        help="Directory for semantic_representations_split_50_{tag}_extended.json.",
+    )
+    p.add_argument(
+        "--limit_steps",
+        type=int,
+        default=0,
+        help="Optional limit of NEW steps to generate (0=no limit)",
+    )
     return p.parse_args()
+
 
 def infer_tag(rewrite_path: Path) -> str:
     """
@@ -131,16 +155,22 @@ def infer_tag(rewrite_path: Path) -> str:
         raise ValueError(f"Cannot infer tag from rewrite filename: {name}")
     return m.group(1)
 
+
 def backoff_sleep(attempt: int) -> None:
-    time.sleep(min(30, 2 ** attempt))
+    time.sleep(min(30, 2**attempt))
+
 
 def is_fatal_request_error(e: Exception) -> bool:
     s = str(e)
-    return ("Error code: 400" in s) or ("invalid_request_error" in s) or ("invalid_json_schema" in s)
+    return (
+        ("Error code: 400" in s) or ("invalid_request_error" in s) or ("invalid_json_schema" in s)
+    )
+
 
 def sha1_16(s: str) -> str:
     h = hashlib.sha1(s.encode("utf-8")).hexdigest()
     return h[:16]
+
 
 def load_json_dict(path: Path) -> Dict:
     if not path.exists():
@@ -151,8 +181,10 @@ def load_json_dict(path: Path) -> Dict:
     except Exception:
         return {}
 
+
 def normalize_step_text(s: str) -> str:
     return " ".join((s or "").strip().split())
+
 
 def iter_rewrite_steps(rewrite_obj: Dict) -> List[str]:
     steps: List[str] = []
@@ -172,9 +204,11 @@ def iter_rewrite_steps(rewrite_obj: Dict) -> List[str]:
                     steps.append(normalize_step_text(x))
     return steps
 
+
 def chunk(items: List[Tuple[str, str]], n: int):
     for i in range(0, len(items), n):
-        yield items[i:i+n]
+        yield items[i : i + n]
+
 
 def main() -> None:
     args = parse_args()
@@ -282,7 +316,9 @@ def main() -> None:
 
                 missing = [sid for sid in expected.keys() if sid not in by_id]
                 if missing:
-                    print(f"[Batch {batch_counter}] Missing ids: {len(missing)} (up to 10): {missing[:10]}")
+                    print(
+                        f"[Batch {batch_counter}] Missing ids: {len(missing)} (up to 10): {missing[:10]}"
+                    )
 
                 saved = 0
                 for sid, sd in expected.items():
@@ -299,7 +335,9 @@ def main() -> None:
 
                 out_path.parent.mkdir(parents=True, exist_ok=True)
                 out_path.write_text(json.dumps(out, ensure_ascii=False, indent=4), encoding="utf-8")
-                print(f"[Batch {batch_counter}] Saved {saved}/{len(batch)}. Total entries: {len(out)}")
+                print(
+                    f"[Batch {batch_counter}] Saved {saved}/{len(batch)}. Total entries: {len(out)}"
+                )
                 break
 
             except Exception as e:
@@ -316,6 +354,7 @@ def main() -> None:
     print("Done.")
     print(f"Output: {out_path}")
     print(f"Total entries: {len(out)}")
+
 
 if __name__ == "__main__":
     main()

@@ -46,15 +46,29 @@ def load_settings(config_path: str | Path | None = None) -> Settings:
     models = raw.get("models", {})
 
     return Settings(
-        egoexo4d_root=Path(os.getenv("PIEV_EGOEXO4D_ROOT", _resolve_repo_path(paths["egoexo4d_root"]))),
-        outputs_root=Path(os.getenv("PIEV_OUTPUTS_ROOT", _resolve_repo_path(paths["outputs_root"]))),
-        resources_root=Path(os.getenv("PIEV_RESOURCES_ROOT", _resolve_repo_path(paths["resources_root"]))),
-        annotations_root=Path(os.getenv("PIEV_ANNOTATIONS_ROOT", _resolve_repo_path(paths["annotations_root"]))),
+        egoexo4d_root=Path(
+            os.getenv("PIEV_EGOEXO4D_ROOT", _resolve_repo_path(paths["egoexo4d_root"]))
+        ),
+        outputs_root=Path(
+            os.getenv("PIEV_OUTPUTS_ROOT", _resolve_repo_path(paths["outputs_root"]))
+        ),
+        resources_root=Path(
+            os.getenv("PIEV_RESOURCES_ROOT", _resolve_repo_path(paths["resources_root"]))
+        ),
+        annotations_root=Path(
+            os.getenv("PIEV_ANNOTATIONS_ROOT", _resolve_repo_path(paths["annotations_root"]))
+        ),
         videos_root=Path(os.getenv("PIEV_VIDEO_ROOT", _resolve_repo_path(paths["videos_root"]))),
         frames_root=Path(os.getenv("PIEV_FRAMES_ROOT", _resolve_repo_path(paths["frames_root"]))),
-        split50_path=Path(os.getenv("PIEV_SPLIT50_PATH", _resolve_repo_path(paths["split50_path"]))),
-        keystep_train_path=Path(os.getenv("PIEV_KEYSTEP_TRAIN_PATH", _resolve_repo_path(paths["keystep_train_path"]))),
-        take_names_path=Path(os.getenv("PIEV_TAKE_NAMES_PATH", _resolve_repo_path(paths["take_names_path"]))),
+        split50_path=Path(
+            os.getenv("PIEV_SPLIT50_PATH", _resolve_repo_path(paths["split50_path"]))
+        ),
+        keystep_train_path=Path(
+            os.getenv("PIEV_KEYSTEP_TRAIN_PATH", _resolve_repo_path(paths["keystep_train_path"]))
+        ),
+        take_names_path=Path(
+            os.getenv("PIEV_TAKE_NAMES_PATH", _resolve_repo_path(paths["take_names_path"]))
+        ),
         openai_model=os.getenv("OPENAI_MODEL", models.get("openai_model", "gpt-5.2")),
         qwen_text_model=os.getenv(
             "QWEN_TEXT_MODEL",

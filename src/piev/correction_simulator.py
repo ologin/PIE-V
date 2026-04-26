@@ -38,14 +38,24 @@ BASE_DETECT: Dict[str, Dict[str, float]] = {
 }
 
 # Must match error_simulator
-UNLOCK_PREDS = {"GET","TAKE","RETRIEVE","PICK_UP","GRAB","REMOVE"}
+UNLOCK_PREDS = {"GET", "TAKE", "RETRIEVE", "PICK_UP", "GRAB", "REMOVE"}
 
 # For object token matching
-STOP_TOKENS = {"of","in","on","from","to","with","and","or"}
+STOP_TOKENS = {"of", "in", "on", "from", "to", "with", "and", "or"}
 
 # “Prep” actions: if deleted and the same object is used soon after, we should fix before first use.
 PREP_PREDS = {
-    "CUT","CHOP","SLICE","DICE","MINCE","SHRED","GRATE","PEEL","TRIM","SEED","CORE"
+    "CUT",
+    "CHOP",
+    "SLICE",
+    "DICE",
+    "MINCE",
+    "SHRED",
+    "GRATE",
+    "PEEL",
+    "TRIM",
+    "SEED",
+    "CORE",
 }
 
 # Roles in which “use of an object” is meaningful downstream
@@ -118,16 +128,27 @@ COMMUTATIVE_TRANSPOSE_PAIRS = {
 }
 
 
-# Actions that are minor/repetitive and usually don't require corrections 
+# Actions that are minor/repetitive and usually don't require corrections
 # if they are slightly delayed, skipped, or swapped.
 TRIVIAL_PREDICATES = {
-    "CLEAN", "WIPE", "STIR", "PLACE", "ROLL", "CHECK", "DRY", 
-    "WASH_HANDS", "CLEAN_HANDS", "WIPE_HANDS", "DISPOSE", "ARRANGE"
+    "CLEAN",
+    "WIPE",
+    "STIR",
+    "PLACE",
+    "ROLL",
+    "CHECK",
+    "DRY",
+    "WASH_HANDS",
+    "CLEAN_HANDS",
+    "WIPE_HANDS",
+    "DISPOSE",
+    "ARRANGE",
 }
 
 # -----------------------------
 # Helpers
 # -----------------------------
+
 
 def clamp01(x: float) -> float:
     if x < 0.0:
@@ -186,6 +207,7 @@ def normalize_step_text(s: Any) -> str:
         return ""
     return " ".join(s.strip().lower().split())
 
+
 def _tokens(val: Any) -> set:
     """Tokenize (lowercase alpha/_), drop stop tokens. Mirrors error_simulator style."""
     if not isinstance(val, str):
@@ -193,10 +215,12 @@ def _tokens(val: Any) -> set:
     toks = set(re.findall(r"[a-z_]+", val.lower()))
     return {t for t in toks if t and t not in STOP_TOKENS}
 
+
 def _object_tokens(obj: Optional[str]) -> set:
     if not isinstance(obj, str):
         return set()
     return _tokens(obj.strip())
+
 
 def _step_uses_object_tokens(step: Dict[str, Any], obj: str) -> bool:
     """
@@ -221,6 +245,7 @@ def _step_uses_object_tokens(step: Dict[str, Any], obj: str) -> bool:
                 return True
 
     return False
+
 
 def find_first_future_use_index_tokens(
     steps: List[Dict[str, Any]],
@@ -264,7 +289,9 @@ def _canonical_obj_string(step: Dict[str, Any]) -> Optional[str]:
     return s or None
 
 
-def _step_uses_object_in_roles(step: Dict[str, Any], obj: Any, roles: Tuple[str, ...] = FUTURE_USE_ROLES) -> bool:
+def _step_uses_object_in_roles(
+    step: Dict[str, Any], obj: Any, roles: Tuple[str, ...] = FUTURE_USE_ROLES
+) -> bool:
     """
     True if obj matches step['object_value'] exactly OR appears token-wise in role_to_value for roles.
     This is the “object used” notion we want to align with error_simulator.
@@ -329,7 +356,7 @@ def object_reacquired_before_index(
             for role in FUTURE_USE_ROLES:
                 v = rtv.get(role)
                 if isinstance(v, str) and (_tokens(obj) & _tokens(v)):
-                    return True        
+                    return True
     return False
 
 
@@ -489,7 +516,7 @@ def get_transposition_pair(err: Dict[str, Any]) -> Tuple[Optional[int], Optional
 
 def deletion_is_redundant(steps: List[Dict[str, Any]], err_step_idx: int) -> bool:
     """
-    Checks if a deleted step is effectively redundant because the 
+    Checks if a deleted step is effectively redundant because the
     same action occurs in the immediate vicinity (regional or future).
     """
     if err_step_idx < 0 or err_step_idx >= len(steps):
@@ -501,12 +528,12 @@ def deletion_is_redundant(steps: List[Dict[str, Any]], err_step_idx: int) -> boo
     obj0_str = obj0.strip() if isinstance(obj0, str) and obj0.strip() else _canonical_obj_string(s0)
     sid0 = s0.get("step_description_id")
 
-    # REGIONAL SEARCH: Look +/- 5 steps. 
+    # REGIONAL SEARCH: Look +/- 5 steps.
     # If the same action exists nearby, skipping one instance is not a critical error.
     search_range = range(max(0, err_step_idx - 5), min(len(steps), err_step_idx + 6))
-    
+
     for j in search_range:
-        if j == err_step_idx: 
+        if j == err_step_idx:
             continue
         sj = steps[j]
         if (sj.get("predicate") or "").upper() != pred0:
@@ -526,10 +553,13 @@ def deletion_is_redundant(steps: List[Dict[str, Any]], err_step_idx: int) -> boo
         if sid0 is not None and sidj is not None and str(sidj) == str(sid0):
             return True
         # Fallback to text check if ID is missing
-        if normalize_step_text(sj.get("step_description")) == normalize_step_text(s0.get("step_description")):
+        if normalize_step_text(sj.get("step_description")) == normalize_step_text(
+            s0.get("step_description")
+        ):
             return True
 
     return False
+
 
 def transposition_is_commutative_add_add(steps: List[Dict[str, Any]], a: int, b: int) -> bool:
     """Guard: transposition between ADD and ADD is often harmless; skip correction."""
@@ -543,6 +573,7 @@ def transposition_is_commutative_add_add(steps: List[Dict[str, Any]], a: int, b:
 # -----------------------------
 # Candidate selection / one correction per detect step
 # -----------------------------
+
 
 def pick_one_correction_per_detect_step(
     candidates: List[Dict[str, Any]],
@@ -561,10 +592,15 @@ def pick_one_correction_per_detect_step(
     for d_idx, group in sorted(by_detect.items(), key=lambda x: x[0]):
 
         def key_fn(c: Dict[str, Any]) -> Tuple[int, int, int, int, str]:
-            forced = 1 if c.get("correction_type") in {
-                "reacquire_missing_object_before_use",
-                "perform_missed_step_before_first_use",
-            } else 0            
+            forced = (
+                1
+                if c.get("correction_type")
+                in {
+                    "reacquire_missing_object_before_use",
+                    "perform_missed_step_before_first_use",
+                }
+                else 0
+            )
             sev_r = severity_rank(c.get("severity", "low"))
             ess = 1 if c.get("is_essential", False) else 0
             pred = c.get("predicate")
@@ -598,9 +634,10 @@ def pick_one_correction_per_detect_step(
 
     return selected
 
+
 # Maximum steps allowed between error and detection for a "fix" to remain logical.
 # If a missed step isn't caught within 3 steps, performing it 'now' usually makes no sense.
-MAX_DELETION_REPAIR_LATENCY = 3 
+MAX_DELETION_REPAIR_LATENCY = 3
 
 # For transpositions, if too many steps passed, the sequence is too corrupted to 'restore order'.
 MAX_TRANSPOSITION_REPAIR_LATENCY = 4
@@ -609,14 +646,12 @@ MAX_TRANSPOSITION_REPAIR_LATENCY = 4
 # Correction synthesis
 # -----------------------------
 
+
 def propose_correction_for_error(
-    rng: random.Random, 
-    take_uid: str, 
-    err: Dict[str, Any], 
-    steps: List[Dict[str, Any]]
+    rng: random.Random, take_uid: str, err: Dict[str, Any], steps: List[Dict[str, Any]]
 ) -> Optional[Dict[str, Any]]:
     """
-    Evaluates an error and synthesizes a structured correction, 
+    Evaluates an error and synthesizes a structured correction,
     applying semantic, temporal, and redundancy guards.
     """
     err_type = str(err.get("type") or err.get("error_type") or "").lower().strip()
@@ -652,7 +687,9 @@ def propose_correction_for_error(
             ):
                 return None
 
-            detect_idx = max(0, j - 1)  # log line “after step detect_idx”, correction happens before step j
+            detect_idx = max(
+                0, j - 1
+            )  # log line “after step detect_idx”, correction happens before step j
             L = max(0, detect_idx - err_step_idx)
             targets_error_id = str(err.get("event_id") or "").strip()
 
@@ -664,7 +701,9 @@ def propose_correction_for_error(
                 "latency_steps": int(L),
                 "correction_type": "reacquire_missing_object_before_use",
                 "insert_before_step_index": int(j),
-                "missing_object": obj_for_matching if obj_for_matching is not None else object_value,
+                "missing_object": obj_for_matching
+                if obj_for_matching is not None
+                else object_value,
                 "missing_from_step_index": int(err_step_idx),
                 "_error_step_index": int(err_step_idx),
                 "_priority_meta": {
@@ -716,9 +755,9 @@ def propose_correction_for_error(
     # Filter out trivial actions (cleaning, stirring, etc.) for sequence errors
     if predicate in TRIVIAL_PREDICATES:
         if err_type in {"deletion", "transposition"}:
-            return None # Do not correct minor sequencing shifts for low-stakes actions
+            return None  # Do not correct minor sequencing shifts for low-stakes actions
         if err_type == "wrong_execution" and rng.random() > 0.3:
-            return None # Reduce corrections for minor slips on trivial actions
+            return None  # Reduce corrections for minor slips on trivial actions
 
     # Redundant deletions (repeating an action nearby)
     if err_type == "deletion" and deletion_is_redundant(steps, err_step_idx):
@@ -732,7 +771,10 @@ def propose_correction_for_error(
             if transposition_is_commutative_add_add(steps, a, b):
                 return None
             # Check if any step in the swap pair is trivial
-            pa, pb = (steps[a].get("predicate") or "").upper(), (steps[b].get("predicate") or "").upper()
+            pa, pb = (
+                (steps[a].get("predicate") or "").upper(),
+                (steps[b].get("predicate") or "").upper(),
+            )
             if pa in TRIVIAL_PREDICATES or pb in TRIVIAL_PREDICATES:
                 return None
 
@@ -740,30 +782,36 @@ def propose_correction_for_error(
 
     # Calculate probability of detection based on severity and load
     p_detect = compute_detect_prob(
-        err_type=err_type, phase_b=phase_b, severity=severity,
-        is_essential=is_essential, predicate=predicate, step_load=step_load
+        err_type=err_type,
+        phase_b=phase_b,
+        severity=severity,
+        is_essential=is_essential,
+        predicate=predicate,
+        step_load=step_load,
     )
     if rng.random() > p_detect:
         return None
 
     # Latency calculation
     L = sample_latency_steps(rng, err_type)
-    
+
     # Precondition triggers (does the next step force us to notice the error?)
-    min_L = precondition_trigger_min_latency(steps, err_step_idx, predicate, object_value, lookahead=5)
+    min_L = precondition_trigger_min_latency(
+        steps, err_step_idx, predicate, object_value, lookahead=5
+    )
     if min_L is not None:
         L = min(L, min_L)
-    
+
     detect_idx = min(err_step_idx + L, len(steps) - 1)
 
     # --- 3. TEMPORAL & BLOCK CONSTRAINTS ---
 
     # Temporal Window: Prevent "zombie corrections" happening too late
     if err_type == "deletion" and L > MAX_DELETION_REPAIR_LATENCY:
-        return None # Too late to perform the missed step logically
-    
+        return None  # Too late to perform the missed step logically
+
     if err_type == "transposition" and L > MAX_TRANSPOSITION_REPAIR_LATENCY:
-        return None # Sequence is too far gone to restore order simply
+        return None  # Sequence is too far gone to restore order simply
 
     # Block Guard: Detection must stay within the same functional block for sequence fixes
     if err_type in {"deletion", "transposition"}:
@@ -811,17 +859,19 @@ def propose_correction_for_error(
     # Assemble correction record
     targets_error_id = str(err.get("event_id") or "").strip()
     correction = {
-        "correction_id": "", # Filled by caller
+        "correction_id": "",  # Filled by caller
         "targets_error_id": targets_error_id,
         "targets_error_type": err_type,
         "detect_at_step_index": int(detect_idx),
         "latency_steps": int(L),
         "correction_type": c_type,
-        "_error_step_index": int(err_step_idx)
+        "_error_step_index": int(err_step_idx),
     }
-    if rb is not None: correction["rollback_steps"] = int(rb)
-    if redo is not None: correction["redo_step_index"] = int(redo)
-    
+    if rb is not None:
+        correction["rollback_steps"] = int(rb)
+    if redo is not None:
+        correction["redo_step_index"] = int(redo)
+
     # For transpositions, store the pair for the LLM
     if err_type == "transposition" and c_type == "restore_order":
         pair = get_transposition_pair(err)
@@ -835,19 +885,19 @@ def propose_correction_for_error(
     }
 
     # Add a compact intent string to guide LLM writer/judge.
-    ctype = correction.get('correction_type')
+    ctype = correction.get("correction_type")
     intent = None
-    if ctype == 'undo_extra_step':
-        intent = 'Undo the extra inserted step so the procedure can continue.'
-    elif ctype == 'stop_and_fix':
-        intent = 'Stop, fix the wrong execution, and redo the intended action correctly.'
-    elif ctype == 'rollback_and_redo':
-        intent = 'Rollback the substituted action and redo the original intended step.'
-    elif ctype == 'restore_order':
-        intent = 'Restore a logically feasible order for the transposed steps.'
+    if ctype == "undo_extra_step":
+        intent = "Undo the extra inserted step so the procedure can continue."
+    elif ctype == "stop_and_fix":
+        intent = "Stop, fix the wrong execution, and redo the intended action correctly."
+    elif ctype == "rollback_and_redo":
+        intent = "Rollback the substituted action and redo the original intended step."
+    elif ctype == "restore_order":
+        intent = "Restore a logically feasible order for the transposed steps."
     else:
-        intent = 'Apply a minimal fix so later steps remain feasible.'
-    correction['intent'] = intent
+        intent = "Apply a minimal fix so later steps remain feasible."
+    correction["intent"] = intent
     return correction
 
 
@@ -879,7 +929,9 @@ def simulate_corrections_for_take(
     selected = pick_one_correction_per_detect_step(candidates, steps)
 
     # Assign stable correction ids per take
-    for idx, c in enumerate(sorted(selected, key=lambda x: (x["detect_at_step_index"], str(x["targets_error_id"])))):
+    for idx, c in enumerate(
+        sorted(selected, key=lambda x: (x["detect_at_step_index"], str(x["targets_error_id"])))
+    ):
         c["correction_id"] = f"{take_uid}_corr_{idx}"
 
         # Strip helper fields to keep output minimal
@@ -894,6 +946,7 @@ def simulate_corrections_for_take(
 # -----------------------------
 # Log injection
 # -----------------------------
+
 
 def format_correction_log_line(
     corr_number_1based: int,
@@ -910,14 +963,14 @@ def format_correction_log_line(
     if ctype in {"stop_and_fix", "rollback_and_redo"}:
         redo = correction.get("redo_step_index", None)
         if isinstance(redo, int):
-            suffix = f"-> redo Step {redo+1:02d}"
+            suffix = f"-> redo Step {redo + 1:02d}"
         else:
             suffix = "-> redo step"
 
     elif ctype == "perform_missed_step_now":
         redo = correction.get("redo_step_index", None)
         if isinstance(redo, int):
-            suffix = f"-> do missed Step {redo+1:02d} now"
+            suffix = f"-> do missed Step {redo + 1:02d} now"
         else:
             suffix = "-> do missed step now"
 
@@ -928,25 +981,25 @@ def format_correction_log_line(
         pair = correction.get("restore_order_pair")
         if isinstance(pair, list) and len(pair) == 2 and all(isinstance(x, int) for x in pair):
             a, b = pair[0], pair[1]
-            suffix = f"-> restore order between Steps {a+1:02d} and {b+1:02d}"
+            suffix = f"-> restore order between Steps {a + 1:02d} and {b + 1:02d}"
         else:
             suffix = "-> restore correct step order"
 
     elif ctype == "reacquire_missing_object_before_use":
         ins = correction.get("insert_before_step_index", None)
         if isinstance(ins, int):
-            suffix = f"-> reacquire before Step {ins+1:02d}"
+            suffix = f"-> reacquire before Step {ins + 1:02d}"
         else:
             suffix = "-> reacquire before first use"
     elif ctype == "perform_missed_step_before_first_use":
         ins = correction.get("insert_before_step_index", None)
         if isinstance(ins, int):
-            suffix = f"-> do missed step before Step {ins+1:02d}"
+            suffix = f"-> do missed step before Step {ins + 1:02d}"
         else:
             suffix = "-> do missed step before first use"
 
     return (
-        f"[Corr {corr_number_1based:02d} after Step {detect_idx+1:02d}] "
+        f"[Corr {corr_number_1based:02d} after Step {detect_idx + 1:02d}] "
         f"({phase}) CORRECTION for {cid} {etype}: {ctype} {suffix}"
     )
 
@@ -990,13 +1043,15 @@ def inject_corrections_into_logs(
             phase = str(steps[i].get("phase", "phase_2")) if 0 <= i < len(steps) else "phase_2"
             for c in by_detect[i]:
                 corr_counter += 1
-                out_lines.append(format_correction_log_line(
-                    corr_number_1based=corr_counter,
-                    detect_idx=i,
-                    phase=phase,
-                    correction=c,
-                    steps=steps,
-                ))
+                out_lines.append(
+                    format_correction_log_line(
+                        corr_number_1based=corr_counter,
+                        detect_idx=i,
+                        phase=phase,
+                        correction=c,
+                        steps=steps,
+                    )
+                )
 
     take_payload["simulation_log_lines"] = out_lines
     take_payload["simulation_log"] = "\n".join(out_lines)
@@ -1006,8 +1061,11 @@ def inject_corrections_into_logs(
 # CLI
 # -----------------------------
 
+
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Add structured correction plans to an error plan JSON.")
+    p = argparse.ArgumentParser(
+        description="Add structured correction plans to an error plan JSON."
+    )
     p.add_argument("--input", required=True, help="Path to split_50_error_plan.json")
     p.add_argument("--out", required=True, help="Output path for extended JSON with corrections")
     p.add_argument("--seed", type=int, default=123, help="Random seed for reproducibility")
@@ -1084,7 +1142,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 
 
 # Example:

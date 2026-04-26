@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  public-release-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package and development tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Check Python formatting
+        run: python -m ruff format --check .
+
+      - name: Lint Python sources
+        run: python -m ruff check .
+
+      - name: Compile Python sources
+        run: python -m compileall -q src prep analysis baselines examples/video_generation/scripts docs
+
+      - name: Run tests
+        run: python -m pytest -q

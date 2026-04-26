@@ -23,10 +23,18 @@ MAX_BATCHES = int(os.getenv("MAX_BATCHES", "0"))  # 0 = no limit
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Generate semantic representations for a step vocabulary.")
-    p.add_argument("--vocab_csv", default=str(REPO_ROOT / "data" / "resources" / "split_50_vocabulary.csv"))
-    p.add_argument("--out", default=str(REPO_ROOT / "data" / "resources" / "semantic_representations_split_50.json"))
+    p = argparse.ArgumentParser(
+        description="Generate semantic representations for a step vocabulary."
+    )
+    p.add_argument(
+        "--vocab_csv", default=str(REPO_ROOT / "data" / "resources" / "split_50_vocabulary.csv")
+    )
+    p.add_argument(
+        "--out",
+        default=str(REPO_ROOT / "data" / "resources" / "semantic_representations_split_50.json"),
+    )
     return p.parse_args()
+
 
 def load_vocab(csv_path: Path) -> List[Tuple[str, str]]:
     rows: List[Tuple[str, str]] = []
@@ -39,9 +47,11 @@ def load_vocab(csv_path: Path) -> List[Tuple[str, str]]:
                 rows.append((sid, sd))
     return rows
 
+
 def chunk(items: List[Tuple[str, str]], n: int):
     for i in range(0, len(items), n):
-        yield items[i:i + n]
+        yield items[i : i + n]
+
 
 def main():
     args = parse_args()
@@ -91,7 +101,9 @@ def main():
 
         missing_ids = [sid for sid in expected.keys() if sid not in generated]
         if missing_ids:
-            print(f"[Batch {batch_counter}] Missing ids: {len(missing_ids)} (showing up to 10): {missing_ids[:10]}")
+            print(
+                f"[Batch {batch_counter}] Missing ids: {len(missing_ids)} (showing up to 10): {missing_ids[:10]}"
+            )
 
         for sid, sd in expected.items():
             sem = generated.get(sid, "")
@@ -108,6 +120,7 @@ def main():
     print("Done.")
     print(f"Saved entries: {len(out)}")
     print(f"Output: {out_json}")
+
 
 if __name__ == "__main__":
     main()

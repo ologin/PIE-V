@@ -44,11 +44,13 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 # ---------------------------
 BASE_URL = "https://api-singapore.klingai.com"
 
+
 def make_jwt_token(access_key: str, secret_key: str) -> str:
     now = int(time.time())
     payload = {"iss": access_key, "exp": now + 1800, "nbf": now - 5}
     token = jwt.encode(payload, secret_key, algorithm="HS256", headers={"typ": "JWT"})
     return token.decode("utf-8") if isinstance(token, bytes) else token
+
 
 def auth_headers() -> dict:
     # Fail with a clear message instead of KeyError (saves time when running on new machines).
@@ -62,10 +64,16 @@ def auth_headers() -> dict:
     token = make_jwt_token(ak, sk)
     return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-def create_omni_task(prompt: str, first_frame: str, end_frame: str | None = None,
-                     mode: str = "pro", duration: int = 10,
-                     external_task_id: str | None = None,
-                     feature_video_url: str | None = None) -> str:
+
+def create_omni_task(
+    prompt: str,
+    first_frame: str,
+    end_frame: str | None = None,
+    mode: str = "pro",
+    duration: int = 10,
+    external_task_id: str | None = None,
+    feature_video_url: str | None = None,
+) -> str:
     """
     NOTE: duration is expected to be an integer seconds value (typically 3..10).
     """
@@ -86,11 +94,13 @@ def create_omni_task(prompt: str, first_frame: str, end_frame: str | None = None
         image_list.append({"image_url": end_frame, "type": "end_frame"})
     body["image_list"] = image_list
     if feature_video_url:
-        body["video_list"] = [{
-            "video_url": feature_video_url,
-            "refer_type": "feature",
-            "keep_original_sound": "no",
-        }]
+        body["video_list"] = [
+            {
+                "video_url": feature_video_url,
+                "refer_type": "feature",
+                "keep_original_sound": "no",
+            }
+        ]
     if external_task_id:
         body["external_task_id"] = external_task_id
 
@@ -105,6 +115,7 @@ def create_omni_task(prompt: str, first_frame: str, end_frame: str | None = None
         raise RuntimeError(f"Create task failed: {j}")
     return j["data"]["task_id"]
 
+
 def get_task(task_id: str) -> dict:
     url = f"{BASE_URL}/v1/videos/omni-video/{task_id}"
     r = requests.get(url, headers=auth_headers(), timeout=60)
@@ -113,6 +124,7 @@ def get_task(task_id: str) -> dict:
     if j.get("code") != 0:
         raise RuntimeError(f"Get task failed: {j}")
     return j["data"]
+
 
 def wait_task(task_id: str, poll_sec: int = 5, timeout_sec: int = 1200) -> dict:
     t0 = time.time()
@@ -124,6 +136,7 @@ def wait_task(task_id: str, poll_sec: int = 5, timeout_sec: int = 1200) -> dict:
         if time.time() - t0 > timeout_sec:
             raise TimeoutError(f"Timeout waiting task={task_id}, last_status={st}")
         time.sleep(poll_sec)
+
 
 def download_file(url: str, out_path: str) -> None:
     with requests.get(url, stream=True, timeout=300) as r:
@@ -141,9 +154,11 @@ def download_file(url: str, out_path: str) -> None:
 def _run(cmd: list[str]) -> None:
     subprocess.check_call(cmd)
 
+
 def ffprobe_json(video_path: str) -> dict:
     cmd = ["ffprobe", "-v", "error", "-of", "json", "-show_format", "-show_streams", video_path]
     return json.loads(subprocess.check_output(cmd).decode("utf-8"))
+
 
 def ffprobe_video_specs(video_path: str) -> dict:
     j = ffprobe_json(video_path)
@@ -164,60 +179,116 @@ def ffprobe_video_specs(video_path: str) -> dict:
     dur = float(fmt["duration"])
     return {"width": w, "height": h, "fps": fps, "duration": dur}
 
+
 def extract_frame_png(video_path: str, t_sec: float, out_png: str) -> None:
     Path(out_png).parent.mkdir(parents=True, exist_ok=True)
     cmd = [
-        "ffmpeg", "-y", "-loglevel", "error",
-        "-ss", f"{t_sec:.3f}",
-        "-i", video_path,
-        "-frames:v", "1",
-        "-update", "1",
-        out_png
+        "ffmpeg",
+        "-y",
+        "-loglevel",
+        "error",
+        "-ss",
+        f"{t_sec:.3f}",
+        "-i",
+        video_path,
+        "-frames:v",
+        "1",
+        "-update",
+        "1",
+        out_png,
     ]
     _run(cmd)
+
 
 def png_to_base64(png_path: str) -> str:
     b = Path(png_path).read_bytes()
     return base64.b64encode(b).decode("utf-8")
 
+
 def extract_segment(video_path: str, t_start: float, t_end: float, out_mp4: str) -> None:
     Path(out_mp4).parent.mkdir(parents=True, exist_ok=True)
     # try stream copy, fallback to re-encode
-    cmd = ["ffmpeg", "-y", "-ss", f"{t_start:.3f}", "-to", f"{t_end:.3f}", "-i", video_path, "-c", "copy", out_mp4]
-    try:
-        _run(cmd)
-    except subprocess.CalledProcessError:
-        cmd = [
-            "ffmpeg", "-y",
-            "-ss", f"{t_start:.3f}", "-to", f"{t_end:.3f}",
-            "-i", video_path,
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-            "-c:a", "aac", "-b:a", "192k",
-            out_mp4
-        ]
-        _run(cmd)
-
-def trim_to_duration(in_mp4: str, out_mp4: str, dur_sec: float) -> None:
-    Path(out_mp4).parent.mkdir(parents=True, exist_ok=True)
     cmd = [
-        "ffmpeg", "-y", "-loglevel", "error",
-        "-i", in_mp4,
-        "-t", f"{dur_sec:.3f}",
-        "-c", "copy",
-        out_mp4
+        "ffmpeg",
+        "-y",
+        "-ss",
+        f"{t_start:.3f}",
+        "-to",
+        f"{t_end:.3f}",
+        "-i",
+        video_path,
+        "-c",
+        "copy",
+        out_mp4,
     ]
     try:
         _run(cmd)
     except subprocess.CalledProcessError:
         cmd = [
-            "ffmpeg", "-y", "-loglevel", "error",
-            "-i", in_mp4,
-            "-t", f"{dur_sec:.3f}",
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-            "-c:a", "aac", "-b:a", "192k",
-            out_mp4
+            "ffmpeg",
+            "-y",
+            "-ss",
+            f"{t_start:.3f}",
+            "-to",
+            f"{t_end:.3f}",
+            "-i",
+            video_path,
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "18",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            out_mp4,
         ]
         _run(cmd)
+
+
+def trim_to_duration(in_mp4: str, out_mp4: str, dur_sec: float) -> None:
+    Path(out_mp4).parent.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-loglevel",
+        "error",
+        "-i",
+        in_mp4,
+        "-t",
+        f"{dur_sec:.3f}",
+        "-c",
+        "copy",
+        out_mp4,
+    ]
+    try:
+        _run(cmd)
+    except subprocess.CalledProcessError:
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-i",
+            in_mp4,
+            "-t",
+            f"{dur_sec:.3f}",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "18",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            out_mp4,
+        ]
+        _run(cmd)
+
 
 def normalize_clip(in_mp4: str, out_mp4: str, width: int, height: int, fps: int = 60) -> None:
     Path(out_mp4).parent.mkdir(parents=True, exist_ok=True)
@@ -227,25 +298,63 @@ def normalize_clip(in_mp4: str, out_mp4: str, width: int, height: int, fps: int 
 
     if has_audio:
         cmd = [
-            "ffmpeg", "-y", "-loglevel", "error",
-            "-i", in_mp4,
-            "-vf", vf,
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "192k",
-            out_mp4
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-i",
+            in_mp4,
+            "-vf",
+            vf,
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "18",
+            "-c:a",
+            "aac",
+            "-ar",
+            "48000",
+            "-ac",
+            "2",
+            "-b:a",
+            "192k",
+            out_mp4,
         ]
     else:
         cmd = [
-            "ffmpeg", "-y", "-loglevel", "error",
-            "-i", in_mp4,
-            "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-i",
+            in_mp4,
+            "-f",
+            "lavfi",
+            "-i",
+            "anullsrc=channel_layout=stereo:sample_rate=48000",
             "-shortest",
-            "-vf", vf,
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "192k",
-            out_mp4
+            "-vf",
+            vf,
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "18",
+            "-c:a",
+            "aac",
+            "-ar",
+            "48000",
+            "-ac",
+            "2",
+            "-b:a",
+            "192k",
+            out_mp4,
         ]
     _run(cmd)
+
 
 def concat_with_crossfade(clips: list[str], out_mp4: str, fade: float = 0.25) -> None:
     """
@@ -284,7 +393,9 @@ def concat_with_crossfade(clips: list[str], out_mp4: str, fade: float = 0.25) ->
         # start fade at (t_acc - fade)
         this_fade = float(getattr(concat_with_crossfade, "_fades", {}).get(i - 1, fade))
         off = max(0.0, t_acc - this_fade)
-        fc.append(f"{v_prev}{v_labels[i]}xfade=transition=fade:duration={this_fade}:offset={off}{v_out}")
+        fc.append(
+            f"{v_prev}{v_labels[i]}xfade=transition=fade:duration={this_fade}:offset={off}{v_out}"
+        )
         fc.append(f"{a_prev}{a_labels[i]}acrossfade=d={this_fade}{a_out}")
         v_prev = v_out
         a_prev = a_out
@@ -292,14 +403,33 @@ def concat_with_crossfade(clips: list[str], out_mp4: str, fade: float = 0.25) ->
 
     filter_complex = ";".join(fc)
 
-    cmd = ["ffmpeg", "-y", "-loglevel", "error"] + inputs + [
-        "-filter_complex", filter_complex,
-        "-map", v_prev,
-        "-map", a_prev,
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-        "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "192k",
-        out_mp4
-    ]
+    cmd = (
+        ["ffmpeg", "-y", "-loglevel", "error"]
+        + inputs
+        + [
+            "-filter_complex",
+            filter_complex,
+            "-map",
+            v_prev,
+            "-map",
+            a_prev,
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "18",
+            "-c:a",
+            "aac",
+            "-ar",
+            "48000",
+            "-ac",
+            "2",
+            "-b:a",
+            "192k",
+            out_mp4,
+        ]
+    )
     _run(cmd)
 
 
@@ -311,11 +441,13 @@ def load_take(split_json_path: str, take_name: str) -> dict:
     take = next(a for a in data["annotations"] if a["take_name"] == take_name)
     return take
 
+
 def sorted_segments(take: dict) -> list[dict]:
     segs = sorted(take["segments"], key=lambda s: (float(s["start_time"]), float(s["end_time"])))
     for i, s in enumerate(segs):
         s["position"] = i
     return segs
+
 
 def find_segment_by_desc(segs: list[dict], desc: str) -> dict:
     for s in segs:
@@ -323,9 +455,12 @@ def find_segment_by_desc(segs: list[dict], desc: str) -> dict:
             return s
     raise ValueError(f"Segment not found by description: {desc}")
 
+
 def print_segments_table(segs: list[dict]) -> None:
     for s in segs:
-        print(f"[{s['position']:02d}] {float(s['start_time']):8.3f}–{float(s['end_time']):8.3f} | {s.get('step_description')}")
+        print(
+            f"[{s['position']:02d}] {float(s['start_time']):8.3f}–{float(s['end_time']):8.3f} | {s.get('step_description')}"
+        )
 
 
 def drive_view_to_direct(url: str) -> str:
@@ -352,17 +487,48 @@ def parse_args():
     p.add_argument("--take_name", default="sfu_cooking_008_5")
     p.add_argument(
         "--workdir",
-        default=str(REPO_ROOT / "local" / "outputs" / "video_generation" / "kling" / "sfu_cooking_008_5"),
+        default=str(
+            REPO_ROOT / "local" / "outputs" / "video_generation" / "kling" / "sfu_cooking_008_5"
+        ),
     )
-    p.add_argument("--feature_drive_url", default="", help="Google Drive VIEW url for the feature ref video (optional but recommended)")
-    p.add_argument("--make_feature_ref", action="store_true", help="Only extract local feature_ref.mp4 and exit (upload it to Drive)")
-    p.add_argument("--fade", type=float, default=0.25, help="Crossfade seconds for normal transitions (e.g., part1<->generated<->part2)")
-    p.add_argument("--fade_generated", type=float, default=0.35, help="Crossfade seconds specifically between generated clips A->B")
+    p.add_argument(
+        "--feature_drive_url",
+        default="",
+        help="Google Drive VIEW url for the feature ref video (optional but recommended)",
+    )
+    p.add_argument(
+        "--make_feature_ref",
+        action="store_true",
+        help="Only extract local feature_ref.mp4 and exit (upload it to Drive)",
+    )
+    p.add_argument(
+        "--fade",
+        type=float,
+        default=0.25,
+        help="Crossfade seconds for normal transitions (e.g., part1<->generated<->part2)",
+    )
+    p.add_argument(
+        "--fade_generated",
+        type=float,
+        default=0.35,
+        help="Crossfade seconds specifically between generated clips A->B",
+    )
     # Feature-ref timing INSIDE the replaced step (critical for realistic pouring physics).
     # Example: offset=3.5 means start ref at (cut_from + 3.5s) within the original 'pour' segment.
-    p.add_argument("--feature_offset", type=float, default=3.5, help="Seconds after cut_from to start feature_ref (inside the replaced segment)")
-    p.add_argument("--feature_len", type=float, default=8.0, help="Length of feature_ref in seconds (inside the replaced segment)")
+    p.add_argument(
+        "--feature_offset",
+        type=float,
+        default=3.5,
+        help="Seconds after cut_from to start feature_ref (inside the replaced segment)",
+    )
+    p.add_argument(
+        "--feature_len",
+        type=float,
+        default=8.0,
+        help="Length of feature_ref in seconds (inside the replaced segment)",
+    )
     return p.parse_args()
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -386,7 +552,9 @@ if __name__ == "__main__":
     cut_from = float(target["start_time"])
     cut_to = float(target["end_time"])
     removed_len = max(0.0, cut_to - cut_from)
-    print(f"Replacing segment '{target_desc}' @ {cut_from:.3f}–{cut_to:.3f} (len={removed_len:.3f}s)")
+    print(
+        f"Replacing segment '{target_desc}' @ {cut_from:.3f}–{cut_to:.3f} (len={removed_len:.3f}s)"
+    )
 
     work = Path(args.workdir)
     work.mkdir(parents=True, exist_ok=True)
@@ -405,9 +573,13 @@ if __name__ == "__main__":
         fallback_len = min(9.0, max(2.0, seg_len))
         feat_start = max(0.0, cut_from - fallback_len)
         feat_end = cut_from
-        print("WARNING: replaced segment too short for inside-step feature_ref; falling back to pre-step ref.")
+        print(
+            "WARNING: replaced segment too short for inside-step feature_ref; falling back to pre-step ref."
+        )
     else:
-        print("Feature ref will be extracted INSIDE the replaced step for better motion consistency.")
+        print(
+            "Feature ref will be extracted INSIDE the replaced step for better motion consistency."
+        )
 
     feature_local = str(work / "feature_ref.mp4")
 
@@ -416,7 +588,9 @@ if __name__ == "__main__":
 
     if args.make_feature_ref:
         print("\nUpload this feature_ref.mp4 to Google Drive (anyone-with-link).")
-        print("Then rerun with: --feature_drive_url 'https://drive.google.com/file/d/<ID>/view?usp=sharing'")
+        print(
+            "Then rerun with: --feature_drive_url 'https://drive.google.com/file/d/<ID>/view?usp=sharing'"
+        )
         raise SystemExit(0)
 
     feature_url = ""
@@ -424,13 +598,17 @@ if __name__ == "__main__":
         feature_url = drive_view_to_direct(args.feature_drive_url.strip())
         print("Using feature_url:", feature_url)
     else:
-        print("WARNING: no --feature_drive_url provided; generation will run WITHOUT feature reference (less consistent).")
+        print(
+            "WARNING: no --feature_drive_url provided; generation will run WITHOUT feature reference (less consistent)."
+        )
 
     # 2) Decide durations for two clips (must be <=10 each for Kling O1)
     # We aim to roughly match removed_len (≈18.9s) with 9s + 10s.
     dur_a = 9
     dur_b = 10
-    print(f"Planned generated durations: spill={dur_a}s, correction={dur_b}s (total={dur_a+dur_b}s)")
+    print(
+        f"Planned generated durations: spill={dur_a}s, correction={dur_b}s (total={dur_a + dur_b}s)"
+    )
 
     # 3) Extract boundary frames from original
     # Use frames INSIDE the segment we are replacing:
@@ -439,7 +617,7 @@ if __name__ == "__main__":
     # This improves visual continuity vs. sampling frames from the neighboring segments.
     eps_in = 0.05
     t_first = min(specs["duration"] - 0.05, max(0.0, cut_from + eps_in))
-    t_end   = min(specs["duration"] - 0.05, max(0.0, cut_to   - eps_in))
+    t_end = min(specs["duration"] - 0.05, max(0.0, cut_to - eps_in))
 
     frames_dir = work / "frames"
     first_png = str(frames_dir / "first_frame.png")
@@ -465,7 +643,7 @@ if __name__ == "__main__":
         "Realistic liquid behavior, no teleporting, no sudden camera jumps. "
         "Do NOT introduce new objects, do not rearrange the countertop, preserve lighting and existing items. "
         "No tea bags, no sugar, no stirring, no washing, no text overlays."
-    )  
+    )
 
     ext_a = f"{take_name}_E01_spill_{int(time.time())}"
     # Clip A uses the feature reference video (if provided) to match motion/camera style.
@@ -478,7 +656,7 @@ if __name__ == "__main__":
         mode="pro",
         duration=dur_a,
         external_task_id=ext_a,
-        feature_video_url=feature_url or None
+        feature_video_url=feature_url or None,
     )
     print("Kling task A:", task_a)
     res_a = wait_task(task_a)
@@ -523,7 +701,7 @@ if __name__ == "__main__":
         mode="pro",
         duration=dur_b,
         external_task_id=ext_b,
-        feature_video_url=None
+        feature_video_url=None,
     )
     print("Kling task B:", task_b)
     res_b = wait_task(task_b)

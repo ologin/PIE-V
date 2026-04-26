@@ -1,5 +1,7 @@
 # PIE-V
 
+[![CI](https://github.com/ologin/PIE-V/actions/workflows/ci.yml/badge.svg)](https://github.com/ologin/PIE-V/actions/workflows/ci.yml)
+
 **PIE-V** (Psychologically Inspired Error injection for Videos) is a framework for
 constructing and benchmarking mistake-aware egocentric procedural videos. It augments
 clean Ego-Exo4D keystep procedures with structured human-plausible mistakes,
@@ -18,6 +20,8 @@ recovery corrections, validated text rewrites, and video edit specifications.
 - Semantic-role resources used by the planner, writer, and judge.
 - Aggregated human annotation summaries and the public annotation template.
 - Example PIE-V outputs for the 50-scenario Ego-Exo4D subset.
+- Public-release checks for data integrity, project-page assets, tracked media,
+  local paths, and exposed credentials.
 
 Raw Ego-Exo4D videos, original Ego-Exo4D annotation files, and generated MP4 media
 remain outside git. The [`cvprw26` GitHub release](https://github.com/ologin/PIE-V/releases/tag/cvprw26) is the media location used by
@@ -37,6 +41,8 @@ data/examples/            Example PIE-V plans, judged rewrites, and annotations
 data/annotations/         Aggregated human annotation summary and template
 examples/video_generation Case-study notes for video editing scripts
 docs/                     Static project page for GitHub Pages
+tests/                    Public-release smoke tests
+.github/workflows/        GitHub Actions checks
 ```
 
 ## Installation
@@ -52,6 +58,16 @@ Optional backends:
 ```bash
 python -m pip install -e ".[qwen]"
 python -m pip install -e ".[video]"
+```
+
+Development checks:
+
+```bash
+python -m pip install -e ".[dev]"
+python -m ruff format --check .
+python -m ruff check .
+python -m compileall -q src prep analysis baselines examples/video_generation/scripts docs
+python -m pytest -q
 ```
 
 For OpenAI-backed SemRep generation, writing, or judging:
@@ -128,7 +144,7 @@ piev-judge-instructions \
 ## Data Notes
 
 `data/examples/split_50_error_plan_with_corrections.json` contains the sampled
-paper-scale text plan: 50 takes, 102 mistakes, and 27 corrections. 
+paper-scale text plan: 50 takes, 102 mistakes, and 27 corrections.
 `data/annotations/PIE-V_Annotation_Template.xlsx` is the public template for the
 rubric fields used in the human evaluation.
 

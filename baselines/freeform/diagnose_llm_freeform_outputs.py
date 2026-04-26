@@ -131,7 +131,9 @@ def diagnose_take(
     status = str(take_payload.get("status", "missing"))
     error = str(take_payload.get("error", "")) if status != "ok" else ""
 
-    rewrite = take_payload.get("rewrite", {}) if isinstance(take_payload.get("rewrite", {}), dict) else {}
+    rewrite = (
+        take_payload.get("rewrite", {}) if isinstance(take_payload.get("rewrite", {}), dict) else {}
+    )
     final_steps = rewrite.get("final_steps", [])
     meta = rewrite.get("meta", [])
     deletions = rewrite.get("del", [])
@@ -150,13 +152,23 @@ def diagnose_take(
     }
 
     # If not ok, still compute shallow parse availability
-    if not isinstance(rewrite, dict) or not isinstance(final_steps, list) or not isinstance(meta, list):
-        out.update({
-            "mods_u": 0, "mods_e": 0, "mods_m": 0, "mods_c": 0, "mods_i": 0,
-            "u_not_verbatim": -1,
-            "e_no_change": -1,
-            "deleted_src_still_used": -1,
-        })
+    if (
+        not isinstance(rewrite, dict)
+        or not isinstance(final_steps, list)
+        or not isinstance(meta, list)
+    ):
+        out.update(
+            {
+                "mods_u": 0,
+                "mods_e": 0,
+                "mods_m": 0,
+                "mods_c": 0,
+                "mods_i": 0,
+                "u_not_verbatim": -1,
+                "e_no_change": -1,
+                "deleted_src_still_used": -1,
+            }
+        )
         return out
 
     # Re-run validator for an objective schema flag
@@ -180,12 +192,22 @@ def diagnose_take(
             used_src_idxs.add(src_idx)
 
         # u must be verbatim
-        if mod == "u" and isinstance(src_idx, int) and 0 <= src_idx < n_input and i < len(final_steps):
+        if (
+            mod == "u"
+            and isinstance(src_idx, int)
+            and 0 <= src_idx < n_input
+            and i < len(final_steps)
+        ):
             if final_steps[i] != input_steps[src_idx]:
                 u_not_verbatim += 1
 
         # e should usually differ from original (diagnostic only)
-        if mod == "e" and isinstance(src_idx, int) and 0 <= src_idx < n_input and i < len(final_steps):
+        if (
+            mod == "e"
+            and isinstance(src_idx, int)
+            and 0 <= src_idx < n_input
+            and i < len(final_steps)
+        ):
             if final_steps[i] == input_steps[src_idx]:
                 e_no_change += 1
 
@@ -199,16 +221,18 @@ def diagnose_take(
         if s in used_src_idxs:
             deleted_src_still_used += 1
 
-    out.update({
-        "mods_u": mods["u"],
-        "mods_e": mods["e"],
-        "mods_m": mods["m"],
-        "mods_c": mods["c"],
-        "mods_i": mods["i"],
-        "u_not_verbatim": u_not_verbatim,
-        "e_no_change": e_no_change,
-        "deleted_src_still_used": deleted_src_still_used,
-    })
+    out.update(
+        {
+            "mods_u": mods["u"],
+            "mods_e": mods["e"],
+            "mods_m": mods["m"],
+            "mods_c": mods["c"],
+            "mods_i": mods["i"],
+            "u_not_verbatim": u_not_verbatim,
+            "e_no_change": e_no_change,
+            "deleted_src_still_used": deleted_src_still_used,
+        }
+    )
     return out
 
 
@@ -233,11 +257,25 @@ def main() -> None:
 
     # Write CSV
     fieldnames = [
-        "take_uid", "scenario", "take_name", "status", "error",
-        "schema_ok", "schema_msg",
-        "n_input_steps", "n_final_steps", "n_meta", "n_del",
-        "mods_u", "mods_e", "mods_m", "mods_c", "mods_i",
-        "u_not_verbatim", "e_no_change", "deleted_src_still_used",
+        "take_uid",
+        "scenario",
+        "take_name",
+        "status",
+        "error",
+        "schema_ok",
+        "schema_msg",
+        "n_input_steps",
+        "n_final_steps",
+        "n_meta",
+        "n_del",
+        "mods_u",
+        "mods_e",
+        "mods_m",
+        "mods_c",
+        "mods_i",
+        "u_not_verbatim",
+        "e_no_change",
+        "deleted_src_still_used",
     ]
     # Make sure missing keys exist
     for r in rows:

@@ -250,7 +250,7 @@ h3 {
 
 .method-grid {
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -263,15 +263,15 @@ h3 {
 
 .method-grid article:nth-child(1),
 .method-grid article:nth-child(2) {
-  grid-column: span 5;
+  grid-column: span 6;
 }
 
 .method-grid article:nth-child(3) {
-  grid-column: 2 / span 4;
+  grid-column: 2 / span 5;
 }
 
 .method-grid article:nth-child(4) {
-  grid-column: 6 / span 4;
+  grid-column: 7 / span 5;
 }
 
 .method-grid h3 {

@@ -85,11 +85,7 @@ def procedure_logic_agreement(df: pd.DataFrame, w: float = 0.7) -> dict:
     if np.isfinite(alpha_no) and n_no > 0:
         parts.append((n_no, alpha_no))
 
-    alpha_conf = (
-        sum(n * a for n, a in parts) / sum(n for n, _ in parts)
-        if parts
-        else np.nan
-    )
+    alpha_conf = sum(n * a for n, a in parts) / sum(n for n, _ in parts) if parts else np.nan
 
     # Final combined agreement
     A = (
@@ -115,7 +111,11 @@ def procedure_logic_agreement(df: pd.DataFrame, w: float = 0.7) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description="Compute Procedure Logic agreement.")
-    parser.add_argument("--csv", required=True, help="CSV with dataset_id, video_id, item_id, annotator_id, answer, confidence.")
+    parser.add_argument(
+        "--csv",
+        required=True,
+        help="CSV with dataset_id, video_id, item_id, annotator_id, answer, confidence.",
+    )
     parser.add_argument("--w", type=float, default=W, help="Weight for polarity agreement.")
     args = parser.parse_args()
 
@@ -148,20 +148,24 @@ def main():
         res["video_id"] = video_id
         group_rows.append(res)
 
-    per_video = pd.DataFrame(group_rows).sort_values(
-        by=["dataset_id", "video_id"], kind="stable"
-    )
+    per_video = pd.DataFrame(group_rows).sort_values(by=["dataset_id", "video_id"], kind="stable")
 
     # Print a compact table
     cols = [
-        "dataset_id", "video_id",
-        "n_rows", "n_items", "n_annotators",
+        "dataset_id",
+        "video_id",
+        "n_rows",
+        "n_items",
+        "n_annotators",
         "alpha_polarity_nominal",
-        "alpha_conf_yes_ordinal", "alpha_conf_no_ordinal",
+        "alpha_conf_yes_ordinal",
+        "alpha_conf_no_ordinal",
         "alpha_conf_combined",
         "procedure_logic_agreement_A",
     ]
-    with pd.option_context("display.max_rows", 200, "display.max_columns", 50, "display.width", 140):
+    with pd.option_context(
+        "display.max_rows", 200, "display.max_columns", 50, "display.width", 140
+    ):
         print(per_video[cols].to_string(index=False))
 
 

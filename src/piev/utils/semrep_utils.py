@@ -98,12 +98,14 @@ def normalize_step_text(s: str) -> str:
 
 
 def backoff_sleep(attempt: int) -> None:
-    time.sleep(min(30, 2 ** attempt))
+    time.sleep(min(30, 2**attempt))
 
 
 def is_fatal_request_error(e: Exception) -> bool:
     s = str(e)
-    return ("Error code: 400" in s) or ("invalid_request_error" in s) or ("invalid_json_schema" in s)
+    return (
+        ("Error code: 400" in s) or ("invalid_request_error" in s) or ("invalid_json_schema" in s)
+    )
 
 
 def build_semrep_step_to_id(semrep_map: Dict[str, Dict[str, str]]) -> Dict[str, str]:
@@ -128,7 +130,7 @@ def build_semrep_step_to_id(semrep_map: Dict[str, Dict[str, str]]) -> Dict[str, 
 
 def _chunk(items: List[Tuple[str, str]], n: int):
     for i in range(0, len(items), n):
-        yield items[i:i + n]
+        yield items[i : i + n]
 
 
 def _get_openai_client() -> OpenAI:
@@ -197,8 +199,10 @@ def generate_semrep_items_openai(
             # ensure 1:1 coverage; re-request missing ids
             missing_ids = [k for k in expected.keys() if k not in out]
             if missing_ids:
-                raise ValueError(f"Model returned {len(out)}/{len(expected)} items; missing={missing_ids[:3]}...")
-                
+                raise ValueError(
+                    f"Model returned {len(out)}/{len(expected)} items; missing={missing_ids[:3]}..."
+                )
+
             return out
 
         except Exception as e:
@@ -219,6 +223,7 @@ class SemRepAutoExtender:
     - Updates semrep_map + reverse map step_to_id
     - Optionally writes semrep_map back to out_path on flush()
     """
+
     semrep_map: Dict[str, Dict[str, str]]
     out_path: Optional[str] = None
     id_prefix: str = "openai_ext"
@@ -241,7 +246,11 @@ class SemRepAutoExtender:
             if not sd:
                 continue
             sid = self.step_to_id.get(sd) or self.step_to_id.get(sd.lower())
-            if sid and sid in self.semrep_map and self.semrep_map[sid].get("semantic_representation"):
+            if (
+                sid
+                and sid in self.semrep_map
+                and self.semrep_map[sid].get("semantic_representation")
+            ):
                 continue
             missing.append(sd)
 

@@ -29,13 +29,15 @@ Optional semrep support:
 from __future__ import annotations
 
 import argparse
+import base64
+import copy
 import csv
+import io
 import json
 import os
 import re
 import sys
 import time
-import copy
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -50,10 +52,16 @@ from piev.config import REPO_ROOT, load_settings
 SETTINGS = load_settings()
 
 try:
-    from piev.utils.semrep_utils import SemRepAutoExtender, build_semrep_step_to_id as _helper_build_semrep_step_to_id
+    from piev.utils.semrep_utils import (
+        SemRepAutoExtender,
+        build_semrep_step_to_id as _helper_build_semrep_step_to_id,
+    )
 except ImportError:
     try:
-        from semrep_utils import SemRepAutoExtender, build_semrep_step_to_id as _helper_build_semrep_step_to_id
+        from semrep_utils import (
+            SemRepAutoExtender,
+            build_semrep_step_to_id as _helper_build_semrep_step_to_id,
+        )
     except Exception:
         SemRepAutoExtender = None
         _helper_build_semrep_step_to_id = None
@@ -84,6 +92,7 @@ try:
     import torch
     from transformers import AutoTokenizer, AutoProcessor
     from transformers import AutoModelForCausalLM
+
     # Prefer Qwen3-VL when available; fall back to Qwen2-VL for older transformers.
     try:
         from transformers import Qwen3VLForConditionalGeneration
@@ -92,7 +101,7 @@ try:
     try:
         from transformers import Qwen2VLForConditionalGeneration
     except Exception:
-        Qwen2VLForConditionalGeneration = None        
+        Qwen2VLForConditionalGeneration = None
 except Exception:
     torch = None  # type: ignore
     AutoTokenizer = None  # type: ignore
@@ -111,14 +120,18 @@ try:
 except Exception:
     Image = None  # type: ignore
 
-import base64
-import io
 
 @dataclass
 class LLMBackend:
     name: str
 
-    def generate(self, messages: List[Dict[str, str]], temperature: float, max_new_tokens: int, image_data_urls: Optional[List[str]] = None) -> str:
+    def generate(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float,
+        max_new_tokens: int,
+        image_data_urls: Optional[List[str]] = None,
+    ) -> str:
         raise NotImplementedError
 
 
@@ -130,7 +143,13 @@ class OpenAIBackend(LLMBackend):
         self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "") or OPENAI_API_KEY)
         self.model_id = model_id
 
-    def generate(self, messages: List[Dict[str, str]], temperature: float, max_new_tokens: int, image_data_urls: Optional[List[str]] = None) -> str:
+    def generate(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float,
+        max_new_tokens: int,
+        image_data_urls: Optional[List[str]] = None,
+    ) -> str:
         # Prefer Responses API when available; fallback to chat.completions
         try:
             resp = self.client.responses.create(
@@ -158,6 +177,7 @@ class QwenLocalBackend(LLMBackend):
     Qwen3-VL backend with real image support via AutoProcessor + process_vision_info.
     Falls back to text-only if VL deps are missing.
     """
+
     def __init__(self, model_id: str = DEFAULT_QWEN_MODEL_ID) -> None:
         super().__init__(name="qwen")
 
@@ -167,7 +187,10 @@ class QwenLocalBackend(LLMBackend):
         # VL path requires these
         self.has_vl = (
             AutoProcessor is not None
-            and (Qwen3VLForConditionalGeneration is not None or Qwen2VLForConditionalGeneration is not None)
+            and (
+                Qwen3VLForConditionalGeneration is not None
+                or Qwen2VLForConditionalGeneration is not None
+            )
             and Image is not None
         )
 
@@ -177,15 +200,17 @@ class QwenLocalBackend(LLMBackend):
         if self.has_vl:
             # Recommended path for Qwen3-VL
             self.processor = AutoProcessor.from_pretrained(self.model_id, trust_remote_code=True)
-            self.tokenizer = getattr(self.processor, "tokenizer", None) or AutoTokenizer.from_pretrained(
-                self.model_id, use_fast=True, trust_remote_code=True
-            )
+            self.tokenizer = getattr(
+                self.processor, "tokenizer", None
+            ) or AutoTokenizer.from_pretrained(self.model_id, use_fast=True, trust_remote_code=True)
 
             # Qwen3-VL uses Qwen3VLForConditionalGeneration in newer transformers.
             # Some environments still expose only Qwen2VLForConditionalGeneration.
             _vl_cls = Qwen3VLForConditionalGeneration or Qwen2VLForConditionalGeneration
             if _vl_cls is None:
-                raise RuntimeError("No Qwen VL ConditionalGeneration class available in transformers.")
+                raise RuntimeError(
+                    "No Qwen VL ConditionalGeneration class available in transformers."
+                )
             try:
                 self.model = _vl_cls.from_pretrained(
                     self.model_id,
@@ -243,7 +268,7 @@ class QwenLocalBackend(LLMBackend):
         injected = False
 
         pil_images = []
-        for u in (image_data_urls or []):
+        for u in image_data_urls or []:
             im = self._data_url_to_pil(u)
             if im is not None:
                 pil_images.append(im)
@@ -322,7 +347,7 @@ class QwenLocalBackend(LLMBackend):
                 in_ids = inputs.input_ids
                 trimmed = []
                 for i0, o0 in zip(in_ids, generated_ids):
-                    trimmed.append(o0[len(i0):])
+                    trimmed.append(o0[len(i0) :])
 
                 out_text = self.processor.batch_decode(
                     trimmed,
@@ -332,7 +357,7 @@ class QwenLocalBackend(LLMBackend):
                 return (out_text[0] if out_text else "").strip()
 
             except Exception:
-                #Fallback: process_vision_info (Qwen2-style)
+                # Fallback: process_vision_info (Qwen2-style)
                 try:
                     if process_vision_info is None:
                         raise RuntimeError("process_vision_info is not available")
@@ -365,7 +390,7 @@ class QwenLocalBackend(LLMBackend):
                     in_ids = inputs.input_ids
                     trimmed = []
                     for i0, o0 in zip(in_ids, generated_ids):
-                        trimmed.append(o0[len(i0):])
+                        trimmed.append(o0[len(i0) :])
                     out_text = self.processor.batch_decode(
                         trimmed,
                         skip_special_tokens=True,
@@ -373,7 +398,7 @@ class QwenLocalBackend(LLMBackend):
                     )
                     return (out_text[0] if out_text else "").strip()
                 except Exception:
-                    pass 
+                    pass
                 pass
 
         # -------------------------
@@ -381,7 +406,9 @@ class QwenLocalBackend(LLMBackend):
         # -------------------------
         try:
             if self.processor is not None:
-                text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+                text = self.processor.apply_chat_template(
+                    messages, tokenize=False, add_generation_prompt=True
+                )
                 inputs = self.processor(text=[text], padding=True, return_tensors="pt")
                 device = next(self.model.parameters()).device
                 inputs = inputs.to(device)
@@ -400,16 +427,20 @@ class QwenLocalBackend(LLMBackend):
                 # Trim prompt
                 trimmed = []
                 for i0, o0 in zip(inputs.input_ids, generated_ids):
-                    trimmed.append(o0[len(i0):])
+                    trimmed.append(o0[len(i0) :])
 
                 out_text = self.processor.batch_decode(trimmed, skip_special_tokens=True)
                 return (out_text[0] if out_text else "").strip()
 
             # legacy tokenizer-only
-            text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            text = self.tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
 
         except Exception:
-            text = "\n\n".join([f"{m.get('role','user').upper()}: {m.get('content','')}" for m in messages])
+            text = "\n\n".join(
+                [f"{m.get('role', 'user').upper()}: {m.get('content', '')}" for m in messages]
+            )
 
         inputs = self.tokenizer(text, return_tensors="pt")
         try:
@@ -423,7 +454,8 @@ class QwenLocalBackend(LLMBackend):
             max_new_tokens=int(max_new_tokens),
             repetition_penalty=1.02,
             eos_token_id=getattr(self.tokenizer, "eos_token_id", None),
-            pad_token_id=getattr(self.tokenizer, "pad_token_id", None) or getattr(self.tokenizer, "eos_token_id", None),
+            pad_token_id=getattr(self.tokenizer, "pad_token_id", None)
+            or getattr(self.tokenizer, "eos_token_id", None),
             do_sample=do_sample,
         )
         if do_sample:
@@ -436,8 +468,9 @@ class QwenLocalBackend(LLMBackend):
         decoded = self.tokenizer.decode(out[0], skip_special_tokens=True)
         # rough trim
         if decoded.startswith(text):
-            decoded = decoded[len(text):].strip()
+            decoded = decoded[len(text) :].strip()
         return decoded.strip()
+
 
 def make_backend(model_choice: str) -> LLMBackend:
     if model_choice == "openai":
@@ -452,11 +485,14 @@ def make_backend(model_choice: str) -> LLMBackend:
 # -------------------------
 ALLOWED_MOD = {"u", "e", "a", "i", "c", "d", "ms", "mt"}
 
+
 def now_ms() -> int:
     return int(time.time() * 1000)
 
+
 def normalize_ws(s: str) -> str:
     return re.sub(r"\s+", " ", (s or "").strip())
+
 
 def normalize_lookup_key(s: str) -> str:
     """
@@ -469,8 +505,10 @@ def normalize_lookup_key(s: str) -> str:
     s = s.rstrip(".!?:;")
     return s.lower()
 
+
 def tokenize_simple(s: str) -> List[str]:
     return re.findall(r"[a-z0-9]+", (s or "").lower())
+
 
 def jaccard_similarity(a: str, b: str) -> float:
     sa, sb = set(tokenize_simple(a)), set(tokenize_simple(b))
@@ -480,11 +518,13 @@ def jaccard_similarity(a: str, b: str) -> float:
         return 0.0
     return len(sa & sb) / len(sa | sb)
 
+
 def normalize_step_text(s: str) -> str:
     s = (s or "").lower()
     s = re.sub(r"[^a-z0-9\s]", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
     return s
+
 
 def expand_entity_aliases(ent: str) -> Set[str]:
     """
@@ -541,7 +581,7 @@ def extract_json_object(text: str) -> Dict[str, Any]:
             if depth > 0:
                 depth -= 1
                 if depth == 0 and start is not None:
-                    candidates.append(s[start:i+1])
+                    candidates.append(s[start : i + 1])
                     start = None
 
     for chunk in reversed(candidates):
@@ -561,11 +601,13 @@ def _find_meta_by_new(meta: List[Dict[str, Any]], new_idx: int) -> Optional[Dict
             return m
     return None
 
+
 def is_near_duplicate_step(a: str, b: str) -> bool:
     a_n, b_n = normalize_ws(a).lower(), normalize_ws(b).lower()
     if a_n == b_n:
         return True
     return jaccard_similarity(a_n, b_n) >= 0.85
+
 
 # -------------------------
 # Global Cache for Exact SemRep Lookup
@@ -573,27 +615,29 @@ def is_near_duplicate_step(a: str, b: str) -> bool:
 # Map: normalized_step_text -> semantic_representation_string
 _REVERSE_SEMREP_MAP: Dict[str, str] = {}
 
+
 def init_reverse_semrep_map(semrep_map: Dict[str, Dict[str, str]]) -> None:
     """
     Builds a reverse lookup dictionary: normalized text -> SemRep string.
-    This allows O(1) exact matching for steps generated by the LLM, 
+    This allows O(1) exact matching for steps generated by the LLM,
     assuming they exist in the extended JSON.
     """
     global _REVERSE_SEMREP_MAP
     _REVERSE_SEMREP_MAP.clear()
-    
+
     for sid, data in semrep_map.items():
         if not isinstance(data, dict):
             continue
-        
+
         raw_text = data.get("step_description", "")
         sem_rep = data.get("semantic_representation", "")
-        
+
         if raw_text and sem_rep:
             # Normalize key to ensure case-insensitive exact match
             # matches the logic in classify_step
             norm_key = normalize_step_text(raw_text)
             _REVERSE_SEMREP_MAP[norm_key] = sem_rep
+
 
 def find_semrep_exact(text: str) -> Optional[str]:
     """
@@ -601,6 +645,7 @@ def find_semrep_exact(text: str) -> Optional[str]:
     """
     norm_text = normalize_step_text(text)
     return _REVERSE_SEMREP_MAP.get(norm_text)
+
 
 # -------------------------
 # Optional vocab/semrep loading
@@ -623,6 +668,7 @@ def load_vocab_csv(path: str) -> Dict[str, str]:
                     m[nk] = sid
     return m
 
+
 def load_semrep_json(path: str) -> Dict[str, Dict[str, str]]:
     obj = json.load(open(path, "r", encoding="utf-8"))
     out: Dict[str, Dict[str, str]] = {}
@@ -635,6 +681,7 @@ def load_semrep_json(path: str) -> Dict[str, Dict[str, str]]:
                 "semantic_representation": str(v.get("semantic_representation") or ""),
             }
     return out
+
 
 def _build_semrep_step_to_id_fallback(semrep_map: Dict[str, Dict[str, str]]) -> Dict[str, str]:
     """
@@ -661,9 +708,13 @@ def _build_semrep_step_to_id_fallback(semrep_map: Dict[str, Dict[str, str]]) -> 
                     m[key] = sid
     return m
 
+
 build_semrep_step_to_id = _helper_build_semrep_step_to_id or _build_semrep_step_to_id_fallback
 
-def resolve_step_id_from_text(step_txt: str, vocab_map: Dict[str, str], extra_map: Optional[Dict[str, str]] = None) -> Optional[str]:
+
+def resolve_step_id_from_text(
+    step_txt: str, vocab_map: Dict[str, str], extra_map: Optional[Dict[str, str]] = None
+) -> Optional[str]:
     raw = (step_txt or "").rstrip("\n\r")
     if raw in vocab_map:
         return vocab_map[raw]
@@ -681,17 +732,19 @@ def resolve_step_id_from_text(step_txt: str, vocab_map: Dict[str, str], extra_ma
             return extra_map[nk]
     return None
 
+
 def sanitize_nonverbatim_step_texts(final_steps: List[str], meta: List[Dict[str, Any]]) -> None:
     """
     Replace '_' with spaces in *generated* step texts only.
     IMPORTANT: Do NOT touch verbatim steps (u/ms/mt), otherwise schema/verbatim constraints break.
     """
     for m in meta:
-        if m.get("mod") in {"u","ms","mt","d"}:
+        if m.get("mod") in {"u", "ms", "mt", "d"}:
             continue
         new = m.get("new")
         if isinstance(new, int) and 0 <= new < len(final_steps):
             final_steps[new] = final_steps[new].replace("_", " ")
+
 
 # -------------------------
 # Step helpers (plan schema compatibility)
@@ -705,6 +758,7 @@ def _step_idx(s: Dict[str, Any]) -> int:
         return v
     return 0
 
+
 def _step_text(s: Dict[str, Any]) -> str:
     v = s.get("txt")
     if isinstance(v, str) and v:
@@ -713,6 +767,7 @@ def _step_text(s: Dict[str, Any]) -> str:
     if isinstance(v, str) and v:
         return v
     return ""
+
 
 def normalize_object_key(obj_phrase: str) -> str:
     """
@@ -724,20 +779,42 @@ def normalize_object_key(obj_phrase: str) -> str:
         return ""
     toks = re.findall(r"[a-z0-9]+", s)
     # tiny generic filter only
-    tiny = {"the","a","an","to","from","into","onto","on","in","at","with","and","or","of","for","by"}
+    tiny = {
+        "the",
+        "a",
+        "an",
+        "to",
+        "from",
+        "into",
+        "onto",
+        "on",
+        "in",
+        "at",
+        "with",
+        "and",
+        "or",
+        "of",
+        "for",
+        "by",
+    }
     toks = [t for t in toks if t and t not in tiny]
     if not toks:
         return ""
     toks = sorted(toks)
     return " ".join(toks)
 
+
 def openai_repair_strict_json(
-    client, model_id: str, system_prompt: str, user_prompt: str,
-    temperature: float, max_output_tokens: int,
+    client,
+    model_id: str,
+    system_prompt: str,
+    user_prompt: str,
+    temperature: float,
+    max_output_tokens: int,
     image_data_urls: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     user_parts = []
-    for u in (image_data_urls or []):
+    for u in image_data_urls or []:
         if isinstance(u, str) and u.strip():
             user_parts.append({"type": "input_image", "image_url": u, "detail": "low"})
     user_parts.append({"type": "input_text", "text": user_prompt})
@@ -764,6 +841,7 @@ def openai_repair_strict_json(
         raise ValueError("No output_text in OpenAI response.")
     return json.loads(txt)
 
+
 # -------------------------
 # Action classification (heuristic + optional semrep)
 # -------------------------
@@ -776,14 +854,16 @@ def openai_repair_strict_json(
 # ADD_VERBS = {"add","pour","sprinkle","mix","stir","combine"}
 # CUT_VERBS = {"cut","chop","dice","slice","mince","remove","peel"}
 
+
 def _starts_with_any(s: str, prefixes: Tuple[str, ...]) -> bool:
     return any(s.startswith(p) for p in prefixes)
+
 
 def _split_top_level_commas(s: str) -> List[str]:
     parts: List[str] = []
     buf: List[str] = []
     depth = 0
-    for ch in (s or ""):
+    for ch in s or "":
         if ch == "(":
             depth += 1
         elif ch == ")" and depth > 0:
@@ -796,6 +876,7 @@ def _split_top_level_commas(s: str) -> List[str]:
     if buf:
         parts.append("".join(buf).strip())
     return [p for p in parts if p]
+
 
 def parse_semrep_one(semrep: str) -> Optional[Tuple[str, Dict[str, str]]]:
     """
@@ -815,6 +896,7 @@ def parse_semrep_one(semrep: str) -> Optional[Tuple[str, Dict[str, str]]]:
         k, v = part.split(":", 1)
         roles[k.strip()] = v.strip()
     return pred, roles
+
 
 def _head_entity(value: str) -> str:
     """
@@ -842,14 +924,44 @@ def _head_entity(value: str) -> str:
         inner = v[len(head) + 1 : -1].strip()
         if inner:
             # if inner contains "of(...)" etc, drilling usually yields the real object identity
-            if head in {"of","in","on","into","onto","from","to","with","inside","outside","bottom","top","side","surface","interior","exterior","next_to","beside","near","between","under","over","above","below","around","across","along"}:
+            if head in {
+                "of",
+                "in",
+                "on",
+                "into",
+                "onto",
+                "from",
+                "to",
+                "with",
+                "inside",
+                "outside",
+                "bottom",
+                "top",
+                "side",
+                "surface",
+                "interior",
+                "exterior",
+                "next_to",
+                "beside",
+                "near",
+                "between",
+                "under",
+                "over",
+                "above",
+                "below",
+                "around",
+                "across",
+                "along",
+            }:
                 return _head_entity(inner)
             # also handle common pattern: X(of(Y)) -> Y
             if "of(" in inner:
                 return _head_entity(inner)
     return normalize_entity_token(head)
 
+
 _PREP_ACTIONS = {"WASH", "CHOP", "CUT", "SLICE", "PEEL"}
+
 
 def _collect_baseline_affordances(semrep_by_old: Dict[int, str]) -> Dict[str, Set[str]]:
     """
@@ -874,6 +986,7 @@ def _collect_baseline_affordances(semrep_by_old: Dict[int, str]) -> Dict[str, Se
             continue
         aff.setdefault(objh, set()).add(act)
     return aff
+
 
 def validate_affordance_mismatch_against_baseline_semrep(
     final_steps: List[str],
@@ -920,16 +1033,19 @@ def validate_affordance_mismatch_against_baseline_semrep(
             continue
 
         mm = meta_by_new.get(i, {})
-        issues.append({
-            "code": "AFFORDANCE_MISMATCH_BASELINE",
-            "step_index": i,
-            "step": step,
-            "object": objh,
-            "detail": f"Action '{act}' was never used with '{objh}' in baseline for this take; likely implausible cascade.",
-            "meta_mod": mm.get("mod"),
-            "meta_eid": mm.get("eid"),
-        })
+        issues.append(
+            {
+                "code": "AFFORDANCE_MISMATCH_BASELINE",
+                "step_index": i,
+                "step": step,
+                "object": objh,
+                "detail": f"Action '{act}' was never used with '{objh}' in baseline for this take; likely implausible cascade.",
+                "meta_mod": mm.get("mod"),
+                "meta_eid": mm.get("eid"),
+            }
+        )
     return issues
+
 
 def _embedded_of_head(value: str) -> str:
     """Extract head entity from the first `of(...)` occurrence inside a raw SemRep role value.
@@ -949,6 +1065,7 @@ def _embedded_of_head(value: str) -> str:
     inner = (m.group(1) or "").strip()
     return _head_entity(inner)
 
+
 def _container_like_core(ent_head: str, ent_raw: str = "") -> str:
     """Best-effort content/core extraction for container-like entities.
 
@@ -967,6 +1084,7 @@ def _container_like_core(ent_head: str, ent_raw: str = "") -> str:
             return "_".join(parts[:-1])
     return h
 
+
 def _replace_entity_surface(text: str, from_ent: str, to_ent: str) -> str:
     """Replace an entity mention in free text, handling underscore vs space variants.
 
@@ -980,8 +1098,11 @@ def _replace_entity_surface(text: str, from_ent: str, to_ent: str) -> str:
     to_space = to_ent.replace("_", " ").strip()
     out = re.sub(rf"\b{re.escape(from_space)}\b", to_space, text, flags=re.IGNORECASE)
     out = re.sub(rf"\b{re.escape(from_ent)}\b", to_ent, out, flags=re.IGNORECASE)
-    out = re.sub(rf"\b{re.escape(from_space.replace(' ', '-'))}\b", to_space, out, flags=re.IGNORECASE)
+    out = re.sub(
+        rf"\b{re.escape(from_space.replace(' ', '-'))}\b", to_space, out, flags=re.IGNORECASE
+    )
     return out
+
 
 def validate_get_substitution_cascade_semrep(
     final_steps: List[str],
@@ -1012,13 +1133,13 @@ def validate_get_substitution_cascade_semrep(
                 p = parse_semrep_one(sr)
                 if p:
                     _pred, roles = p
-                    objh = _head_entity(roles.get("Object") or roles.get("Theme") or roles.get("Patient") or "")
+                    objh = _head_entity(
+                        roles.get("Object") or roles.get("Theme") or roles.get("Patient") or ""
+                    )
                     if objh:
                         out.add(objh)
                     continue
-            # fallback if semrep missing: substring match against step text
-            t = (final_steps[i] or "").lower()
-            # store nothing here; we'll do fallback check directly where needed
+            # Fallback checks for missing semrep are handled directly where needed.
         return out
 
     def _baseline_entities_before(old_limit: int) -> Set[str]:
@@ -1033,11 +1154,12 @@ def validate_get_substitution_cascade_semrep(
             if not p:
                 continue
             _pred, roles = p
-            objh = _head_entity(roles.get("Object") or roles.get("Theme") or roles.get("Patient") or "")
+            objh = _head_entity(
+                roles.get("Object") or roles.get("Theme") or roles.get("Patient") or ""
+            )
             if objh:
                 out.add(objh)
         return out
-
 
     meta_by_new: Dict[int, Dict[str, Any]] = {}
     for m in meta:
@@ -1079,7 +1201,9 @@ def validate_get_substitution_cascade_semrep(
             cp, croles = cand_parsed
             if _action_from_semrep(cp, croles) != "GET":
                 continue
-            cand_obj_raw = (croles.get("Object") or croles.get("Theme") or croles.get("Patient") or "")
+            cand_obj_raw = (
+                croles.get("Object") or croles.get("Theme") or croles.get("Patient") or ""
+            )
         else:
             cand_sr2 = find_semrep_exact(final_steps[new]) or ""
             cand_parsed2 = parse_semrep_one(cand_sr2) if cand_sr2 else None
@@ -1088,9 +1212,11 @@ def validate_get_substitution_cascade_semrep(
             cp, croles = cand_parsed2
             if _action_from_semrep(cp, croles) != "GET":
                 continue
-            cand_obj_raw = (croles.get("Object") or croles.get("Theme") or croles.get("Patient") or "")
+            cand_obj_raw = (
+                croles.get("Object") or croles.get("Theme") or croles.get("Patient") or ""
+            )
 
-        orig_obj_raw = (oroles.get("Object") or oroles.get("Theme") or oroles.get("Patient") or "")
+        orig_obj_raw = oroles.get("Object") or oroles.get("Theme") or oroles.get("Patient") or ""
         subs.append((new, old, eid, orig_obj_raw, cand_obj_raw))
 
     for new_idx, _old_idx, eid, orig_obj_raw, cand_obj_raw in subs:
@@ -1102,21 +1228,25 @@ def validate_get_substitution_cascade_semrep(
         # Guard: if the substituted GET acquires an entity already present earlier in the rewrite,
         # cascading will often create nonsense (e.g., tea_bag => tea).
         prev_ents = _prev_entities_in_rewrite(new_idx)
-        already_present = (cand_obj in prev_ents)
+        already_present = cand_obj in prev_ents
         if not already_present:
             # fallback: raw text contains "tea bag" etc.
             cand_phrase = cand_obj.replace("_", " ")
-            already_present = any(cand_phrase in (final_steps[i] or "").lower() for i in range(0, new_idx))
+            already_present = any(
+                cand_phrase in (final_steps[i] or "").lower() for i in range(0, new_idx)
+            )
 
         if already_present and cand_obj != orig_obj:
-            issues.append({
-                "code": "SUBSTITUTION_TARGET_ALREADY_PRESENT",
-                "step_index": new_idx,
-                "step": final_steps[new_idx],
-                "object": cand_obj,
-                "eid": eid or None,
-                "detail": f"GET-substitution target '{cand_obj}' already appears earlier in the rewrite; choose a different substitution target.",
-            })
+            issues.append(
+                {
+                    "code": "SUBSTITUTION_TARGET_ALREADY_PRESENT",
+                    "step_index": new_idx,
+                    "step": final_steps[new_idx],
+                    "object": cand_obj,
+                    "eid": eid or None,
+                    "detail": f"GET-substitution target '{cand_obj}' already appears earlier in the rewrite; choose a different substitution target.",
+                }
+            )
             # IMPORTANT: do NOT cascade from this substitution; it must be repaired first.
             continue
 
@@ -1125,17 +1255,19 @@ def validate_get_substitution_cascade_semrep(
         # plausibility issue and let LLM repair pick a different substitution target.
         prev_ents = _baseline_entities_before(_old_idx)
         if cand_obj in prev_ents and cand_obj != orig_obj:
-            issues.append({
-                "code": "SUBSTITUTION_TARGET_ALREADY_PRESENT",
-                "step_index": new_idx,
-                "step": final_steps[new_idx],
-                "object": cand_obj,
-                "eid": eid or None,
-                "detail": (
-                    f"GET-substitution target '{cand_obj}' already appears earlier in the original take; "
-                    "choose a different substitution target to avoid implausible cascades."
-                ),
-            })
+            issues.append(
+                {
+                    "code": "SUBSTITUTION_TARGET_ALREADY_PRESENT",
+                    "step_index": new_idx,
+                    "step": final_steps[new_idx],
+                    "object": cand_obj,
+                    "eid": eid or None,
+                    "detail": (
+                        f"GET-substitution target '{cand_obj}' already appears earlier in the original take; "
+                        "choose a different substitution target to avoid implausible cascades."
+                    ),
+                }
+            )
             # Do NOT cascade from this substitution; it will be repaired upstream.
             continue
 
@@ -1174,29 +1306,37 @@ def validate_get_substitution_cascade_semrep(
             instrh_j = _head_entity(rj.get("Instrument") or "")
             origh_j = _head_entity(rj.get("Origin") or "")
             coobjh_j = _head_entity(rj.get("Coobject") or "")
-            desth_j = _head_entity(rj.get("Destination") or rj.get("Goal") or rj.get("Location") or "")
+            desth_j = _head_entity(
+                rj.get("Destination") or rj.get("Goal") or rj.get("Location") or ""
+            )
 
             for from_ent, to_ent in pairs:
                 hit = (
-                    (objh_j == from_ent) or (instrh_j == from_ent) or (origh_j == from_ent)
-                    or (coobjh_j == from_ent) or (desth_j == from_ent)
+                    (objh_j == from_ent)
+                    or (instrh_j == from_ent)
+                    or (origh_j == from_ent)
+                    or (coobjh_j == from_ent)
+                    or (desth_j == from_ent)
                 )
                 if not hit:
                     continue
-                issues.append({
-                    "code": "SUBSTITUTION_CASCADE_ENTITY",
-                    "step_index": j,
-                    "step": final_steps[j],
-                    "object": from_ent,
-                    "from_ent": from_ent,
-                    "to_ent": to_ent,
-                    "eid": eid or None,
-                    "detail": (
-                        f"downstream 'u' step still references '{from_ent}' after GET-substitution "
-                        f"(eid={eid or 'unknown'}) replaced it with '{to_ent}'"
-                    ),
-                })
+                issues.append(
+                    {
+                        "code": "SUBSTITUTION_CASCADE_ENTITY",
+                        "step_index": j,
+                        "step": final_steps[j],
+                        "object": from_ent,
+                        "from_ent": from_ent,
+                        "to_ent": to_ent,
+                        "eid": eid or None,
+                        "detail": (
+                            f"downstream 'u' step still references '{from_ent}' after GET-substitution "
+                            f"(eid={eid or 'unknown'}) replaced it with '{to_ent}'"
+                        ),
+                    }
+                )
     return issues
+
 
 def _content_candidates(ent_head: str) -> List[str]:
     """
@@ -1223,6 +1363,7 @@ def _content_candidates(ent_head: str) -> List[str]:
     pre_last = parts[-2] if len(parts) >= 2 else ""
 
     out: List[str] = []
+
     def _add(x: str) -> None:
         x = normalize_entity_token(x)
         if x and x not in out and x != e and x != pack:
@@ -1243,6 +1384,7 @@ def _content_candidates(ent_head: str) -> List[str]:
 
     return out
 
+
 def _embedded_location_head(value: str) -> str:
     """
     Extract an embedded Location from role values like:
@@ -1261,7 +1403,7 @@ def _embedded_location_head(value: str) -> str:
     idx = v.find("Location:")
     loc_expr = ""
     if idx >= 0:
-        tail = v[idx + len("Location:"):].strip()
+        tail = v[idx + len("Location:") :].strip()
         # Read until comma at top-level (respect parentheses nesting).
         buf: List[str] = []
         depth = 0
@@ -1287,6 +1429,7 @@ def _embedded_location_head(value: str) -> str:
         return ""
     return _head_entity(loc_expr)
 
+
 def normalize_entity_token(tok: str) -> str:
     t = (tok or "").strip().lower()
     if not t:
@@ -1304,30 +1447,30 @@ def normalize_entity_token(tok: str) -> str:
 def _action_from_semrep(pred: str, roles: Dict[str, str]) -> Optional[str]:
     p = (pred or "").strip().upper()
     manner = (roles.get("Manner") or "").lower()
-    if p in {"GET","TAKE","GRAB","PICK","PICK_UP","RETRIEVE","FETCH","REMOVE"}:
+    if p in {"GET", "TAKE", "GRAB", "PICK", "PICK_UP", "RETRIEVE", "FETCH", "REMOVE"}:
         return "GET"
     if p in {"RETURN"}:
         return "PUT_BACK"
-    if p in {"PUT","PLACE","SET"}:
+    if p in {"PUT", "PLACE", "SET"}:
         # semrep generator for "put ... back" tends to include Manner: back
         if "back" in manner or "away" in manner:
             return "PUT_BACK"
         return None
-    if p in {"OPEN","UNSEAL","UNSCREW"}:
+    if p in {"OPEN", "UNSEAL", "UNSCREW"}:
         return "OPEN"
-    if p in {"CLOSE","SEAL","COVER"}:
+    if p in {"CLOSE", "SEAL", "COVER"}:
         return "CLOSE"
-    if p in {"WASH","RINSE","CLEAN"}:
+    if p in {"WASH", "RINSE", "CLEAN"}:
         return "WASH"
-    if p in {"DRY","WIPE","DRY_OFF"}:
+    if p in {"DRY", "WIPE", "DRY_OFF"}:
         return "DRY"
-    if p in {"ADD","POUR","SPRINKLE","MIX","STIR","COMBINE","INSERT","TRANSFER"}:
+    if p in {"ADD", "POUR", "SPRINKLE", "MIX", "STIR", "COMBINE", "INSERT", "TRANSFER"}:
         return "ADD"
-    if p in {"CUT","CHOP","DICE","SLICE","MINCE","PEEL"}:
+    if p in {"CUT", "CHOP", "DICE", "SLICE", "MINCE", "PEEL"}:
         return "CUT"
-    if p in {"DRAIN","STRAIN"}:
+    if p in {"DRAIN", "STRAIN"}:
         return "OTHER"
-    if p in {"DISPOSE","DISCARD","THROW","TOSS","TRASH"}:
+    if p in {"DISPOSE", "DISCARD", "THROW", "TOSS", "TRASH"}:
         return "DISPOSE"
     return None
 
@@ -1335,7 +1478,7 @@ def _action_from_semrep(pred: str, roles: Dict[str, str]) -> Optional[str]:
 def classify_step(step_text: str, semrep: Optional[str] = None) -> Dict[str, Any]:
     """
     Classify the action based STRICTLY on Semantic Representation.
-    
+
     1. If 'semrep' is provided (from meta/plan), use it.
     2. If not, look up the text in the loaded SemRep JSON (Exact Match).
     3. If not found, return 'OTHER' (no heuristic guessing).
@@ -1344,7 +1487,7 @@ def classify_step(step_text: str, semrep: Optional[str] = None) -> Dict[str, Any
     sr_string = semrep
     if not sr_string:
         sr_string = find_semrep_exact(step_text)
-    
+
     # If we still don't have a SemRep, we cannot safely classify strictly.
     # Returning default safe values.
     if not sr_string:
@@ -1361,14 +1504,25 @@ def classify_step(step_text: str, semrep: Optional[str] = None) -> Dict[str, Any
 
     # 3. Map PREDICATE to Action Category
     # Based on the vocabulary found in Ego-Exo4D SemReps
-    
+
     # GET / TAKE
-    if p_upper in {"GET", "TAKE", "GRAB", "PICK", "PICK_UP", "RETRIEVE", "FETCH", "REMOVE", "COLLECT", "FISH_OUT"}:
+    if p_upper in {
+        "GET",
+        "TAKE",
+        "GRAB",
+        "PICK",
+        "PICK_UP",
+        "RETRIEVE",
+        "FETCH",
+        "REMOVE",
+        "COLLECT",
+        "FISH_OUT",
+    }:
         action = "GET"
-        
+
     # PUT BACK / RETURN
     # "RETURN" is explicit. "PUT_AWAY" usually implies freeing hands.
-    # "PUT" can be ambiguous, but often implies placing something down. 
+    # "PUT" can be ambiguous, but often implies placing something down.
     # Logic: If it's explicitly "PUT_BACK" or "RETURN", mark as PUT_BACK.
     elif p_upper in {"PUT_BACK", "RETURN", "PUT_AWAY", "REPLACE"}:
         action = "PUT_BACK"
@@ -1395,19 +1549,57 @@ def classify_step(step_text: str, semrep: Optional[str] = None) -> Dict[str, Any
         action = "DRY"
 
     # ADD / MIX / POUR
-    elif p_upper in {"ADD", "POUR", "SPRINKLE", "MIX", "STIR", "COMBINE", "INSERT", "TRANSFER", "FILL", "DIP", "SPREAD", "WHISK", "BEAT", "CRACK"}:
+    elif p_upper in {
+        "ADD",
+        "POUR",
+        "SPRINKLE",
+        "MIX",
+        "STIR",
+        "COMBINE",
+        "INSERT",
+        "TRANSFER",
+        "FILL",
+        "DIP",
+        "SPREAD",
+        "WHISK",
+        "BEAT",
+        "CRACK",
+    }:
         action = "ADD"
 
     # CUT
-    elif p_upper in {"CUT", "CHOP", "DICE", "SLICE", "MINCE", "PEEL", "CUT_OFF", "CUT_OUT", "CARVE"}:
+    elif p_upper in {
+        "CUT",
+        "CHOP",
+        "DICE",
+        "SLICE",
+        "MINCE",
+        "PEEL",
+        "CUT_OFF",
+        "CUT_OUT",
+        "CARVE",
+    }:
         action = "CUT"
 
     # DISPOSE
     elif p_upper in {"DISPOSE", "DISCARD", "THROW", "TOSS", "TRASH", "DUMP_OUT"}:
         action = "DISPOSE"
-        
+
     # USE (General interaction)
-    elif p_upper in {"USE", "OPERATE", "TURN_ON", "TURN_OFF", "PRESS", "CHECK", "ADJUST", "MEASURE", "KNEAD", "ROLL", "FLATTEN", "SQUEEZE"}:
+    elif p_upper in {
+        "USE",
+        "OPERATE",
+        "TURN_ON",
+        "TURN_OFF",
+        "PRESS",
+        "CHECK",
+        "ADJUST",
+        "MEASURE",
+        "KNEAD",
+        "ROLL",
+        "FLATTEN",
+        "SQUEEZE",
+    }:
         action = "USE"
 
     # 4. Extract Objects
@@ -1419,21 +1611,25 @@ def classify_step(step_text: str, semrep: Optional[str] = None) -> Dict[str, Any
     raw_obj = roles.get("Object") or roles.get("Theme") or roles.get("Patient")
     if raw_obj:
         head = _head_entity(raw_obj)
-        if head: objs.add(head)
+        if head:
+            objs.add(head)
 
     # Extract Instrument (tools usually need to be held)
     raw_instr = roles.get("Instrument")
     if raw_instr:
         head = _head_entity(raw_instr)
-        if head: objs.add(head)
+        if head:
+            objs.add(head)
 
     # Extract Destination (important for ADD/POUR logic logic: "Pour X into Y")
     raw_dest = roles.get("Destination") or roles.get("Coobject")
     if raw_dest:
         head = _head_entity(raw_dest)
-        if head: dests.add(head)
+        if head:
+            dests.add(head)
 
     return {"action": action, "objects": objs, "dests": dests}
+
 
 def primary_object_from_step(step_text: str, semrep: Optional[str] = None) -> str:
     """
@@ -1444,7 +1640,9 @@ def primary_object_from_step(step_text: str, semrep: Optional[str] = None) -> st
         parsed = parse_semrep_one(semrep)
         if parsed:
             _pred, roles = parsed
-            obj = _head_entity(roles.get("Object") or roles.get("Theme") or roles.get("Patient") or "")
+            obj = _head_entity(
+                roles.get("Object") or roles.get("Theme") or roles.get("Patient") or ""
+            )
             # unwrap inside(of(cup)) etc already handled in _head_entity
             if obj:
                 return obj
@@ -1518,16 +1716,25 @@ def looks_like_stir_in_pot_step(s_ws: str) -> bool:
         return True
     return False
 
+
 # -------------------------
 # Substance/contents normalization (for container-state plausibility)
 # -------------------------
 GENERIC_SUBSTANCE_WORDS = {
-    "mixture", "mix",
-    "contents", "content",
-    "batter", "dough", "paste",
-    "solution", "liquid",
-    "ingredients", "stuff", "material",
+    "mixture",
+    "mix",
+    "contents",
+    "content",
+    "batter",
+    "dough",
+    "paste",
+    "solution",
+    "liquid",
+    "ingredients",
+    "stuff",
+    "material",
 }
+
 
 def substance_tokens(ent: str) -> List[str]:
     """
@@ -1540,6 +1747,7 @@ def substance_tokens(ent: str) -> List[str]:
     toks = [t[:-1] if t.endswith("s") and len(t) > 3 else t for t in toks]
     meaningful = [t for t in toks if t not in GENERIC_SUBSTANCE_WORDS]
     return meaningful or toks
+
 
 def same_substance(a: str, b: str) -> bool:
     """
@@ -1555,6 +1763,7 @@ def same_substance(a: str, b: str) -> bool:
     j = len(ta & tb) / len(ta | tb)
     return j >= 0.67
 
+
 def looks_like_back_transfer(s_ws: str) -> bool:
     """
     Heuristic for "pour/transfer ... back into ..." style steps.
@@ -1567,10 +1776,13 @@ def looks_like_back_transfer(s_ws: str) -> bool:
     # focus on transfer verbs
     return s_ws.startswith(("pour ", "transfer ", "put ", "place ", "return "))
 
+
 # -------------------------
 # Baseline from original (we assume original is logical)
 # -------------------------
-def build_original_baseline(original_steps: List[str], semrep_by_old: Optional[Dict[int, str]] = None) -> Dict[str, Any]:
+def build_original_baseline(
+    original_steps: List[str], semrep_by_old: Optional[Dict[int, str]] = None
+) -> Dict[str, Any]:
     """
     Derive:
       first_get[obj] = first index where obj is GET
@@ -1601,12 +1813,17 @@ def build_original_baseline(original_steps: List[str], semrep_by_old: Optional[D
         return parse_semrep_one(sr.strip())
 
     HEAT_PREDS = {
-        "HEAT","BOIL","COOK","SIMMER",
-        "ADJUST","REGULATE",
-        "TURN_ON","TURN_OFF",
+        "HEAT",
+        "BOIL",
+        "COOK",
+        "SIMMER",
+        "ADJUST",
+        "REGULATE",
+        "TURN_ON",
+        "TURN_OFF",
     }
-    PLACE_PREDS = {"PLACE","PUT","SET","SET_DOWN","POSITION"}
-    STORAGE_PREDS = {"PUT_AWAY","RETURN","PUT_BACK","REPLACE"}
+    PLACE_PREDS = {"PLACE", "PUT", "SET", "SET_DOWN", "POSITION"}
+    STORAGE_PREDS = {"PUT_AWAY", "RETURN", "PUT_BACK", "REPLACE"}
 
     for i, t in enumerate(original_steps):
         sem = semrep_by_old.get(i) if semrep_by_old else None
@@ -1619,7 +1836,7 @@ def build_original_baseline(original_steps: List[str], semrep_by_old: Optional[D
                     first_get[o] = i
                     best_get_text[o] = t
                 ever_get.add(o)
-        if action in {"USE","ADD","CUT","OPEN","CLOSE","WASH","DRY","PUT_BACK"}:
+        if action in {"USE", "ADD", "CUT", "OPEN", "CLOSE", "WASH", "DRY", "PUT_BACK"}:
             for o in objs:
                 if o:
                     ever_use.add(o)
@@ -1629,9 +1846,11 @@ def build_original_baseline(original_steps: List[str], semrep_by_old: Optional[D
         if pr:
             pred, roles = pr
             pu = (pred or "").strip().upper()
-            raw_obj = (roles.get("Object") or roles.get("Theme") or roles.get("Patient") or "")
+            raw_obj = roles.get("Object") or roles.get("Theme") or roles.get("Patient") or ""
             objh = _head_entity(raw_obj)
-            desth = _head_entity(roles.get("Destination") or roles.get("Location") or roles.get("Goal") or "")
+            desth = _head_entity(
+                roles.get("Destination") or roles.get("Location") or roles.get("Goal") or ""
+            )
 
             if pu in HEAT_PREDS:
                 # Whatever the ORIGINAL mentions as Location/Destination for heat-like predicates
@@ -1687,7 +1906,7 @@ def normalize_meta(meta: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         # Key warranty
         mm.setdefault("old", "")
         mm.setdefault("new", "")
-        mm.setdefault("mod", "u")     
+        mm.setdefault("mod", "u")
         mm.setdefault("etype", None)
         mm.setdefault("eid", None)
         mm.setdefault("cid", None)
@@ -1713,6 +1932,7 @@ def normalize_meta(meta: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             mm["cid"] = mm["cid"].strip() or None
         out.append(mm)
     return out
+
 
 def dedupe_corrections_in_place(meta: List[Dict[str, Any]]) -> None:
     """
@@ -1743,13 +1963,14 @@ def dedupe_corrections_in_place(meta: List[Dict[str, Any]]) -> None:
         else:
             seen.add(cid)
 
+
 def force_realize_transposition(final_steps, meta, eid, src, tgt):
     pos = {}
     idx_in_meta = {}
     for k, m in enumerate(meta):
         if (
             m.get("eid") == eid
-            and m.get("mod") in {"ms","mt"}
+            and m.get("mod") in {"ms", "mt"}
             and isinstance(m.get("old"), int)
             and isinstance(m.get("new"), int)
         ):
@@ -1774,8 +1995,10 @@ def force_realize_transposition(final_steps, meta, eid, src, tgt):
     canonicalize_meta_new_indices_in_place(meta)
     return True
 
+
 def meta_non_del_count(meta: List[Dict[str, Any]]) -> int:
     return sum(1 for m in meta if m.get("mod") != "d")
+
 
 def canonicalize_meta_new_indices_in_place(meta: List[Dict[str, Any]]) -> None:
     """
@@ -1790,6 +2013,7 @@ def canonicalize_meta_new_indices_in_place(meta: List[Dict[str, Any]]) -> None:
         m["new"] = new_i
         new_i += 1
 
+
 def _meta_pos_for_new(meta: List[Dict[str, Any]], new_idx: int) -> Optional[int]:
     for k, m in enumerate(meta):
         if m.get("mod") == "d":
@@ -1797,6 +2021,8 @@ def _meta_pos_for_new(meta: List[Dict[str, Any]], new_idx: int) -> Optional[int]
         if isinstance(m.get("new"), int) and int(m["new"]) == int(new_idx):
             return k
     return None
+
+
 def _meta_block_end(meta: List[Dict[str, Any]], start: int) -> int:
     """
     Block = head non-deletion meta entry + all immediately-following deletions.
@@ -1807,6 +2033,8 @@ def _meta_block_end(meta: List[Dict[str, Any]], start: int) -> int:
     while end < len(meta) and meta[end].get("mod") == "d":
         end += 1
     return end
+
+
 def _meta_swap_blocks_by_new(meta: List[Dict[str, Any]], a_new: int, b_new: int) -> bool:
     pa = _meta_pos_for_new(meta, a_new)
     pb = _meta_pos_for_new(meta, b_new)
@@ -1822,13 +2050,19 @@ def _meta_swap_blocks_by_new(meta: List[Dict[str, Any]], a_new: int, b_new: int)
     block_b = meta[pb:qb]
     meta[pa:qb] = block_b + mid + block_a
     return True
-def _meta_insert_before_new(meta: List[Dict[str, Any]], new_idx: int, m_new: Dict[str, Any]) -> None:
+
+
+def _meta_insert_before_new(
+    meta: List[Dict[str, Any]], new_idx: int, m_new: Dict[str, Any]
+) -> None:
     p = _meta_pos_for_new(meta, new_idx)
     if p is None:
         # insert at end (after last block)
         meta.append(m_new)
     else:
         meta.insert(p, m_new)
+
+
 def _meta_remove_block_by_new(meta: List[Dict[str, Any]], new_idx: int) -> bool:
     """
     Remove the non-deletion head with new=new_idx.
@@ -1838,7 +2072,7 @@ def _meta_remove_block_by_new(meta: List[Dict[str, Any]], new_idx: int) -> bool:
     if p is None:
         return False
     q = _meta_block_end(meta, p)
-    trailing_dels = [x for x in meta[p+1:q] if x.get("mod") == "d"]
+    trailing_dels = [x for x in meta[p + 1 : q] if x.get("mod") == "d"]
     del meta[p:q]
     if trailing_dels:
         # attach to previous block (at position p, which is now "after previous block")
@@ -1848,14 +2082,23 @@ def _meta_remove_block_by_new(meta: List[Dict[str, Any]], new_idx: int) -> bool:
             meta[p:p] = trailing_dels
     return True
 
-def enforce_verbatim_for_u_and_moves(original_steps: List[str], final_steps: List[str], meta: List[Dict[str, Any]]) -> None:
+
+def enforce_verbatim_for_u_and_moves(
+    original_steps: List[str], final_steps: List[str], meta: List[Dict[str, Any]]
+) -> None:
     for m in meta:
         if m.get("mod") not in {"u", "ms", "mt"}:
             continue
         old = m.get("old")
         new = m.get("new")
-        if isinstance(old, int) and isinstance(new, int) and 0 <= old < len(original_steps) and 0 <= new < len(final_steps):
+        if (
+            isinstance(old, int)
+            and isinstance(new, int)
+            and 0 <= old < len(original_steps)
+            and 0 <= new < len(final_steps)
+        ):
             final_steps[new] = original_steps[old]
+
 
 def align_final_to_meta_length(final_steps: List[str], meta: List[Dict[str, Any]]) -> List[str]:
     """
@@ -1876,15 +2119,23 @@ def align_final_to_meta_length(final_steps: List[str], meta: List[Dict[str, Any]
 # -------------------------
 # Schema validation + plan coverage
 # -------------------------
-def validate_rewrite_schema(original_steps: List[str], final_steps: List[str], meta: List[Dict[str, Any]]) -> List[str]:
+def validate_rewrite_schema(
+    original_steps: List[str], final_steps: List[str], meta: List[Dict[str, Any]]
+) -> List[str]:
     issues: List[str] = []
     new_indices: List[int] = []
     move_counts: Dict[str, Dict[str, int]] = defaultdict(lambda: {"ms": 0, "mt": 0})
 
     # Corrections must not be empty filler (Continue/Proceed/etc.)
     BAD_CORR_PREFIXES = (
-        "continue", "proceed", "go on", "carry on", "keep going",
-        "then continue", "next", "move on"
+        "continue",
+        "proceed",
+        "go on",
+        "carry on",
+        "keep going",
+        "then continue",
+        "next",
+        "move on",
     )
 
     def _nonempty(x: Any) -> bool:
@@ -1905,13 +2156,15 @@ def validate_rewrite_schema(original_steps: List[str], final_steps: List[str], m
         elif mod == "d":
             if et_s not in {None, "deletion"}:
                 issues.append(f"meta[{i}] mod='d' requires etype='deletion' or null")
-        elif mod in {"ms","mt"}:
+        elif mod in {"ms", "mt"}:
             if et_s not in {None, "transposition"}:
                 issues.append(f"meta[{i}] mod='{mod}' requires etype='transposition' or null")
         elif mod == "e":
             if et_s not in {"substitution", "wrong_execution"}:
-                issues.append(f"meta[{i}] mod='e' requires etype in {{substitution,wrong_execution}}")
-        elif mod in {"u","a"}:
+                issues.append(
+                    f"meta[{i}] mod='e' requires etype in {{substitution,wrong_execution}}"
+                )
+        elif mod in {"u", "a"}:
             if et_s is not None:
                 issues.append(f"meta[{i}] mod='{mod}' requires etype=null")
         elif mod == "c":
@@ -1920,8 +2173,12 @@ def validate_rewrite_schema(original_steps: List[str], final_steps: List[str], m
                 issues.append(f"meta[{i}] mod='c' requires etype null or 'correction'")
 
         # Allow insertion without eid ONLY if it's an explicit repair insertion.
-        is_repair_insertion = (mod == "i" and _nonempty(m.get("repair_reason")))
-        if mod in {"e", "a", "i", "ms", "mt", "d"} and not _nonempty(m.get("eid")) and not is_repair_insertion:
+        is_repair_insertion = mod == "i" and _nonempty(m.get("repair_reason"))
+        if (
+            mod in {"e", "a", "i", "ms", "mt", "d"}
+            and not _nonempty(m.get("eid"))
+            and not is_repair_insertion
+        ):
             issues.append(f"meta[{i}] mod='{mod}' requires non-empty eid")
 
         if mod == "c" and not _nonempty(m.get("cid")):
@@ -1967,19 +2224,25 @@ def validate_rewrite_schema(original_steps: List[str], final_steps: List[str], m
         if mod == "c" and isinstance(newv, int) and 0 <= newv < len(final_steps):
             txt = normalize_ws(final_steps[newv]).lower()
             if len(txt.split()) <= 2 or txt.startswith(BAD_CORR_PREFIXES):
-                issues.append(f"correction at final_steps[{newv}] looks like filler: '{final_steps[newv]}'")
+                issues.append(
+                    f"correction at final_steps[{newv}] looks like filler: '{final_steps[newv]}'"
+                )
 
     # Explicit structural check: number of non-deletion meta entries must equal final_steps length.
     non_del = [m for m in meta if m.get("mod") in ALLOWED_MOD and m.get("mod") != "d"]
     if len(non_del) != len(final_steps):
-        issues.append(f"meta/final_steps length mismatch: meta_non_del={len(non_del)} vs len(final_steps)={len(final_steps)}")
+        issues.append(
+            f"meta/final_steps length mismatch: meta_non_del={len(non_del)} vs len(final_steps)={len(final_steps)}"
+        )
 
     if sorted(new_indices) != list(range(len(final_steps))):
         issues.append("meta.new indices must cover 0..len(final_steps)-1 exactly once")
 
     for eid, cts in move_counts.items():
         if cts["ms"] != 1 or cts["mt"] != 1:
-            issues.append(f"transposition eid={eid} must have exactly one ms and one mt (ms={cts['ms']} mt={cts['mt']})")
+            issues.append(
+                f"transposition eid={eid} must have exactly one ms and one mt (ms={cts['ms']} mt={cts['mt']})"
+            )
 
     # strict 'u'
     for i, m in enumerate(meta):
@@ -1996,6 +2259,7 @@ def validate_rewrite_schema(original_steps: List[str], final_steps: List[str], m
         if normalize_ws(final_steps[new]) != normalize_ws(original_steps[old]):
             issues.append(f"meta[{i}] u mismatch ORIGINAL[{old}]")
     return issues
+
 
 def validate_plan_coverage(take: Dict[str, Any], meta: List[Dict[str, Any]]) -> List[str]:
     issues: List[str] = []
@@ -2032,7 +2296,7 @@ def validate_plan_coverage(take: Dict[str, Any], meta: List[Dict[str, Any]]) -> 
             if cts.get("ms", 0) != 1 or cts.get("mt", 0) != 1:
                 issues.append(
                     f"plan_coverage: transposition eid={eid} must have exactly one ms and one mt "
-                    f"(ms={cts.get('ms',0)} mt={cts.get('mt',0)})"
+                    f"(ms={cts.get('ms', 0)} mt={cts.get('mt', 0)})"
                 )
 
     for c in corrs:
@@ -2067,7 +2331,11 @@ def validate_transposition_realized(take: Dict[str, Any], meta: List[Dict[str, A
             continue
         src = e.get("step_index") if isinstance(e.get("step_index"), int) else e.get("src_step_idx")
         spec = e.get("spec") if isinstance(e.get("spec"), dict) else {}
-        tgt = spec.get("transposition_target") if isinstance(spec.get("transposition_target"), int) else e.get("target_step_idx")
+        tgt = (
+            spec.get("transposition_target")
+            if isinstance(spec.get("transposition_target"), int)
+            else e.get("target_step_idx")
+        )
         if not (isinstance(src, int) and isinstance(tgt, int)):
             continue
         trans.append((eid, src, tgt))
@@ -2088,7 +2356,9 @@ def validate_transposition_realized(take: Dict[str, Any], meta: List[Dict[str, A
             # Allow intentional plan override, but still require a real swap of some pair.
             has_override = any(bool(m.get("plan_override")) for m in msmt)
             if not has_override:
-                issues.append(f"transposition eid={eid} has ms/mt old={sorted(old_to_new.keys())}, expected {{{src},{tgt}}}")
+                issues.append(
+                    f"transposition eid={eid} has ms/mt old={sorted(old_to_new.keys())}, expected {{{src},{tgt}}}"
+                )
                 continue
             olds = sorted(old_to_new.keys())
             if len(olds) != 2:
@@ -2114,9 +2384,10 @@ def validate_transposition_realized(take: Dict[str, Any], meta: List[Dict[str, A
 
     return issues
 
+
 def iter_plan_transpositions(take: Dict[str, Any]) -> List[Tuple[str, int, int]]:
     out: List[Tuple[str, int, int]] = []
-    for e in (take.get("errors") or []):
+    for e in take.get("errors") or []:
         if not isinstance(e, dict):
             continue
         etype = str(e.get("type") or e.get("error_type") or "").strip().lower()
@@ -2127,13 +2398,18 @@ def iter_plan_transpositions(take: Dict[str, Any]) -> List[Tuple[str, int, int]]
             continue
         src = e.get("step_index") if isinstance(e.get("step_index"), int) else e.get("src_step_idx")
         spec = e.get("spec") if isinstance(e.get("spec"), dict) else {}
-        tgt = spec.get("transposition_target") if isinstance(spec.get("transposition_target"), int) else e.get("target_step_idx")
+        tgt = (
+            spec.get("transposition_target")
+            if isinstance(spec.get("transposition_target"), int)
+            else e.get("target_step_idx")
+        )
         if isinstance(src, int) and isinstance(tgt, int):
             out.append((eid, int(src), int(tgt)))
     return out
 
+
 def plan_insertion_text_for_eid(take: Dict[str, Any], eid: str) -> Optional[str]:
-    for e in (take.get("errors") or []):
+    for e in take.get("errors") or []:
         if not isinstance(e, dict):
             continue
         eeid = str(e.get("event_id") or e.get("error_id") or "").strip()
@@ -2143,7 +2419,13 @@ def plan_insertion_text_for_eid(take: Dict[str, Any], eid: str) -> Optional[str]
         if etype != "insertion":
             continue
 
-        for k in ("step_description", "txt", "insert_step_description", "inserted_step", "insert_step"):
+        for k in (
+            "step_description",
+            "txt",
+            "insert_step_description",
+            "inserted_step",
+            "insert_step",
+        ):
             v = e.get(k)
             if isinstance(v, str) and v.strip():
                 return v.strip()
@@ -2157,6 +2439,7 @@ def plan_insertion_text_for_eid(take: Dict[str, Any], eid: str) -> Optional[str]
 
     return None
 
+
 def _new_index_of_old(meta: List[Dict[str, Any]], old_idx: int) -> Optional[int]:
     for m in meta:
         if m.get("mod") == "d":
@@ -2164,6 +2447,7 @@ def _new_index_of_old(meta: List[Dict[str, Any]], old_idx: int) -> Optional[int]
         if m.get("old") == old_idx and isinstance(m.get("new"), int):
             return int(m["new"])
     return None
+
 
 def validate_and_repair_insertions_from_plan(
     take: Dict[str, Any],
@@ -2185,7 +2469,7 @@ def validate_and_repair_insertions_from_plan(
 
     # map eid -> planned insert text + src
     planned: List[Tuple[str, int, str]] = []
-    for e in (take.get("errors") or []):
+    for e in take.get("errors") or []:
         etype = str(e.get("type") or e.get("error_type") or "").strip().lower()
         if etype != "insertion":
             continue
@@ -2213,10 +2497,19 @@ def validate_and_repair_insertions_from_plan(
             pos = _new_index_of_old(meta, src)
             if pos is None:
                 pos = len(final_steps)
-            template = {"old": "", "new": pos, "mod": "i", "etype": "insertion", "eid": eid, "cid": None}
+            template = {
+                "old": "",
+                "new": pos,
+                "mod": "i",
+                "etype": "insertion",
+                "eid": eid,
+                "cid": None,
+            }
             _insert_step(final_steps, meta, semrep_by_new, pos, ptxt, template)
             changed = True
-            issues.append(f"INSERTION_MISSING: inserted planned insertion eid={eid} before src(old={src}) at new={pos}")
+            issues.append(
+                f"INSERTION_MISSING: inserted planned insertion eid={eid} before src(old={src}) at new={pos}"
+            )
             continue
 
         # check first insertion realization for this eid (plan expects 1)
@@ -2232,12 +2525,15 @@ def validate_and_repair_insertions_from_plan(
             # replace text deterministically
             final_steps[newi] = ptxt
             changed = True
-            issues.append(f"INSERTION_TEXT_MISMATCH: eid={eid} jaccard={sim:.2f} replaced with plan text")
+            issues.append(
+                f"INSERTION_TEXT_MISMATCH: eid={eid} jaccard={sim:.2f} replaced with plan text"
+            )
 
     if changed:
         canonicalize_meta_new_indices_in_place(meta)
         final_steps[:] = align_final_to_meta_length(final_steps, meta)
     return changed, issues
+
 
 def validate_old_index_coverage(original_steps: List[str], meta: List[Dict[str, Any]]) -> List[str]:
     issues: List[str] = []
@@ -2268,6 +2564,7 @@ def validate_old_index_coverage(original_steps: List[str], meta: List[Dict[str, 
         elif c > 1:
             issues.append(f"old_coverage: old index {k} appears {c} times")
     return issues
+
 
 def validate_planned_errors_still_realized(
     take: Dict[str, Any],
@@ -2301,7 +2598,8 @@ def validate_planned_errors_still_realized(
             alt = e.get("alternate_src_indices") or []
             alt_set = {int(x) for x in alt if isinstance(x, int)}
             dels = [
-                m for m in ms
+                m
+                for m in ms
                 if m.get("mod") == "d"
                 and (m.get("new") in {"", None})
                 and (
@@ -2311,7 +2609,9 @@ def validate_planned_errors_still_realized(
                 )
             ]
             if not dels:
-                issues.append(f"planned_error_not_realized: deletion eid={eid} must have meta d old={src} new=''")
+                issues.append(
+                    f"planned_error_not_realized: deletion eid={eid} must have meta d old={src} new=''"
+                )
             # and must NOT have any non-deletion referencing the same old
             # Only enforce "old=src must disappear" when the deletion was realized on src without override.
             realized_on_src = any(
@@ -2321,29 +2621,48 @@ def validate_planned_errors_still_realized(
             if realized_on_src:
                 kept = [m for m in meta if m.get("old") == src and m.get("mod") != "d"]
                 if kept:
-                    issues.append(f"planned_error_healed: deletion eid={eid} but old={src} still used in meta")
+                    issues.append(
+                        f"planned_error_healed: deletion eid={eid} but old={src} still used in meta"
+                    )
 
         elif etype == "substitution":
-            subs = [m for m in ms if m.get("mod") == "e" and m.get("old") == src and isinstance(m.get("new"), int)]
+            subs = [
+                m
+                for m in ms
+                if m.get("mod") == "e" and m.get("old") == src and isinstance(m.get("new"), int)
+            ]
             if not subs:
-                issues.append(f"planned_error_not_realized: substitution eid={eid} needs meta e old={src}")
+                issues.append(
+                    f"planned_error_not_realized: substitution eid={eid} needs meta e old={src}"
+                )
             else:
                 m0 = subs[0]
                 new = int(m0["new"])
                 if 0 <= src < len(original_steps) and 0 <= new < len(final_steps):
                     if normalize_ws(final_steps[new]) == normalize_ws(original_steps[src]):
-                        issues.append(f"planned_error_healed: substitution eid={eid} but final equals original at old={src}")
+                        issues.append(
+                            f"planned_error_healed: substitution eid={eid} but final equals original at old={src}"
+                        )
 
         elif etype == "insertion":
-            ins = [m for m in ms if m.get("mod") == "i" and (m.get("old") in {"", None}) and isinstance(m.get("new"), int)]
+            ins = [
+                m
+                for m in ms
+                if m.get("mod") == "i"
+                and (m.get("old") in {"", None})
+                and isinstance(m.get("new"), int)
+            ]
             if not ins:
-                issues.append(f"planned_error_not_realized: insertion eid={eid} needs meta i old=''")
+                issues.append(
+                    f"planned_error_not_realized: insertion eid={eid} needs meta i old=''"
+                )
 
         elif etype == "transposition":
             # already handled elsewhere
             pass
 
     return issues
+
 
 # -------------------------
 # Plausibility checks (core)
@@ -2362,7 +2681,6 @@ def plausibility_issues(
 
     ambient: Set[str] = set(original_baseline.get("ambient") or set())
     first_get: Dict[str, int] = dict(original_baseline.get("first_get") or {})
-    best_get_text: Dict[str, str] = dict(original_baseline.get("best_get_text") or {})
     portable: Set[str] = set(original_baseline.get("portable") or set())
 
     # Track substance locations in containers to catch nonsense like:
@@ -2381,12 +2699,17 @@ def plausibility_issues(
     tainted_loc: Set[str] = set()
 
     HEAT_PREDS = {
-        "HEAT","BOIL","COOK","SIMMER",
-        "ADJUST","REGULATE",
-        "TURN_ON","TURN_OFF",
+        "HEAT",
+        "BOIL",
+        "COOK",
+        "SIMMER",
+        "ADJUST",
+        "REGULATE",
+        "TURN_ON",
+        "TURN_OFF",
     }
-    PLACE_PREDS = {"PLACE","PUT","SET","SET_DOWN","POSITION"}
-    STORAGE_PREDS = {"PUT_AWAY","RETURN","PUT_BACK","REPLACE"}
+    PLACE_PREDS = {"PLACE", "PUT", "SET", "SET_DOWN", "POSITION"}
+    STORAGE_PREDS = {"PUT_AWAY", "RETURN", "PUT_BACK", "REPLACE"}
 
     def _pred_roles(step_text: str, semrep: Optional[str]) -> Optional[Tuple[str, Dict[str, str]]]:
         sr = semrep or find_semrep_exact(step_text) or ""
@@ -2442,6 +2765,7 @@ def plausibility_issues(
             continue
         if isinstance(m.get("new"), int):
             meta_by_new[int(m["new"])] = m
+
     def is_model_changed(i: int) -> bool:
         m = meta_by_new.get(int(i))
         if not isinstance(m, dict):
@@ -2486,13 +2810,17 @@ def plausibility_issues(
         if pr:
             pred, roles = pr
             pu = (pred or "").strip().upper()
-            objh = _head_entity(roles.get("Object") or roles.get("Theme") or roles.get("Patient") or "")
-            desth = _head_entity(roles.get("Destination") or roles.get("Location") or roles.get("Goal") or "")
+            objh = _head_entity(
+                roles.get("Object") or roles.get("Theme") or roles.get("Patient") or ""
+            )
+            desth = _head_entity(
+                roles.get("Destination") or roles.get("Location") or roles.get("Goal") or ""
+            )
 
             if pu in PLACE_PREDS and objh and desth:
                 obj_loc[objh] = desth
                 if is_model_changed(i):
-                    tainted_loc.add(objh)                
+                    tainted_loc.add(objh)
 
             if pu in STORAGE_PREDS and objh and desth:
                 obj_loc[objh] = desth
@@ -2504,14 +2832,16 @@ def plausibility_issues(
                 # Flag even on 'u' heat-step if the object's location was changed by the model earlier
                 if loc and heat_surfaces and (loc not in heat_surfaces):
                     if is_model_changed(i) or (objh in tainted_loc):
-                        issues.append({
-                            "code": "HEAT_WHILE_NOT_ON_HEAT_SURFACE",
-                            "step_index": i,
-                            "step": step,
-                            "object": objh,
-                            "detail": f"heat/adjust on '{objh}' while it is located at non-heat location '{loc}' (heat surfaces from ORIGINAL)",
-                            "location": loc,
-                        })
+                        issues.append(
+                            {
+                                "code": "HEAT_WHILE_NOT_ON_HEAT_SURFACE",
+                                "step_index": i,
+                                "step": step,
+                                "object": objh,
+                                "detail": f"heat/adjust on '{objh}' while it is located at non-heat location '{loc}' (heat surfaces from ORIGINAL)",
+                                "location": loc,
+                            }
+                        )
 
         # ---------- "BACK INTO SAME CONTAINER" check ----------
         # If we say "pour/transfer back into X" but the substance is already in X (never left),
@@ -2531,13 +2861,15 @@ def plausibility_issues(
             if dest1 and sub:
                 if _has_back(step, sem) and substance_loc.get(sub) == dest1:
                     if is_model_changed(i):
-                        issues.append({
-                            "code": "BACK_TO_SAME_CONTAINER",
-                            "step_index": i,
-                            "step": step,
-                            "object": sub,
-                            "detail": f"'{sub}' is already in '{dest1}', so 'back into {dest1}' is nonsensical",
-                        })
+                        issues.append(
+                            {
+                                "code": "BACK_TO_SAME_CONTAINER",
+                                "step_index": i,
+                                "step": step,
+                                "object": sub,
+                                "detail": f"'{sub}' is already in '{dest1}', so 'back into {dest1}' is nonsensical",
+                            }
+                        )
                 prev = substance_loc.get(sub)
                 if prev and prev != dest1:
                     container_contents[prev].discard(sub)
@@ -2558,15 +2890,21 @@ def plausibility_issues(
             disposed_at.pop(obj0, None)
             disposed_changed.pop(obj0, None)
 
-        if obj0 and obj0 in disposed and action in {"USE","ADD","OPEN","CLOSE","CUT","WASH","DRY","OTHER"}:
+        if (
+            obj0
+            and obj0 in disposed
+            and action in {"USE", "ADD", "OPEN", "CLOSE", "CUT", "WASH", "DRY", "OTHER"}
+        ):
             if is_model_changed(i) or disposed_changed.get(obj0, False):
-                issues.append({
-                    "code": "USE_AFTER_DISPOSE",
-                    "step_index": i,
-                    "step": step,
-                    "object": obj0,
-                    "detail": f"'{obj0}' is used after it was disposed at step {disposed_at.get(obj0)}",
-                })
+                issues.append(
+                    {
+                        "code": "USE_AFTER_DISPOSE",
+                        "step_index": i,
+                        "step": step,
+                        "object": obj0,
+                        "detail": f"'{obj0}' is used after it was disposed at step {disposed_at.get(obj0)}",
+                    }
+                )
 
         # Mark "object placed/cooked in pot/water"
         if obj0 and looks_like_cook_into_pot_or_water_step(s_ws):
@@ -2576,13 +2914,15 @@ def plausibility_issues(
         if obj0 and looks_like_drain_step(s_ws):
             if not in_pot_or_water.get(obj0, False):
                 if is_model_changed(i) and obj0 not in flagged_drain_before_cook:
-                    issues.append({
-                        "code": "DRAIN_BEFORE_COOK",
-                        "step_index": i,
-                        "step": step,
-                        "object": obj0,
-                        "detail": f"drain happens before '{obj0}' was ever placed/cooked in pot/water",
-                    })
+                    issues.append(
+                        {
+                            "code": "DRAIN_BEFORE_COOK",
+                            "step_index": i,
+                            "step": step,
+                            "object": obj0,
+                            "detail": f"drain happens before '{obj0}' was ever placed/cooked in pot/water",
+                        }
+                    )
                     flagged_drain_before_cook.add(obj0)
 
             # Update state only for actual drain steps
@@ -2594,24 +2934,28 @@ def plausibility_issues(
         if obj0 and looks_like_stir_in_pot_step(s_ws):
             if drained.get(obj0, False):
                 if is_model_changed(i) and obj0 not in flagged_stir_after_drain:
-                    issues.append({
-                        "code": "STIR_IN_POT_AFTER_DRAIN",
-                        "step_index": i,
-                        "step": step,
-                        "object": obj0,
-                        "detail": f"stirring '{obj0}' in the pot happens after it was drained",
-                        "drain_index": last_drain_idx.get(obj0),
-                    })
+                    issues.append(
+                        {
+                            "code": "STIR_IN_POT_AFTER_DRAIN",
+                            "step_index": i,
+                            "step": step,
+                            "object": obj0,
+                            "detail": f"stirring '{obj0}' in the pot happens after it was drained",
+                            "drain_index": last_drain_idx.get(obj0),
+                        }
+                    )
                     flagged_stir_after_drain.add(obj0)
             elif not in_pot_or_water.get(obj0, False):
                 if should_flag(i, obj0):
-                    issues.append({
-                        "code": "STIR_IN_POT_NOT_IN_POT",
-                        "step_index": i,
-                        "step": step,
-                        "object": obj0,
-                        "detail": f"stirring '{obj0}' in the pot happens before it was placed/cooked in pot/water",
-                    })
+                    issues.append(
+                        {
+                            "code": "STIR_IN_POT_NOT_IN_POT",
+                            "step_index": i,
+                            "step": step,
+                            "object": obj0,
+                            "detail": f"stirring '{obj0}' in the pot happens before it was placed/cooked in pot/water",
+                        }
+                    )
 
         # mark intro by GET
         if action == "GET":
@@ -2631,17 +2975,19 @@ def plausibility_issues(
                         cur_changed = is_model_changed(i)
 
                         if cur_changed or prev_changed:
-                            issues.append({
-                                "code": "DUP_GET_NO_PUT",
-                                "step_index": i,
-                                "step": step,
-                                "object": o,
-                                "detail": (
-                                    f"duplicate GET/PICK of '{o}' while it's already held "
-                                    f"(no put back / set aside in between)"
-                                ),
-                                "prev_index": prev,
-                            })
+                            issues.append(
+                                {
+                                    "code": "DUP_GET_NO_PUT",
+                                    "step_index": i,
+                                    "step": step,
+                                    "object": o,
+                                    "detail": (
+                                        f"duplicate GET/PICK of '{o}' while it's already held "
+                                        f"(no put back / set aside in between)"
+                                    ),
+                                    "prev_index": prev,
+                                }
+                            )
 
                     held.add(o)
 
@@ -2669,13 +3015,15 @@ def plausibility_issues(
                 if o in portable and o not in held:
                     # only flag if it looks like model created a new contradiction
                     if should_flag(i, o):
-                        issues.append({
-                            "code": "TOOL_NOT_HELD",
-                            "step_index": i,
-                            "step": step,
-                            "object": o,
-                            "detail": f"object '{o}' opened but not held (missing GET or should not have been put back)",
-                        })
+                        issues.append(
+                            {
+                                "code": "TOOL_NOT_HELD",
+                                "step_index": i,
+                                "step": step,
+                                "object": o,
+                                "detail": f"object '{o}' opened but not held (missing GET or should not have been put back)",
+                            }
+                        )
 
         # USE-ish actions: object should not appear "too late"
         if action in {"USE", "ADD", "CUT", "DRY", "WASH", "OPEN", "CLOSE"}:
@@ -2688,24 +3036,28 @@ def plausibility_issues(
                 if o not in introduced and o in first_get:
                     # original required GET at some point; now we used before ever getting
                     if should_flag(i, o):
-                        issues.append({
-                            "code": "USE_BEFORE_INTRO",
-                            "step_index": i,
-                            "step": step,
-                            "object": o,
-                            "detail": f"object used before introduction (original had a GET for it): '{o}'",
-                        })
-                # portable needs holding for use/add/cut/dry/open/close (not for wash necessarily)
-                if o in portable and action in {"USE","ADD","CUT","DRY","OPEN","CLOSE"}:
-                    if o not in held and o not in ambient:
-                        if should_flag(i, o):
-                            issues.append({
-                                "code": "PORTABLE_NOT_HELD",
+                        issues.append(
+                            {
+                                "code": "USE_BEFORE_INTRO",
                                 "step_index": i,
                                 "step": step,
                                 "object": o,
-                                "detail": f"portable item used but not held (missing GET or put back immediately before): '{o}'",
-                            })
+                                "detail": f"object used before introduction (original had a GET for it): '{o}'",
+                            }
+                        )
+                # portable needs holding for use/add/cut/dry/open/close (not for wash necessarily)
+                if o in portable and action in {"USE", "ADD", "CUT", "DRY", "OPEN", "CLOSE"}:
+                    if o not in held and o not in ambient:
+                        if should_flag(i, o):
+                            issues.append(
+                                {
+                                    "code": "PORTABLE_NOT_HELD",
+                                    "step_index": i,
+                                    "step": step,
+                                    "object": o,
+                                    "detail": f"portable item used but not held (missing GET or put back immediately before): '{o}'",
+                                }
+                            )
 
         # Detect GET-after-use (if object is used before, then later GET shows up)
         # We flag only when the GET is model-changed or when it creates obvious contradiction.
@@ -2735,28 +3087,32 @@ def plausibility_issues(
             for o in objs:
                 if o and o in filled:
                     if should_flag(i, o):
-                        issues.append({
-                            "code": "DRY_AFTER_FILL",
-                            "step_index": i,
-                            "step": step,
-                            "object": o,
-                            "detail": f"dry/wipe happens after filling the same container/object: '{o}'",
-                        })
+                        issues.append(
+                            {
+                                "code": "DRY_AFTER_FILL",
+                                "step_index": i,
+                                "step": step,
+                                "object": o,
+                                "detail": f"dry/wipe happens after filling the same container/object: '{o}'",
+                            }
+                        )
 
         # PUT_BACK before use: if model added PUT_BACK then immediately uses same portable without GET
-        if action in {"USE","ADD","CUT","OPEN","CLOSE"}:
+        if action in {"USE", "ADD", "CUT", "OPEN", "CLOSE"}:
             for o in objs:
                 if o in portable and o not in held and o not in ambient:
                     # if there exists a near GET soon after, the sequence is likely swapped
                     # report a dedicated code for deterministic swap
                     if should_flag(i, o):
-                        issues.append({
-                            "code": "PUT_BACK_BEFORE_USE",
-                            "step_index": i,
-                            "step": step,
-                            "object": o,
-                            "detail": f"object '{o}' appears required here but is not held (may need to move nearby GET earlier)",
-                        })
+                        issues.append(
+                            {
+                                "code": "PUT_BACK_BEFORE_USE",
+                                "step_index": i,
+                                "step": step,
+                                "object": o,
+                                "detail": f"object '{o}' appears required here but is not held (may need to move nearby GET earlier)",
+                            }
+                        )
 
     # De-duplicate issues (same code+step+object)
     seen = set()
@@ -2768,6 +3124,7 @@ def plausibility_issues(
         seen.add(key)
         uniq.append(it)
     return uniq
+
 
 def validate_location_continuity_semrep(
     final_steps: List[str],
@@ -2803,7 +3160,11 @@ def validate_location_continuity_semrep(
         return mm.get("mod") != "u"
 
     def sr_for_step(i: int, txt: str) -> str:
-        if semrep_by_new is not None and isinstance(semrep_by_new.get(i), str) and semrep_by_new.get(i).strip():
+        if (
+            semrep_by_new is not None
+            and isinstance(semrep_by_new.get(i), str)
+            and semrep_by_new.get(i).strip()
+        ):
             return semrep_by_new[i].strip()
         sr = find_semrep_exact(txt) or ""
         return sr.strip()
@@ -2815,9 +3176,19 @@ def validate_location_continuity_semrep(
 
     # Predicates that imply a location update (place/put/transfer/insert/etc.)
     LOC_UPDATE_PREDS = {
-        "PLACE", "PUT", "SET", "SET_DOWN", "POSITION",
-        "INSERT", "TRANSFER", "MOVE", "STORE",
-        "RETURN", "PUT_BACK", "PUT_AWAY", "REPLACE",
+        "PLACE",
+        "PUT",
+        "SET",
+        "SET_DOWN",
+        "POSITION",
+        "INSERT",
+        "TRANSFER",
+        "MOVE",
+        "STORE",
+        "RETURN",
+        "PUT_BACK",
+        "PUT_AWAY",
+        "REPLACE",
     }
     # Predicates that can encode an explicit source/location claim for GET/REMOVE.
     GET_PREDS = {"GET", "TAKE", "GRAB", "PICK", "PICK_UP", "RETRIEVE", "FETCH", "REMOVE"}
@@ -2825,19 +3196,16 @@ def validate_location_continuity_semrep(
     def _extract_obj_loc(parsed: Tuple[str, Dict[str, str]]) -> Tuple[str, str, str]:
         pred, roles = parsed
         # Cache the raw object string once; we also use it to extract embedded Location.
-        raw_obj = (roles.get("Object") or roles.get("Theme") or roles.get("Patient") or "")
+        raw_obj = roles.get("Object") or roles.get("Theme") or roles.get("Patient") or ""
         objh = _head_entity(raw_obj)
         # Treat Destination and Location as interchangeable "target/location" cues.
         loch = _head_entity(
-            roles.get("Destination")
-            or roles.get("Location")
-            or roles.get("Goal")
-            or ""
+            roles.get("Destination") or roles.get("Location") or roles.get("Goal") or ""
         )
         # Many SemReps encode Location inside Object (e.g., butter(Location: in(skillet))).
         if not loch and raw_obj:
             loch = _embedded_location_head(raw_obj)
-            
+
         # Common "source" cues for GET-like actions.
         srch = _head_entity(
             roles.get("Source")
@@ -2872,15 +3240,17 @@ def validate_location_continuity_semrep(
             known = obj_loc.get(objh, "")
             if known and known != srch:
                 if is_model_changed(i) or (objh in tainted_loc):
-                    issues.append({
-                        "code": "LOCATION_MISMATCH_ON_GET",
-                        "step_index": i,
-                        "step": step,
-                        "object": objh,
-                        "detail": f"SemRep claims '{objh}' comes from '{srch}', but tracked location is '{known}'",
-                        "expected_location": known,
-                        "claimed_location": srch,
-                    })
+                    issues.append(
+                        {
+                            "code": "LOCATION_MISMATCH_ON_GET",
+                            "step_index": i,
+                            "step": step,
+                            "object": objh,
+                            "detail": f"SemRep claims '{objh}' comes from '{srch}', but tracked location is '{known}'",
+                            "expected_location": known,
+                            "claimed_location": srch,
+                        }
+                    )
 
         # Explicit Location mention on a non-update, non-GET predicate:
         # - If it contradicts tracked state, flag it (only when model-changed or tainted).
@@ -2890,15 +3260,17 @@ def validate_location_continuity_semrep(
             known = obj_loc.get(objh, "")
             if known and known != loch:
                 if is_model_changed(i) or (objh in tainted_loc):
-                    issues.append({
-                        "code": "LOCATION_MISMATCH",
-                        "step_index": i,
-                        "step": step,
-                        "object": objh,
-                        "detail": f"SemRep mentions location '{loch}' for '{objh}', but tracked location is '{known}'",
-                        "expected_location": known,
-                        "claimed_location": loch,
-                    })
+                    issues.append(
+                        {
+                            "code": "LOCATION_MISMATCH",
+                            "step_index": i,
+                            "step": step,
+                            "object": objh,
+                            "detail": f"SemRep mentions location '{loch}' for '{objh}', but tracked location is '{known}'",
+                            "expected_location": known,
+                            "claimed_location": loch,
+                        }
+                    )
             # Soft update (current claim becomes the new tracked location).
             if not known or known != loch:
                 obj_loc[objh] = loch
@@ -2916,22 +3288,35 @@ def validate_location_continuity_semrep(
         uniq.append(it)
     return uniq
 
+
 # -------------------------
 # Deterministic repair (minimal local edits)
 # -------------------------
-def _swap_adjacent(final_steps: List[str], meta: List[Dict[str, Any]], semrep_by_new: Optional[Dict[int, str]], i: int) -> None:
-    final_steps[i], final_steps[i+1] = final_steps[i+1], final_steps[i]
+def _swap_adjacent(
+    final_steps: List[str],
+    meta: List[Dict[str, Any]],
+    semrep_by_new: Optional[Dict[int, str]],
+    i: int,
+) -> None:
+    final_steps[i], final_steps[i + 1] = final_steps[i + 1], final_steps[i]
     # meta is a timeline (may include deletions). Swap BLOCKS by new index.
     _meta_swap_blocks_by_new(meta, i, i + 1)
     canonicalize_meta_new_indices_in_place(meta)
     if semrep_by_new is not None:
-        si, sj = semrep_by_new.get(i), semrep_by_new.get(i+1)
+        si, sj = semrep_by_new.get(i), semrep_by_new.get(i + 1)
         if si is None and sj is None:
             return
-        semrep_by_new[i], semrep_by_new[i+1] = sj, si
+        semrep_by_new[i], semrep_by_new[i + 1] = sj, si
 
-def _insert_step(final_steps: List[str], meta: List[Dict[str, Any]], semrep_by_new: Optional[Dict[int, str]],
-                 idx: int, step_text: str, template_meta: Dict[str, Any]) -> None:
+
+def _insert_step(
+    final_steps: List[str],
+    meta: List[Dict[str, Any]],
+    semrep_by_new: Optional[Dict[int, str]],
+    idx: int,
+    step_text: str,
+    template_meta: Dict[str, Any],
+) -> None:
     final_steps.insert(idx, step_text)
     # Insert as a new step BEFORE the block that currently has new==idx.
     _meta_insert_before_new(meta, idx, dict(template_meta))
@@ -2939,12 +3324,18 @@ def _insert_step(final_steps: List[str], meta: List[Dict[str, Any]], semrep_by_n
         # shift right
         for k in sorted(list(semrep_by_new.keys()), reverse=True):
             if k >= idx:
-                semrep_by_new[k+1] = semrep_by_new.pop(k)
+                semrep_by_new[k + 1] = semrep_by_new.pop(k)
         semrep_by_new[idx] = ""
     canonicalize_meta_new_indices_in_place(meta)
     # do NOT reorder meta; it is a timeline
 
-def _delete_step(final_steps: List[str], meta: List[Dict[str, Any]], semrep_by_new: Optional[Dict[int, str]], idx: int) -> None:
+
+def _delete_step(
+    final_steps: List[str],
+    meta: List[Dict[str, Any]],
+    semrep_by_new: Optional[Dict[int, str]],
+    idx: int,
+) -> None:
     del final_steps[idx]
     # Remove the block for new==idx; keep any trailing deletions attached to previous block.
     _meta_remove_block_by_new(meta, idx)
@@ -2954,8 +3345,9 @@ def _delete_step(final_steps: List[str], meta: List[Dict[str, Any]], semrep_by_n
         # shift left
         for k in sorted(list(semrep_by_new.keys())):
             if k > idx:
-                semrep_by_new[k-1] = semrep_by_new.pop(k)
+                semrep_by_new[k - 1] = semrep_by_new.pop(k)
     canonicalize_meta_new_indices_in_place(meta)
+
 
 def deterministic_repair(
     final_steps: List[str],
@@ -3081,7 +3473,9 @@ def deterministic_repair(
 
         # If the cook step is a planned substitution, keep it cook-like but non-verbatim.
         m2 = _find_meta_by_new(meta, pos2) or {}
-        if (m2.get("mod") == "e") and (str(m2.get("etype") or "").strip().lower() == "substitution"):
+        if (m2.get("mod") == "e") and (
+            str(m2.get("etype") or "").strip().lower() == "substitution"
+        ):
             # If it's not already cook-like, rewrite it.
             s_ws = normalize_ws(normalize_step_text(final_steps[pos2]))
             if not looks_like_cook_into_pot_or_water_step(s_ws):
@@ -3211,12 +3605,18 @@ def deterministic_repair(
                     return "table"
                 return ""
 
-            surface = _infer_surface(final_steps[prev]) or _infer_surface(final_steps[i]) or "work table"
+            surface = (
+                _infer_surface(final_steps[prev]) or _infer_surface(final_steps[i]) or "work table"
+            )
             put_txt = f"Put the {obj} back on the {surface}."
             # This is a physics repair insertion (NOT a planned error).
             template = {
-                "old": "", "new": i, "mod": "i", "etype": "insertion",
-                "eid": "", "cid": None,
+                "old": "",
+                "new": i,
+                "mod": "i",
+                "etype": "insertion",
+                "eid": "",
+                "cid": None,
                 "repair_reason": "repair insertion: PUT_BACK_ON_SURFACE",
             }
             _insert_step(final_steps, meta, semrep_by_new, i, put_txt, template)
@@ -3226,14 +3626,14 @@ def deterministic_repair(
         if code == "PUT_BACK_BEFORE_USE" and obj in portable:
             # look ahead for a GET of the same object within next 3 steps; if found, bubble it up by swaps
             found = None
-            for j in range(i+1, min(len(final_steps), i+4)):
+            for j in range(i + 1, min(len(final_steps), i + 4)):
                 sem = semrep_by_new.get(j) if semrep_by_new else None
                 cj = classify_step(final_steps[j], semrep=sem)
                 if cj["action"] == "GET" and obj in cj["objects"]:
                     found = j
                     break
             if found is not None:
-                for k in range(found-1, i-1, -1):
+                for k in range(found - 1, i - 1, -1):
                     _swap_adjacent(final_steps, meta, semrep_by_new, k)
                     changed = True
                 continue
@@ -3247,8 +3647,12 @@ def deterministic_repair(
                 eid = eid if isinstance(eid, str) and eid else (choose_eid_near(i) or "E_UNKNOWN")
                 # This is a physics repair insertion (NOT a planned error).
                 template = {
-                    "old": "", "new": i, "mod": "i", "etype": "insertion",
-                    "eid": "", "cid": None,
+                    "old": "",
+                    "new": i,
+                    "mod": "i",
+                    "etype": "insertion",
+                    "eid": "",
+                    "cid": None,
                     "repair_reason": "repair insertion: GET_BEFORE_USE",
                 }
                 _insert_step(final_steps, meta, semrep_by_new, i, get_txt, template)
@@ -3262,7 +3666,7 @@ def deterministic_repair(
                 _delete_step(final_steps, meta, semrep_by_new, i)
                 changed = True
                 continue
- 
+
         if code == "LOCATION_MISMATCH" and isinstance(obj, str) and obj:
             # Cascade fix: if a downstream step expects object at Loc_2 but we track Loc_1,
             # minimally adjust THIS step to include a transfer/move between locations.
@@ -3292,7 +3696,7 @@ def deterministic_repair(
 
             # Build a minimal "move" prefix and keep the original action after it.
             obj_txt = obj.replace("_", " ").strip()
-            from_txt = (from_loc.replace("_", " ").strip() if isinstance(from_loc, str) else "")
+            from_txt = from_loc.replace("_", " ").strip() if isinstance(from_loc, str) else ""
             to_txt = to_loc.replace("_", " ").strip()
 
             prefix = ""
@@ -3317,7 +3721,11 @@ def deterministic_repair(
                 changed = True
             continue
 
-        if code in {"HEAT_WHILE_IN_STORAGE_LOCATION","HEAT_WHILE_NOT_ON_HEAT_SURFACE"} and isinstance(obj, str) and obj:
+        if (
+            code in {"HEAT_WHILE_IN_STORAGE_LOCATION", "HEAT_WHILE_NOT_ON_HEAT_SURFACE"}
+            and isinstance(obj, str)
+            and obj
+        ):
             if 0 <= i <= len(final_steps):
                 mi = _find_meta_by_new(meta, i)
                 eid = choose_eid_near(i) or (mi.get("eid") if isinstance(mi, dict) else None)
@@ -3329,8 +3737,12 @@ def deterministic_repair(
                     fix = f"Place the {obj} back where it can be heated."
 
                 template = {
-                    "old": "", "new": i, "mod": "i", "etype": "insertion",
-                    "eid": "", "cid": None,
+                    "old": "",
+                    "new": i,
+                    "mod": "i",
+                    "etype": "insertion",
+                    "eid": "",
+                    "cid": None,
                     "repair_reason": "repair insertion: PLACE_ON_HEAT_SURFACE",
                 }
                 _insert_step(final_steps, meta, semrep_by_new, i, fix, template)
@@ -3340,7 +3752,6 @@ def deterministic_repair(
     if changed:
         canonicalize_meta_new_indices_in_place(meta)
     return final_steps, meta, changed
-
 
 
 # -------------------------
@@ -3451,34 +3862,32 @@ Return ONLY the JSON object.
 """
 
 REPAIR_OUTPUT_SCHEMA = {
-  "type": "object",
-  "properties": {
-    "final_steps": {
-      "type": "array",
-      "items": {"type": "string"}
-    },
-    "meta": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "old": {"anyOf": [{"type": "integer"}, {"type": "string"}, {"type": "null"}]},
-          "new": {"anyOf": [{"type": "integer"}, {"type": "string"}, {"type": "null"}]},
-          "mod": {"type": "string"},
-          "etype": {"anyOf": [{"type": "string"}, {"type": "null"}]},
-          "eid": {"anyOf": [{"type": "string"}, {"type": "null"}]},
-          "cid": {"anyOf": [{"type": "string"}, {"type": "null"}]},
-          "repair_reason": {"anyOf": [{"type": "string"}, {"type": "null"}]},
-          "plan_override": {"anyOf": [{"type": "boolean"}, {"type": "null"}]}
+    "type": "object",
+    "properties": {
+        "final_steps": {"type": "array", "items": {"type": "string"}},
+        "meta": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "old": {"anyOf": [{"type": "integer"}, {"type": "string"}, {"type": "null"}]},
+                    "new": {"anyOf": [{"type": "integer"}, {"type": "string"}, {"type": "null"}]},
+                    "mod": {"type": "string"},
+                    "etype": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                    "eid": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                    "cid": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                    "repair_reason": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                    "plan_override": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
+                },
+                "required": ["old", "new", "mod", "etype", "eid", "cid"],
+                "additionalProperties": False,
+            },
         },
-        "required": ["old", "new", "mod", "etype", "eid", "cid"],
-        "additionalProperties": False
-      }
-    }
-  },
-  "required": ["final_steps", "meta"],
-  "additionalProperties": False
+    },
+    "required": ["final_steps", "meta"],
+    "additionalProperties": False,
 }
+
 
 def format_steps_for_prompt(steps: List[Dict[str, Any]]) -> str:
     out = []
@@ -3488,6 +3897,7 @@ def format_steps_for_prompt(steps: List[Dict[str, Any]]) -> str:
         txt = _step_text(s)
         out.append(f"{idx:02d} [{phase}] {txt}")
     return "\n".join(out)
+
 
 def format_plan_for_prompt(errors: List[Dict[str, Any]], corrections: List[Dict[str, Any]]) -> str:
     out: List[str] = []
@@ -3526,6 +3936,7 @@ def format_plan_for_prompt(errors: List[Dict[str, Any]], corrections: List[Dict[
 
     return "\n".join(out)
 
+
 def build_repair_user_prompt(
     take: Dict[str, Any],
     original_steps: List[str],
@@ -3546,7 +3957,9 @@ def build_repair_user_prompt(
     for s in schema_issues:
         issues_lines.append(f"- SCHEMA: {s}")
     for it in plaus_issues:
-        issues_lines.append(f"- PLAUS({it.get('code')} @ {it.get('step_index')}): {it.get('detail')} | step='{it.get('step')}'")
+        issues_lines.append(
+            f"- PLAUS({it.get('code')} @ {it.get('step_index')}): {it.get('detail')} | step='{it.get('step')}'"
+        )
     issues_block = "\n".join(issues_lines) if issues_lines else "(none)"
 
     # --- EXTRA GUIDANCE for plausibility: seasoning vs prep-actions ---
@@ -3561,7 +3974,10 @@ AFFORDANCE_MISMATCH_BASELINE guidance (IMPORTANT):
 """
 
     cascade_guidance = ""
-    if any((it.get("code") in {"SUBSTITUTION_TARGET_ALREADY_PRESENT", "SUBSTITUTION_CASCADE_ENTITY"}) for it in (plaus_issues or [])):
+    if any(
+        (it.get("code") in {"SUBSTITUTION_TARGET_ALREADY_PRESENT", "SUBSTITUTION_CASCADE_ENTITY"})
+        for it in (plaus_issues or [])
+    ):
         cascade_guidance = """
 GET-SUBSTITUTION / CASCADE guidance (IMPORTANT):
 - If you see SUBSTITUTION_TARGET_ALREADY_PRESENT:
@@ -3595,6 +4011,7 @@ ISSUES FOUND:
 Repair minimally and output ONLY JSON with keys final_steps/meta.
 """
 
+
 # -------------------------
 # Main per-take judge
 # -------------------------
@@ -3613,7 +4030,7 @@ def build_semrep_maps_for_take(
     """
 
     semrep_by_old: Dict[int, str] = {}
-    for s in (take.get("steps") or []):
+    for s in take.get("steps") or []:
         old = _step_idx(s)
         sr0 = s.get("semantic_representation")
         if isinstance(sr0, str) and sr0.strip():
@@ -3623,7 +4040,12 @@ def build_semrep_maps_for_take(
         sid = s.get("step_description_id")
         if (not isinstance(sid, str) or not sid.strip()) and vocab_map is not None:
             sid = resolve_step_id_from_text(txt, vocab_map, extra_map=semrep_step_to_id)
-        if isinstance(sid, str) and sid.strip() and semrep_map is not None and sid.strip() in semrep_map:
+        if (
+            isinstance(sid, str)
+            and sid.strip()
+            and semrep_map is not None
+            and sid.strip() in semrep_map
+        ):
             sr = semrep_map[sid.strip()].get("semantic_representation") or ""
             if sr:
                 semrep_by_old[int(old)] = sr
@@ -3643,10 +4065,16 @@ def build_semrep_maps_for_take(
         mod = m.get("mod")
         new = m.get("new")
         old = m.get("old")
-        if mod in {"u","ms","mt"} and isinstance(new, int) and isinstance(old, int) and old in semrep_by_old:
+        if (
+            mod in {"u", "ms", "mt"}
+            and isinstance(new, int)
+            and isinstance(old, int)
+            and old in semrep_by_old
+        ):
             semrep_by_new[new] = semrep_by_old[old]
 
     return semrep_by_old, semrep_by_new
+
 
 def _score(sch: List[str], plan: List[str], pl: List[Dict[str, Any]]) -> Tuple[int, int, int]:
     """
@@ -3659,6 +4087,7 @@ def _score(sch: List[str], plan: List[str], pl: List[Dict[str, Any]]) -> Tuple[i
     soft = len(pl)
     # (has_any_hard, hard_count, soft_count)
     return (1 if hard > 0 else 0, hard, soft)
+
 
 def judge_one_take(
     take: Dict[str, Any],
@@ -3696,16 +4125,20 @@ def judge_one_take(
         if frame_cache is None:
             return "", []
         if EgoVideoFrameCache is None or FrameRequest is None:
-            return "",   []
+            return "", []
 
         # choose old indices:
         old_indices = []
         # 1) prioritize wrong_execution/substitution src indices from plan errors
-        for e in (take.get("errors") or []):
+        for e in take.get("errors") or []:
             etype = str(e.get("type") or e.get("error_type") or "").strip().lower()
             if etype not in {"wrong_execution", "substitution"}:
                 continue
-            src = e.get("step_index") if isinstance(e.get("step_index"), int) else e.get("src_step_idx")
+            src = (
+                e.get("step_index")
+                if isinstance(e.get("step_index"), int)
+                else e.get("src_step_idx")
+            )
             if isinstance(src, int):
                 old_indices.append(src)
 
@@ -3726,7 +4159,7 @@ def judge_one_take(
             if x in seen:
                 continue
             seen.add(x)
-            uniq_old.append (x)
+            uniq_old.append(x)
 
         captions = []
         urls: List[str] = []
@@ -3755,11 +4188,13 @@ def judge_one_take(
             if p is None:
                 continue
 
-            captions.append(f"- Image for ORIGINAL old={oi}: '{txt}' (t≈{(float(st)+float(en))/2:.2f}s)")
+            captions.append(
+                f"- Image for ORIGINAL old={oi}: '{txt}' (t≈{(float(st) + float(en)) / 2:.2f}s)"
+            )
             urls.append(frame_cache.image_to_data_url(p))
 
         if not urls:
-            return "",   []
+            return "", []
 
         cap = "IMAGES (mid-frames):\n" + "\n".join(captions) + "\n"
         return cap, urls
@@ -3768,16 +4203,19 @@ def judge_one_take(
         # Writes into the SAME report rows (csv/json). No extra files.
         if not debug_llm:
             return
-        report_rows.append({
-            "take_uid": take_uid,
-            "take_name": take_name,
-            "kind": "trace",
-            "code": code,
-            "step_index": step_index if step_index is not None else "",
-            "detail": detail[:2500],  # keep it bounded
-        })
+        report_rows.append(
+            {
+                "take_uid": take_uid,
+                "take_name": take_name,
+                "kind": "trace",
+                "code": code,
+                "step_index": step_index if step_index is not None else "",
+                "detail": detail[:2500],  # keep it bounded
+            }
+        )
 
     llm_used = False
+
     def _dbg(msg: str) -> None:
         # Print only when enabled; stderr so it lands in job logs.
         # provenance summary (LLM vs deterministic)
@@ -3788,7 +4226,7 @@ def judge_one_take(
         _trace_row(
             "PROVENANCE",
             f"llm_used={int(llm_used)} base_score={base_score} final_score={final_score} "
-            f"final_hard={len(schema_issues)+len(planned_realization_issues)} final_soft={len(plaus_issues)}"
+            f"final_hard={len(schema_issues) + len(planned_realization_issues)} final_soft={len(plaus_issues)}",
         )
 
     if not isinstance(final_steps, list) or not all(isinstance(x, str) for x in final_steps):
@@ -3810,19 +4248,21 @@ def judge_one_take(
         take=take,
         final_steps=final_steps,
         meta=meta,
-        semrep_by_new=None,   # semrep computed later; deterministic insertion doesn't need it
+        semrep_by_new=None,  # semrep computed later; deterministic insertion doesn't need it
         jaccard_min=0.70,
     )
     if debug_llm and _ins_issues:
         for msg in _ins_issues:
-            report_rows.append({
-                "take_uid": take_uid,
-                "take_name": take_name,
-                "kind": "schema",
-                "code": "INSERTION_PLAN_ENFORCE",
-                "step_index": "",
-                "detail": msg,
-            })
+            report_rows.append(
+                {
+                    "take_uid": take_uid,
+                    "take_name": take_name,
+                    "kind": "schema",
+                    "code": "INSERTION_PLAN_ENFORCE",
+                    "step_index": "",
+                    "detail": msg,
+                }
+            )
 
     # --- force-realize transpositions early ---
     trans_issues = validate_transposition_realized(take, meta)
@@ -3840,7 +4280,9 @@ def judge_one_take(
     enforce_verbatim_for_u_and_moves(original_steps, final_steps, meta)
     sanitize_nonverbatim_step_texts(final_steps, meta)
 
-    def recompute_semrep(fs: List[str], mt: List[Dict[str, Any]]) -> Tuple[Dict[int, str], Dict[int, str], Dict[str, Any]]:
+    def recompute_semrep(
+        fs: List[str], mt: List[Dict[str, Any]]
+    ) -> Tuple[Dict[int, str], Dict[int, str], Dict[str, Any]]:
         nonlocal semrep_step_to_id
         if semrep_extender is not None:
             semrep_extender.ensure_for_texts(fs)
@@ -3855,19 +4297,19 @@ def judge_one_take(
         base = text.rstrip().rstrip(".")
         p = (pred or "").upper()
         # generic, predicate-class based (no scenario hardcode)
-        if p in {"POSITION","PLACE","PUT","INSERT","INSTALL","MOUNT","SET"}:
+        if p in {"POSITION", "PLACE", "PUT", "INSERT", "INSTALL", "MOUNT", "SET"}:
             return base + ", but do not seat it fully"
-        if p in {"TIGHTEN","FASTEN","SECURE","LOCK"}:
+        if p in {"TIGHTEN", "FASTEN", "SECURE", "LOCK"}:
             return base + ", but leave it slightly loose"
         if p in {"OPEN"}:
             return base + ", but only partially"
-        if p in {"CLOSE","SEAL"}:
+        if p in {"CLOSE", "SEAL"}:
             return base + ", but not completely"
-        if p in {"MIX","STIR","COMBINE"}:
+        if p in {"MIX", "STIR", "COMBINE"}:
             return base + ", but only briefly"
-        if p in {"CUT","SLICE","CHOP"}:
+        if p in {"CUT", "SLICE", "CHOP"}:
             return base + ", but unevenly"
-        if p in {"ADD","POUR","TRANSFER"}:
+        if p in {"ADD", "POUR", "TRANSFER"}:
             return base + ", but spill a little"
         return base + ", but not quite correctly"
 
@@ -3896,7 +4338,9 @@ def judge_one_take(
             if not parsed:
                 continue
             pred, roles = parsed
-            dest = _head_entity(roles.get("Destination") or roles.get("Location") or roles.get("Goal") or "")
+            dest = _head_entity(
+                roles.get("Destination") or roles.get("Location") or roles.get("Goal") or ""
+            )
             orig_instr = _head_entity(roles.get("Instrument") or "")
 
             cand = final_steps[new]
@@ -3926,7 +4370,9 @@ def judge_one_take(
         semrep_by_new: Dict[int, str],
         semrep_by_old: Dict[int, str],
     ) -> Tuple[List[str], List[str], List[Dict[str, Any]]]:
-        planned_realization_issues = validate_planned_errors_still_realized(take, original_steps, fs, mt)
+        planned_realization_issues = validate_planned_errors_still_realized(
+            take, original_steps, fs, mt
+        )
         schema_issues = (
             validate_rewrite_schema(original_steps, fs, mt)
             + validate_plan_coverage(take, mt)
@@ -3965,7 +4411,6 @@ def judge_one_take(
     base_score = _score(schema_issues, planned_realization_issues, plaus_issues)
     best_score = base_score
     best_candidate: Optional[Tuple[List[str], List[Dict[str, Any]]]] = None
-    best_err_summary = ""
 
     llm_last_err = ""
 
@@ -4011,12 +4456,14 @@ def judge_one_take(
                         prompt_with_imgs,
                         temperature=t,
                         max_output_tokens=max_new_tokens,
-                        image_data_urls=img_urls,  
+                        image_data_urls=img_urls,
                     )
                 else:
                     raw = backend.generate(
-                        messages=[{"role": "system", "content": SYSTEM_REPAIR},
-                                  {"role": "user", "content": prompt_with_imgs},],
+                        messages=[
+                            {"role": "system", "content": SYSTEM_REPAIR},
+                            {"role": "user", "content": prompt_with_imgs},
+                        ],
                         temperature=t,
                         max_new_tokens=max_new_tokens,
                         image_data_urls=img_urls,
@@ -4065,21 +4512,14 @@ def judge_one_take(
                     top = f"{pl2[0].get('code')}: {pl2[0].get('detail')}"
                 _trace_row(
                     "LLM_ATTEMPT",
-                    f"attempt={attempt} temp={t:.3f} score={cand_score} hard={len(sch2)+len(plan2)} soft={len(pl2)} top={top}",
-                    step_index=attempt
+                    f"attempt={attempt} temp={t:.3f} score={cand_score} hard={len(sch2) + len(plan2)} soft={len(pl2)} top={top}",
+                    step_index=attempt,
                 )
 
                 # Keep the best attempt so far (deepcopy to avoid later mutation).
                 if cand_score < best_score:
                     best_score = cand_score
                     best_candidate = (copy.deepcopy(fs), copy.deepcopy(mt))
-
-                    if sch2 or plan2:
-                        best_err_summary = " ; ".join((sch2 + plan2)[:3])
-                    elif pl2:
-                        best_err_summary = f"{pl2[0].get('code')}: {pl2[0].get('detail')}"
-                    else:
-                        best_err_summary = ""
 
                 err_summary = ""
                 if sch2 or plan2:
@@ -4089,7 +4529,7 @@ def judge_one_take(
                 _dbg(
                     f"[LLM_DEBUG] take={take_name} uid={take_uid} attempt={attempt}/{max_retries} "
                     f"temp={t:.3f} score={cand_score} best={best_score} base={base_score} "
-                    f"hard={len(sch2)+len(plan2)} soft={len(pl2)} top='{(err_summary or '')[:220]}'"
+                    f"hard={len(sch2) + len(plan2)} soft={len(pl2)} top='{(err_summary or '')[:220]}'"
                 )
 
                 if not sch2 and not plan2 and not pl2:
@@ -4100,20 +4540,24 @@ def judge_one_take(
                     _trace_row("LLM_ADOPT", f"mode=perfect score={cand_score}", step_index=attempt)
                     break
 
-                llm_last_err = " ; ".join(sch2 + plan2) if (sch2 or plan2) else (pl2[0].get("detail") if pl2 else "unknown")
+                llm_last_err = (
+                    " ; ".join(sch2 + plan2)
+                    if (sch2 or plan2)
+                    else (pl2[0].get("detail") if pl2 else "unknown")
+                )
             except Exception as e:
                 llm_last_err = str(e)
-                _trace_row("LLM_EXCEPTION", f"attempt={attempt} err={llm_last_err}", step_index=attempt)
+                _trace_row(
+                    "LLM_EXCEPTION", f"attempt={attempt} err={llm_last_err}", step_index=attempt
+                )
                 _dbg(
                     f"[LLM_DEBUG] take={take_name} uid={take_uid} attempt={attempt}/{max_retries} "
                     f"EXCEPTION: {llm_last_err[:800]}"
                 )
 
         # If we didn't reach a perfect solution, still adopt the best attempt if it improves score.
-        adopted_mode = "base"
         if best_candidate is not None and best_score < base_score:
             final_steps, meta = best_candidate
-            adopted_mode = "best"
             _trace_row("LLM_ADOPT", f"mode=best best_score={best_score} base_score={base_score}")
             _dbg(
                 f"[LLM_DEBUG] take={take_name} uid={take_uid} adopting best_attempt score={best_score} "
@@ -4128,7 +4572,9 @@ def judge_one_take(
 
         # recompute after LLM attempts (whatever candidate we kept)
         semrep_by_old, semrep_by_new, baseline = recompute_semrep(final_steps, meta)
-        if coerce_wrong_execution_to_manner(take, original_steps, final_steps, meta, semrep_by_old, semrep_by_new):
+        if coerce_wrong_execution_to_manner(
+            take, original_steps, final_steps, meta, semrep_by_old, semrep_by_new
+        ):
             # keep meta/steps consistent after edits
             canonicalize_meta_new_indices_in_place(meta)
             final_steps = align_final_to_meta_length(final_steps, meta)
@@ -4142,7 +4588,7 @@ def judge_one_take(
     # -------------------------
     # 2) deterministic-last repair
     # -------------------------
-    if (schema_issues or planned_realization_issues or plaus_issues):
+    if schema_issues or planned_realization_issues or plaus_issues:
         # deterministic mostly addresses plausibility, not schema/coverage
         any_change = False
         det_pass = 0
@@ -4172,42 +4618,50 @@ def judge_one_take(
     # FINAL report rows (append final issues)
     # -------------------------
     for s in schema_issues:
-        report_rows.append({
-            "take_uid": take_uid,
-            "take_name": take_name,
-            "kind": "schema",
-            "code": "SCHEMA",
-            "step_index": "",
-            "detail": s,
-        })
+        report_rows.append(
+            {
+                "take_uid": take_uid,
+                "take_name": take_name,
+                "kind": "schema",
+                "code": "SCHEMA",
+                "step_index": "",
+                "detail": s,
+            }
+        )
     for s in planned_realization_issues:
-        report_rows.append({
-            "take_uid": take_uid,
-            "take_name": take_name,
-            "kind": "schema",
-            "code": "PLANNED_ERROR_NOT_REALIZED",
-            "step_index": "",
-            "detail": s,
-        })
+        report_rows.append(
+            {
+                "take_uid": take_uid,
+                "take_name": take_name,
+                "kind": "schema",
+                "code": "PLANNED_ERROR_NOT_REALIZED",
+                "step_index": "",
+                "detail": s,
+            }
+        )
     for it in plaus_issues:
-        report_rows.append({
-            "take_uid": take_uid,
-            "take_name": take_name,
-            "kind": "plausibility",
-            "code": it.get("code"),
-            "step_index": it.get("step_index"),
-            "detail": it.get("detail"),
-        })
+        report_rows.append(
+            {
+                "take_uid": take_uid,
+                "take_name": take_name,
+                "kind": "plausibility",
+                "code": it.get("code"),
+                "step_index": it.get("step_index"),
+                "detail": it.get("detail"),
+            }
+        )
 
     if (schema_issues or planned_realization_issues or plaus_issues) and (not disable_llm_fallback):
-        report_rows.append({
-            "take_uid": take_uid,
-            "take_name": take_name,
-            "kind": "llm_first_pass_failed",
-            "code": "LLM_FIRST_PASS_FAILED",
-            "step_index": "",
-            "detail": llm_last_err or "LLM first-pass did not fully fix issues",
-        })
+        report_rows.append(
+            {
+                "take_uid": take_uid,
+                "take_name": take_name,
+                "kind": "llm_first_pass_failed",
+                "code": "LLM_FIRST_PASS_FAILED",
+                "step_index": "",
+                "detail": llm_last_err or "LLM first-pass did not fully fix issues",
+            }
+        )
 
     # final normalize
     meta = normalize_meta(meta)
@@ -4219,18 +4673,42 @@ def judge_one_take(
 
     return {"final_steps": final_steps, "meta": meta}, report_rows
 
+
 # -------------------------
 # CLI + report writing
 # -------------------------
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Judge+repair erroneous procedure rewrites.")
-    p.add_argument("--plan", default=str(REPO_ROOT / "data" / "examples" / "split_50_error_plan_with_corrections.json"), help="Path to split_50_error_plan_with_corrections.json")
-    p.add_argument("--rewrite", default=str(REPO_ROOT / "data" / "examples" / "split_50_error_instructions_openai.json"), help="Path to writer output JSON")
-    p.add_argument("--out", default=str(REPO_ROOT / "local" / "outputs" / "split_50_error_instructions_openai_judged.json"), help="Output judged JSON path")
-    p.add_argument("--report_base", default=str(REPO_ROOT / "local" / "outputs" / "openai_judged_report"), help="Base path (without extension) for CSV/JSON reports")
+    p.add_argument(
+        "--plan",
+        default=str(REPO_ROOT / "data" / "examples" / "split_50_error_plan_with_corrections.json"),
+        help="Path to split_50_error_plan_with_corrections.json",
+    )
+    p.add_argument(
+        "--rewrite",
+        default=str(REPO_ROOT / "data" / "examples" / "split_50_error_instructions_openai.json"),
+        help="Path to writer output JSON",
+    )
+    p.add_argument(
+        "--out",
+        default=str(
+            REPO_ROOT / "local" / "outputs" / "split_50_error_instructions_openai_judged.json"
+        ),
+        help="Output judged JSON path",
+    )
+    p.add_argument(
+        "--report_base",
+        default=str(REPO_ROOT / "local" / "outputs" / "openai_judged_report"),
+        help="Base path (without extension) for CSV/JSON reports",
+    )
 
     # MODEL FLAGS (writer-style)
-    p.add_argument("--model", required=True, choices=["openai", "qwen"], help="Which backend to use for LLM fallback")
+    p.add_argument(
+        "--model",
+        required=True,
+        choices=["openai", "qwen"],
+        help="Which backend to use for LLM fallback",
+    )
 
     # filtering (by take_name)
     p.add_argument(
@@ -4239,29 +4717,44 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help="If set, process only these take_name values (space-separated). Example: --take_name fair_bike_06_15 sfu_cooking026_8",
     )
-    p.add_argument("--limit", type=int, default=-1, help="If >0, process only first N (after filtering)")
+    p.add_argument(
+        "--limit", type=int, default=-1, help="If >0, process only first N (after filtering)"
+    )
 
     # llm behavior
     p.add_argument("--temperature", type=float, default=0.1)
     p.add_argument("--max_retries", type=int, default=2)
     p.add_argument("--max_new_tokens", type=int, default=2400)
-    p.add_argument("--disable_llm_fallback", action="store_true", help="Disable LLM fallback repair (deterministic only)")
+    p.add_argument(
+        "--disable_llm_fallback",
+        action="store_true",
+        help="Disable LLM fallback repair (deterministic only)",
+    )
 
     # optional semrep
-    p.add_argument("--vocab_csv", default=str(REPO_ROOT / "data" / "resources" / "split_50_vocabulary.csv"), help="Optional vocab CSV for semrep lookup")
-    p.add_argument("--semrep_json", default=str(REPO_ROOT / "data" / "resources" / "semantic_representations_split_50.json"), help="Optional semrep JSON for semrep lookup")
+    p.add_argument(
+        "--vocab_csv",
+        default=str(REPO_ROOT / "data" / "resources" / "split_50_vocabulary.csv"),
+        help="Optional vocab CSV for semrep lookup",
+    )
+    p.add_argument(
+        "--semrep_json",
+        default=str(REPO_ROOT / "data" / "resources" / "semantic_representations_split_50.json"),
+        help="Optional semrep JSON for semrep lookup",
+    )
 
     p.add_argument(
         "--debug_llm",
         action="store_true",
         help="Print LLM attempt diagnostics to stderr (no files).",
-    )    
+    )
     p.add_argument(
         "--use_frames",
         action="store_true",
         help="Attach 1-2 cached mid-frames to OpenAI LLM repair on retry attempts (when issues persist).",
     )
     return p.parse_args()
+
 
 def write_report_csv(path: str, rows: List[Dict[str, Any]]) -> None:
     cols = ["take_uid", "take_name", "kind", "code", "step_index", "detail"]
@@ -4270,6 +4763,7 @@ def write_report_csv(path: str, rows: List[Dict[str, Any]]) -> None:
         w.writeheader()
         for r in rows:
             w.writerow({c: r.get(c, "") for c in cols})
+
 
 def main() -> None:
     args = parse_args()
@@ -4284,7 +4778,7 @@ def main() -> None:
     backend: Optional[LLMBackend] = None
     if not args.disable_llm_fallback:
         backend = make_backend(args.model)
-    
+
     frame_cache = None
     if args.use_frames and (not args.disable_llm_fallback) and EgoVideoFrameCache is not None:
         frame_cache = EgoVideoFrameCache()
@@ -4347,7 +4841,10 @@ def main() -> None:
         take_ids = filtered
 
         if not take_ids:
-            print("WARNING: --take_name filter matched 0 takes. Showing a few available take_name values:", file=sys.stderr)
+            print(
+                "WARNING: --take_name filter matched 0 takes. Showing a few available take_name values:",
+                file=sys.stderr,
+            )
             shown = 0
             for tid0 in list(takes_plan.keys())[:200]:
                 t0 = takes_plan.get(tid0) or {}
@@ -4410,7 +4907,13 @@ def main() -> None:
         report_rows.extend(rows)
 
         # rows already correspond to this take -> don't try to match by take_uid (often absent in plan)
-        status = "ok" if not any(r.get("kind") in {"schema", "plausibility", "llm_first_pass_failed"} for r in rows) else "judged_with_findings"
+        status = (
+            "ok"
+            if not any(
+                r.get("kind") in {"schema", "plausibility", "llm_first_pass_failed"} for r in rows
+            )
+            else "judged_with_findings"
+        )
 
         out_obj["takes"][tid] = {
             "take_uid": take_uid,
@@ -4432,6 +4935,7 @@ def main() -> None:
 
     print(f"Wrote judged JSON: {args.out}")
     print(f"Wrote report: {args.report_base}.csv / {args.report_base}.json")
+
 
 if __name__ == "__main__":
     main()
