@@ -4,12 +4,12 @@
 
 **PIE-V** (Psychologically Inspired Error injection for Videos) is a framework for
 constructing and benchmarking mistake-aware egocentric procedural videos. It augments
-clean Ego-Exo4D keystep procedures with structured human-plausible mistakes,
+clean keystep-annotated video procedures with structured human-plausible mistakes,
 recovery corrections, validated text rewrites, and video edit specifications.
 
-[Paper: How to Correctly Make Mistakes](https://arxiv.org/abs/2604.15134)  
-[Project page: PIE-V](https://ologin.github.io/PIE-V/)  
-[Release: cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw26)
+Paper: [How to Correctly Make Mistakes](https://arxiv.org/abs/2604.15134)  
+Project page: [PIE-V](https://ologin.github.io/PIE-V/)  
+Release: [cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw26)
 
 ## What Is Included
 
