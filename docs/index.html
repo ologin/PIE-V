@@ -60,8 +60,8 @@
           <p>
             PIE-V is a pipeline to create examples of erroneous procedure
             execution where mistakes are not random, scripted, or staged, but
-            <em>human-plausible deviations with explicit procedural consequences
-            and, when appropriate, recoveries</em>. It constructs controlled
+            <strong>human-plausible deviations with explicit procedural consequences
+            and, when appropriate, recoveries</strong>. It constructs controlled
             mistake-aware egocentric procedural videos from clean
             keystep-annotated procedures.
           </p>
@@ -88,9 +88,9 @@
           <article>
             <h3>Ego-Exo4D Subset</h3>
             <p>
-              PIE-V starts from 17 Ego-Exo4D keystep tasks, covering COVID test
-              procedures, bicycle repair, CPR, and cooking tasks such as salads,
-              noodles, omelets, tea, pasta, coffee latte, and sushi rolls. The
+              PIE-V starts from 17 Ego-Exo4D keystep tasks: COVID test
+              procedures, bicycle repair, CPR, and cooking tasks (e.g., salads,
+              noodles, omelets, tea, pasta, and sushi rolls). The
               subset contains
               <a href="https://github.com/ologin/PIE-V/blob/main/data/manifests/take_names.txt">50 takes</a>:
               three videos per task, except Cooking Sushi Rolls, where only one
@@ -105,7 +105,7 @@
               The planner samples 102 mistakes across the 50 takes. Sampling is
               conditioned on video duration, step complexity, task complexity,
               procedure phase, working-memory load, and semantic step
-              information from semantic role labeling. The
+              information from SRL. The
               <a href="https://github.com/ologin/PIE-V/tree/main/data/resources">semantic resources</a>
               and
               <a href="https://github.com/ologin/PIE-V/tree/main/data/examples">generated text examples</a>
@@ -132,7 +132,7 @@
               <a href="https://github.com/ologin/PIE-V/blob/main/data/annotations/annotation_summary.csv">annotation summary</a>
               and
               <a href="https://github.com/ologin/PIE-V/blob/main/data/annotations/PIE-V_Annotation_Template.xlsx">annotation template</a>
-              document the rating fields.
+              document the rating.
             </p>
           </article>
         </div>
@@ -173,7 +173,6 @@
             <h3>Transposition</h3>
             <p>Two locally plausible steps are executed in the wrong order.</p>
           </article>
-          <div class="taxonomy-plus" aria-hidden="true">+</div>
           <article class="taxonomy-card tax-c">
             <span>C</span>
             <h3>Correction</h3>

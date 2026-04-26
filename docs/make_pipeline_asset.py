@@ -22,7 +22,7 @@ LINE = "#d2cabf"
 DARK = "#17212c"
 WHITE = "#fffdf8"
 YELLOW = "#ffcc3d"
-COLORS = ["#00838a", "#6b4dbb", "#c9241c", "#2e7d32", "#9a6a00", "#005bbb"]
+COLORS = ["#c9241c", "#2e7d32", "#6b4dbb", "#00838a", "#9a6a00", "#005bbb"]
 
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
@@ -86,7 +86,7 @@ def main() -> None:
     draw = ImageDraw.Draw(img)
     draw_grid(draw)
 
-    draw.text((92, 84), "PIE-V: Psychologically Inspired Error Injection for Video", font=FONT_TITLE, fill=INK)
+    draw.text((92, 84), "Psychologically Inspired Error Injection for Video", font=FONT_TITLE, fill=INK)
     draw.text(
         (96, 166),
         "Structured mistakes, recovery traces, and video edits for egocentric procedural benchmarks",
@@ -95,16 +95,16 @@ def main() -> None:
     )
 
     cards = [
-        ("1", "Clean keysteps", "Ego-Exo4D procedures with timings and steps"),
-        ("2", "Semantic layer", "Predicate-role SemRep plus role impact priors"),
-        ("3", "Error planner", "WE, D, S, I, T sampled by phase and step load"),
+        ("1", "Clean keysteps", "Video procedural dataset with timing and steps"),
+        ("2", "Semantic layer", "Predicate-role SRL plus role impact priors"),
+        ("3", "Error planner", "WE, D, S, I, T sampled by phase/load wrt SRL"),
         ("4", "Correction planner", "Detection, action, latency, and recovery type"),
-        ("5", "LLM writer + judge", "Cascade-consistent rewrites validated and repaired"),
+        ("5", "LLM writer + judge", "Mistaken instructions plus cascade-consistent rewrites"),
         ("6", "Video synthesis", "Regenerate affected windows and stitch episodes"),
     ]
 
     x0, y0 = 96, 302
-    cw, ch, gap = 244, 276, 34
+    cw, ch, gap = 244, 300, 34
     for i, (num, title, body) in enumerate(cards):
         x = x0 + i * (cw + gap)
         draw.rounded_rectangle((x, y0, x + cw, y0 + ch), radius=24, fill=WHITE, outline=LINE, width=3)
@@ -117,7 +117,7 @@ def main() -> None:
 
     band = (96, 650, W - 96, 920)
     draw.rounded_rectangle(band, radius=28, fill=DARK)
-    stats = [("17", "tasks"), ("50", "Ego-Exo4D scenarios"), ("102", "mistakes"), ("27", "corrections"), ("9", "rubric metrics")]
+    stats = [("17", "tasks"), ("50", "scenarios"), ("102", "mistakes"), ("27", "corrections"), ("9", "rubric metrics")]
     stat_x = [180, 520, 850, 1150, 1440]
     for (value, label), x in zip(stats, stat_x):
         draw.text((x, 755), value, font=FONT_STAT, fill=YELLOW, anchor="mm")
