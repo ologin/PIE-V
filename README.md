@@ -5,9 +5,9 @@ constructing and benchmarking mistake-aware egocentric procedural videos. It aug
 clean Ego-Exo4D keystep procedures with structured human-plausible mistakes,
 recovery corrections, validated text rewrites, and video edit specifications.
 
-Paper: [How to Correctly Make Mistakes](https://arxiv.org/abs/2604.15134)  
-Project page: [ologin.github.io/PIE-V](https://ologin.github.io/PIE-V/)  
-EgoVis CVPR Workshop 2026 release: [cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw26)
+[Paper: How to Correctly Make Mistakes](https://arxiv.org/abs/2604.15134)  
+[Project page: PIE-V](https://ologin.github.io/PIE-V/)  
+[Release: cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw26)
 
 ## What Is Included
 
@@ -15,14 +15,13 @@ EgoVis CVPR Workshop 2026 release: [cvprw26](https://github.com/ologin/PIE-V/rel
   substitution, insertion, and transposition.
 - A correction simulator that samples detection, action, latency, and repair type.
 - LLM writer and judge stages for cascade-consistent procedure rewrites.
-- Semantic-role resources used by the planner and validator.
+- Semantic-role resources used by the planner, writer, and judge.
 - Aggregated human annotation summaries and the public annotation template.
 - Example PIE-V outputs for the 50-scenario Ego-Exo4D subset.
 
 Raw Ego-Exo4D videos, original Ego-Exo4D annotation files, and generated MP4 media
-remain outside git. The `cvprw26` GitHub release is the media location used by
-the paper and project page:
-[https://github.com/ologin/PIE-V/releases/tag/cvprw26](https://github.com/ologin/PIE-V/releases/tag/cvprw26).
+remain outside git. The [`cvprw26` GitHub release](https://github.com/ologin/PIE-V/releases/tag/cvprw26) is the media location used by
+the paper and project page.
 
 ## Repository Layout
 
@@ -129,10 +128,7 @@ piev-judge-instructions \
 ## Data Notes
 
 `data/examples/split_50_error_plan_with_corrections.json` contains the sampled
-paper-scale text plan: 50 takes, 102 mistakes, and 27 corrections. The committed
-annotation table is an aggregated export from the `DATA` sheet of the project
-annotation workbook and omits individual annotator columns.
-
+paper-scale text plan: 50 takes, 102 mistakes, and 27 corrections. 
 `data/annotations/PIE-V_Annotation_Template.xlsx` is the public template for the
 rubric fields used in the human evaluation.
 
@@ -142,7 +138,7 @@ Ego-Exo4D `split_50.json` and `keystep_train.json` files remain local inputs.
 ## Video Generation
 
 The paper uses provider-specific video-editing case studies for Seedance, Kling,
-Runway, Veo, and Sora-style workflows. The examples document the representative
+Runway, and Veo workflows. The examples document the representative
 cases used for the project page; the full text pipeline covers all five PIE-V
 error types.
 
