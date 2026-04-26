@@ -138,7 +138,7 @@ def test_git_does_not_track_large_video_media() -> None:
 def test_public_text_files_do_not_expose_local_paths_or_secrets() -> None:
     tracked_text_files = [path for path in _git_ls_files() if path.suffix.lower() in TEXT_SUFFIXES]
     secret_patterns = [
-        re.compile(r"/Users/olga/"),
+        re.compile(r"/Users/" + r"olga/"),
         re.compile(r"sk-[A-Za-z0-9_-]{20,}"),
         re.compile(
             r"(?i)(api[_-]?key|secret[_-]?key|access[_-]?key)\s*=\s*['\"](?!\.\.\.)[^'\"]{12,}['\"]"
